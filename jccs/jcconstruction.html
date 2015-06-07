@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+		<title>Just Cubees Construction Site</title>
+	  
+		<style>
+			html, body {
+				overflow: hidden;
+				width: 100%;
+				height: 100%;
+				margin: 0;
+				padding: 0;
+			}
+			
+			.canvas {
+				width: 100%;
+				height: 100%;
+				touch-action: none;
+				float:left;
+			}
+
+			.dragDialogueBox {
+				position:absolute;
+				width:240px;
+				height:100px;
+				top:40px;
+				left:10px;
+				border: 1px solid #333333;
+				background-color: #FFFFFF;
+				box-shadow: 5px 5px 2px #111111;
+				z-index:5;
+			}
+			
+			.dragDialogueBox div, input {
+				position:absolute;
+			}
+			
+			.dragDialogueBox label, input {
+				margin: 2px 2px 2px 2px;
+			}
+			
+			.heading {
+				border-bottom: 1px solid #666666;
+				width:240px;
+				height:20px;
+				background-color:#AAAAAA;
+			}
+			
+			.titlediv {
+				left:5px;
+				cursor:default;
+			}
+			
+			.closediv {
+				right:2px;
+				opacity:0.6;
+				font-family: sans-serif;
+				cursor:default;
+			}
+			
+			.closedive:hover {
+				opacity:1;
+			}
+			
+			.dragContent {
+				width: 240px;
+				height:80px;
+				top:20px;
+			}
+			
+			.divider {
+				position:absolute;
+				border:solid 4px white;
+			}
+			
+			.dialogueBox {
+				position:absolute;
+				display:table;
+				background-color: #FFFFFF;
+				z-index:5;
+			}			
+			
+			.row {
+				display:table-row;
+				height:100%;
+				width:100%;
+			}
+
+			
+			.content {
+				display:table-cell;
+				border: 1px solid #666666;
+				padding-left:4px;
+				cursor:default;
+			}
+			
+			.content:hover {
+				background: linear-gradient(to right, #999999 , #FFFFFF); 
+			}
+			
+			#menu {
+				top:0px;
+				right:0px;
+				width:100%;
+				height:20px;
+			}
+			
+			#blank {
+				width:50%;
+			}
+			
+			.arrcontent {
+				display:table-cell;
+				border: 1px solid #666666;
+				padding-left:4px;
+				cursor:default;
+				opacity:0.7;
+				width:30px;
+				text-align:center;
+				font-weight:bold;
+				padding-left:0px;
+				text-shadow: 1px 1px #AAAAAA;
+			}
+			
+			.arrcontent:hover {
+				opacity:1; 
+			}
+			
+			#leftarrow{
+				background-color:#4040FF;
+			}
+			
+			#rightarrow {
+				background-color:#FF4040;
+			}
+			
+			#uparrow {
+			
+			}
+			
+			#downarrow {
+				background-color:#40FF40;
+			}
+			
+			#forwardarrow {
+				background-color:#FFFF00;
+			}
+			
+			#backarrow {
+				background-color:#804000;
+			}
+			
+			.subMenu {
+				position:absolute;
+				display:table;
+				background-color: #FFFFFF;
+				z-index:4;
+				top:22px;
+				right:0px;
+				width:100%;
+				height:64px;
+				border:1px solid black;
+				border-top:none;
+				visibility:hidden;
+			}
+			
+			.filecontent {
+				display:table-cell;
+				cursor:default;
+				width:70px;
+				opacity: 0.6;
+				padding-left:4px;
+				border-right:black 1px solid;
+			}
+			
+			.filecontent:hover {
+				opacity:1; 
+			}			
+			
+			.cubeepic {
+				display:table-cell;
+				cursor:default;
+				width:56px;
+				height:58px;
+				opacity:0.6;
+				background-repeat:no-repeat;
+			}
+			
+			.cubeepic:hover {
+				opacity:1; 
+			}
+			
+			.subcontent {
+				display:table-cell;
+				cursor:default;
+			}
+			
+			.blankcontent {
+				display:table-cell;
+				width:25px;
+				cursor:default;
+			}
+			
+			#box{
+				background-image:url("images/box.png");
+			}
+			
+			#cyl{
+				background-image:url("images/cyl.png");
+			}
+			
+			#sph{
+				background-image:url("images/sphere.png");
+			}
+			
+			#rof{
+				background-image:url("images/roof.png");
+			}
+			
+			.dividr {
+				display:table-cell;
+				cursor:default;
+				border-right:1px dotted black;
+			}
+			
+			#clear:hover {
+				background: linear-gradient(to right, #999999 , #FFFFFF); 
+			}
+			
+			#all {
+				width:90px;
+				vertical-align: middle;
+			}
+			
+			#all:hover {
+				background: linear-gradient(to right, #999999 , #FFFFFF); 
+			}
+			
+			.chart {
+				width:10px;
+				height:10px;
+				border:1px solid black;
+				float:left;
+				margin:2px 2px 2px 2px;
+			}
+			
+			#colours {
+				display:table-cell;
+				cursor:default;
+				width:60px;
+			}			
+			
+			#currentColour {
+				width:60px;
+			}
+			
+			#clear {
+				width:119px;
+				vertical-align: middle;
+			}
+			
+			#colour {
+				width:50px;
+				height:50px;
+				border:1px solid black;
+				margin:5px 5px 5px -1px;
+				background-color:#0000FF;
+			}
+			
+			#textures {
+				width:40%;
+			}
+			
+			#texturepics {
+				width:90%;
+				height:56px;
+				margin:1px;
+				overflow:auto;				
+			}
+			
+			.textureimage {
+				background-repeat:no-repeat;
+				width:50px;
+				height:50px;
+				border:1px solid black;
+				margin:2px 2px 2px 2px;
+				float:left;
+				opacity:0.75;
+			}
+			
+			.textureimage:hover {
+				opacity:1;
+			}
+			
+			#metal {
+				background-image:url("images/xtMetal.png");
+			}
+			
+			#wood {
+				background-image:url("images/xtWood.png");
+			}
+			
+			#rust {
+				background-image:url("images/xtRust.png");
+			}
+			
+			.rotate {
+				width:50px;
+				height:50px;
+				border:1px solid black;
+				margin:5px 5px 5px 5px;
+				opacity:0.75;
+				float:left;
+			}
+			
+			.rotate:hover {
+				opacity:1;
+			}
+			
+			#rotateX {
+				background-image:url("images/rotX.png");
+			}
+			
+			#rotateY {
+				background-image:url("images/rotY.png");
+			}
+			
+			#rotateZ {
+				background-image:url("images/rotZ.png");
+			}
+		</style>
+		
+		<script src="../Babylon/babylon2.1a.js"></script>
+		<script src="../Babylon/hand.js"></script>
+		<script src="funcs/classes.js"></script>
+		<script src="funcs/tools.js"></script> 		
+		<script src="funcs/main.js"></script>
+		<script src="funcs/sceneStudio.js"></script>
+			
+		<script>
+			"use strict";
+			window.onload=main;
+			
+			//GLOBAL VARIABLE
+			var cursorPos;
+			var downMouse = false;
+			var dlgbox;
+			
+			var num_of_boxes = 0;
+			var num_of_models = 0;
+			var JCubees={};
+			var jcCanvas;
+			var jcEngine;
+			var jccsStudio, jcssStudio;
+			var jcModelList={}, jcModels={};
+			
+		</script>
+			
+	</head>
+
+	<body>
+		<canvas id="jcCanvas" class="canvas"></canvas>
+		
+		<!--dialogue boxes-->
+		<div id='menu' class="dialogueBox">
+			<div id="menulist" class="row">
+				<div id='file' class='content'>File</div>
+				<div id='cubee' class='content'>New Cubee</div>
+				<div id='selection' class='content'>Selection</div>
+				<div id='addToScene' class='content'>Add To Scene...</div>
+				<div id='model' class='content'>Model</div>
+				<div id='help' class='content'>Help</div> 
+				<div id='blank' class='content'></div>
+				<div id='leftarrow' class='arrcontent'>&larr;</div>
+				<div id='rightarrow' class='arrcontent'>&rarr;</div>
+				<div id='uparrow' class='arrcontent'>&uarr;</div>
+				<div id='downarrow' class='arrcontent'>&darr;</div>
+				<div id='backarrow' class='arrcontent'>&lt;</div>
+				<div id='forwardarrow' class='arrcontent'>&gt;</div>
+			</div>
+		</div>
+		
+		<div id='subfilemenu' class='subMenu'>
+			<div class='row'>
+				
+				<div id='new' class='filecontent'>New...</div>
+				<div id='store' class='filecontent'>Store...</div>
+				<div id='fetch' class='filecontent'>Fetch...</div>
+				<div id='save' class='filecontent'>Save</div>
+				<div id='save_as' class='filecontent'>Save As...</div>
+				<div id='open' class='filecontent'>Open...</div>
+				<div id='export' class='filecontent'>Export...</div>
+				<div id='import' class='filecontent'>Import...</div>
+				<div class="subcontent"></div>
+			</div>
+		</div>
+		
+		<div id='subcubeemenu' class="subMenu">
+			<div class="row">
+				<div class="blankcontent"></div>
+				<div id="box" class = "cubeepic" alt="Cube" title="Cube"></div>
+				<div class="blankcontent"></div>
+				<div id="cyl" class = "cubeepic" alt="Cylinder" title="Cylinder"></div>
+				<div class="blankcontent"></div>
+				<div id="sph" class = "cubeepic" alt="Sphere" title="Sphere"></div>
+				<div class="blankcontent"></div>
+				<div id="rof" class = "cubeepic" alt="Right Prism" title="Right Prism"></div>
+				<div class="subcontent"></div>
+			</div>
+		</div>
+		
+		<div id='subselectionmenu' class="subMenu">
+			<div class="row">
+				<div class="blankcontent"></div>
+				<div id="clear" class="dividr">Clear Selection</div>
+				<div class="blankcontent"></div>
+				<div id="all" class="dividr">Select All</div>
+				<div class="blankcontent"></div>
+				<div id="colours">
+					
+				</div>
+				<div id="currentColour" class="dividr">
+					<div id="colour"></div>
+				</div>
+				<div class="blankcontent"></div>
+				<div id="textures" class="dividr">
+					<div id="texturepics">
+		
+					</div>
+				</div>
+				<div class="blankcontent"></div>
+				<div id="rotations" class="dividr">
+					<div id="rotateX" class="rotate"></div>
+					<div id="rotateY" class="rotate"></div>
+					<div id="rotateZ" class="rotate"></div>
+				</div>
+				<div class="subcontent"></div>
+			</div>
+		</div>
+		
+		<!--draggable dialogue boxes-->
+		<div id='store' class="dragDialogueBox" draggable="true">
+			<div class="row">
+				<div class="heading"> 
+					<div class="titlediv">Store</div>
+					<div class="closediv">X</div>
+				</div>
+				<div id='storeContent' class='dragContent'>
+					<label for="storeIn">Model name: </label><input id="storeIn" type="text" size="15"/>
+				</div>
+			</div>
+		</div>
+		
+	</body>
+
+</html>

@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+		<title>Lathe</title>
+	  
+		<style>
+			html, body {
+				overflow: hidden;
+				width: 100%;
+				height: 100%;
+				margin: 0;
+				padding: 0;
+			}
+			
+			.canvas {
+				width: 49.5%;
+				height: 100%;
+				touch-action: none;
+				float:left;
+			}
+
+			#productCanvas {
+				
+				margin-right:0.5%;
+			}
+			
+			.noTextCursor {
+				cursor:default;
+			}
+			
+			.noTextCursor:hover {
+				background: linear-gradient(to right, #999999 , #FFFFFF); 
+			}
+			
+			.dialogueBox {
+				position:absolute;
+				display:table;
+				border: 1px solid #333333;
+				background-color: #FFFFFF;
+				box-shadow: 5px 5px 2px #111111;
+				<!-- visibility:hidden; -->
+				z-index:5;
+			}
+			
+			.row {
+				display:table-row;
+				height:100%;
+				width:100%;
+			}
+			
+			.space {
+				display:table-cell;
+				border: 1px solid #666666;
+				width:25%;
+			}
+			
+			.content {
+				display:table-cell;
+				border: 1px solid #666666;
+				width:75%;
+			}
+			
+			#segment {
+				top:50px;
+				right:50px;
+				width:120px;
+				height:60px;
+				visibility:hidden;
+			}
+			
+			#p_curved, #p_straight {
+				color: #888888;
+			}
+			
+			#node {
+				top:50px;
+				right:50px;
+				width:120px;
+				height:60px;
+				visibility:hidden;
+			}
+			
+			#p_corner {
+				color: #888888;
+			}
+			
+		</style>
+		
+		<script src="../Babylon/babylon2.1a.js"></script>
+		<script src="../Babylon/hand.js"></script>
+		<script src="funcs/classes.js"></script>
+		<script src="funcs/tools.js"></script>
+		<script src="funcs/events.js"></script>
+		<script src="funcs/main.js"></script>	
+			
+		<script>
+			"use strict";
+			window.onload=main;
+			
+		</script>
+			
+	</head>
+
+	<body>
+		<canvas id="productCanvas" class="canvas"></canvas>
+		<canvas id="latheCanvas" class="canvas"></canvas>
+		
+		<!--dialogue boxes-->
+		<div id='segment' class="dialogueBox">
+			<div class="row">
+				<div class="space"> </div>
+				<div id='segmentContent' class='content'>
+					<div id="p_add" class="noTextCursor">&nbsp;&nbsp;Add Point</div>
+					<div id="p_straight" class="noTextCursor">&nbsp;&nbsp;Straight</div>
+					<div id="p_curved" class="noTextCursor">&nbsp;&nbsp;Curved</div>
+				</div>
+			</div>
+		</div>
+		
+		<div id='node' class="dialogueBox">
+			<div class="row">
+				<div class="space"> </div>
+				<div id='nodeContent' class='content'>
+					<div id="p_corner" class="noTextCursor">&nbsp;&nbsp;Corner</div>
+					<div id="p_smooth" class="noTextCursor">&nbsp;&nbsp;Smooth</div>
+					<div id="p_joined" class="noTextCursor">&nbsp;&nbsp;Joined</div>
+				</div>
+			</div>
+		</div>
+		
+	</body>
+
+</html>
