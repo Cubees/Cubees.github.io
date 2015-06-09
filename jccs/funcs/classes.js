@@ -3,6 +3,18 @@ Studio = function (engine) {
 	this.scene = new BABYLON.Scene(engine);
 }
 
+function JcubeeBlank(name) {
+	this.name = name;
+		
+	//methods
+	this.addMarkers = addMarkers;
+	this.moveT = moveT;
+	this.showMarkers = showMarkers;
+	this.hideMarkers = hideMarkers;
+	this.disable = disable;
+	this.enable = enable;	
+}
+
 function JcubeeBox(name, x, y, z, material, scene) {
 	this.name = name;
 	this.Jcubee = BABYLON.Mesh.CreateBox(name, 60.0, scene, true);	
@@ -16,6 +28,8 @@ function JcubeeBox(name, x, y, z, material, scene) {
 	this.moveT = moveT;
 	this.showMarkers = showMarkers;
 	this.hideMarkers = hideMarkers;
+	this.disable = disable;
+	this.enable = enable;	
 }
 
 function JcubeeCylinder(name, x, y, z, material, scene) {
@@ -31,6 +45,8 @@ function JcubeeCylinder(name, x, y, z, material, scene) {
 	this.moveT = moveT;
 	this.showMarkers = showMarkers;
 	this.hideMarkers = hideMarkers;
+	this.disable = disable;
+	this.enable = enable;	
 }
 
 function JcubeeSphere(name, x, y, z, material, scene) {
@@ -46,6 +62,8 @@ function JcubeeSphere(name, x, y, z, material, scene) {
 	this.moveT = moveT;
 	this.showMarkers = showMarkers;
 	this.hideMarkers = hideMarkers;
+	this.disable = disable;
+	this.enable = enable;	
 }
 
 function JcubeeRoof(name, x, y, z, material, scene) {
@@ -63,7 +81,6 @@ function JcubeeRoof(name, x, y, z, material, scene) {
 	];
 	
 	this.Jcubee = BABYLON.Mesh.ExtrudeShape(name, shape, path, 1, 0, BABYLON.Mesh.CAP_ALL, scene, true, BABYLON.Mesh.DOUBLESIDE);
-	this.Jcubee.rotation.z = Math.PI;
 	this.Jcubee.material = material;
 	this.Jcubee.position.x = x;
 	this.Jcubee.position.y = y;
@@ -74,7 +91,8 @@ function JcubeeRoof(name, x, y, z, material, scene) {
 	this.moveT = moveT;
 	this.showMarkers = showMarkers;
 	this.hideMarkers = hideMarkers; 
-	
+	this.disable = disable;
+	this.enable = enable;	
 }
 
 function addMarkers(scene) {
@@ -145,6 +163,24 @@ function hideMarkers() {
 	this.frontMarker.visibility = 0;
 	this.rightMarker.visibility = 0;
 	this.groundMarker.visibility = 0; */
+}
+
+function disable() {
+	this.Jcubee.setEnabled(false);
+	this.backMarker.setEnabled(false);
+	this.leftMarker.setEnabled(false);
+	this.frontMarker.setEnabled(false);
+	this.rightMarker.setEnabled(false);
+	this.groundMarker.setEnabled(false);
+}
+
+function enable() {
+	this.Jcubee.setEnabled(true);
+	this.backMarker.setEnabled(true);
+	this.leftMarker.setEnabled(true);
+	this.frontMarker.setEnabled(true);
+	this.rightMarker.setEnabled(true);
+	this.groundMarker.setEnabled(true);
 }
 	
 

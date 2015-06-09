@@ -17,9 +17,12 @@ function main() {
 	var moveForward = new BABYLON.Vector3(0, 0, 60); // +ve z axis direction
 	var moveBackward = new BABYLON.Vector3(0, 0, -60); // -ve z axis direction
 	
-	axisX = new BABYLON.Vector3(1, 0, 0);
-	axisY = new BABYLON.Vector3(0, 1, 0);
-	axisZ = new BABYLON.Vector3(0, 0, 1);
+	var confirmName;
+	var confirmFunc;
+	
+	//axisX = new BABYLON.Vector3(1, 0, 0);
+	//axisY = new BABYLON.Vector3(0, 1, 0);
+	//axisZ = new BABYLON.Vector3(0, 0, 1);
 	
 	/*-------------MENU ELEMENTS---------------	*/
 	//Get Menu Elements 
@@ -36,12 +39,22 @@ function main() {
 	var forwardarrow = document.getElementById("forwardarrow");
 	var backarrow = document.getElementById("backarrow");
 	
+	// File Menu and Sub-Menus
 	var file_ = document.getElementById("file");
 	var subfilemenu = document.getElementById("subfilemenu");
+	var store = document.getElementById("store");
+	var store_as = document.getElementById("store_as");
 	
+	// Cubee Menu and Sub-Menus
 	var cubee = document.getElementById("cubee");
 	var subcubeemenu = document.getElementById("subcubeemenu");
 	
+	var box = document.getElementById("box");
+	var cyl = document.getElementById("cyl");
+	var sph = document.getElementById("sph");
+	var rof = document.getElementById("rof");
+	
+	// Selection Menu and Sub-Menus
 	var selection = document.getElementById("selection");
 	var subselectionmenu = document.getElementById("subselectionmenu");
 	var clear = document.getElementById("clear");
@@ -49,50 +62,37 @@ function main() {
 	var colour = document.getElementById("colour");
 	colour.colarray=[0,0,255];
 	
-	var box = document.getElementById("box");
-	var cyl = document.getElementById("cyl");
-	var sph = document.getElementById("sph");
-	var rof = document.getElementById("rof");
-	
-	//*******sub menu list ************
-	var subMenuList = [subfilemenu, subcubeemenu, subselectionmenu];
-	
 	var colours = document.getElementById("colours");
+	setColours(colours);
 	
 	var texturepics = document.getElementById("texturepics");
-	
-	setColours(colours);
 	setTextures();
 	
 	var rotateX = document.getElementById("rotateX");
 	var rotateY = document.getElementById("rotateY");
 	var rotateZ = document.getElementById("rotateZ");
 	
+	//*******sub menu list ************
+	var subMenuList = [subfilemenu, subcubeemenu, subselectionmenu];
+	
+	/*--------DIALOGUE BOX ELEMENTS------------------*/
+	
 	var ddb = document.getElementsByClassName("dragDialogueBox");
 	var closediv = document.getElementsByClassName("closediv");
 	var headerDiv = document.getElementsByClassName("heading");
+	var cancelDiv = document.getElementsByClassName("DBCancel"); 
+	var inpt = document.getElementsByClassName("inpt");
 	
+	var storeDB = document.getElementById("storeDB"); 
 	var storeIn = document.getElementById("storeIn");
+	var storeBut = document.getElementById("storeBut");
+	
+	var confirmDB = document.getElementById("confirmDB"); 
+	var confirmBut = document.getElementById("confirmBut");	
+	
+	/*----------MENU EVENTS--------------------------------*/
 
-	//Menu Elements Events
-	for(var i=0;i<ddb.length;i++){
-        ddb[i].style.top = "40px";
-        ddb[i].style.left = "10px";
-    }
-	
-	window.addEventListener('mousemove', function(e) {doDrag(e)}, false);
-	
-	for(var i=0;i<headerDiv.length;i++){
-        headerDiv[i].addEventListener('mousedown', function(e) {startdbDrag(e, this)}, false);
-        headerDiv[i].addEventListener('mouseup', function(e) {enddbDrag(e)}, false);
-    }
-	
-	for(var i=0;i<closediv.length;i++){
-        closediv[i].addEventListener('click', function() {doClose(this)}, false);
-    }
-	
-	add_to_scene.addEventListener("click", addtoscene, false);
-	
+	//move events
 	leftarrow.addEventListener("mousedown", leftMove, false);
 	rightarrow.addEventListener("mousedown", rightMove, false);
 	uparrow.addEventListener("mousedown", upMove, false);
@@ -100,14 +100,19 @@ function main() {
 	forwardarrow.addEventListener("mousedown", forwardMove, false);
 	backarrow.addEventListener("mousedown", backMove, false);
 	
+	//file events
 	file_.addEventListener('click', showFileMenu, false);
+	store.addEventListener('click', doStore, false);
+	store_as.addEventListener('click', openStoreAs, false);
 	
+	//cubee events
 	cubee.addEventListener("click", showCubeeMenu, false);
 	box.addEventListener("click", makeBox, false);
 	cyl.addEventListener("click", makeCylinder, false);
 	sph.addEventListener("click", makeSphere, false);
 	rof.addEventListener("click", makeRoof, false);
 	
+	//Selection events
 	selection.addEventListener("click", showSelectionMenu, false);
 	clear.addEventListener("click", clearSelection, false);
 	all.addEventListener("click", selectAll, false);
@@ -117,37 +122,54 @@ function main() {
 	rotateY.addEventListener("click", Yrotate, false);
 	rotateZ.addEventListener("click", Zrotate, false);
 	
-	//Set readable styles for Elements
+	//Set readable styles for Selection
 	selection.style.color="#888888";
+	
+	//add to scene event
+	add_to_scene.addEventListener("click", addtoscene, false);
+	
+	
+	
+	/*-----------DIALOGUE BOX EVENTS--------------------*/
+	
+	//Drag events
+	window.addEventListener('mousemove', function(e) {doDrag(e)}, false);
+	
+	for(var i=0;i<ddb.length;i++){
+        ddb[i].style.top = "150px";
+        ddb[i].style.left = "500px";
+   };
+	
+	for(var i=0;i<headerDiv.length;i++){
+        headerDiv[i].addEventListener('mousedown', function(e) {startdbDrag(e, this)}, false);
+        headerDiv[i].addEventListener('mouseup', function(e) {enddbDrag(e)}, false);
+    }
+	;
+	//Close dialogue box
+	for(var i=0;i<closediv.length;i++){
+        closediv[i].addEventListener('click', function() {doClose(this)}, false);
+   };
+    
+    //Cancel dialogue box
+    for(var i=0;i<cancelDiv.length;i++){
+        cancelDiv[i].addEventListener('click', function() {doClose(this)}, false);
+    };
+    
+    //input dialogue box
+    for(var i=0;i<inpt.length;i++){   	
+        inpt[i].addEventListener('keydown', function(evt) {inpKeyDown(evt)}, false);
+    };    
+    
+    //Confirm Dialogue Box
+    confirmBut.addEventListener('click', doConfirm, false);
+    
+    //Store As in App
+    storeBut.addEventListener('click', doStoreAs, false);
 
 	
+	
+		
 	/*-------------MENU FUNCTIONS ---------------*/
-	//Close drag dialogue box
-	function doClose(box) {
-		box.parentNode.parentNode.parentNode.style.visibility = 'hidden';
-	}
-	
-	function startdbDrag(e, box) {
-		cursorPos = getPosition(e);
-		downMouse = true;
-		dlgbox = box.parentNode.parentNode;				
-	}
-	
-	function doDrag(e, box) {
-		if(!downMouse) {return};
-
-		var cursorNow = getPosition(e);	
-		var dx = cursorNow.x - cursorPos.x;
-		var dy = cursorNow.y - cursorPos.y;
-		cursorPos = cursorNow;
-		dlgbox.style.top = (parseInt(dlgbox.style.top) + dy)+"px";
-		dlgbox.style.left = (parseInt(dlgbox.style.left) + dx)+"px";
-	}
-	
-	function enddbDrag(e) {
-		downMouse = false;				
-	}
-	
 	//set colours in selection menu
 	function setColours(colours) {
 		var colarray = [ 
@@ -170,6 +192,8 @@ function main() {
 				colours.appendChild(col);
 			}
 		}
+		model.innerHTML = "Model -- *"+currentName;
+		JCisStored = false;
 	}
 	
 	//set textures in selection menu
@@ -190,22 +214,41 @@ function main() {
 			txtr.addEventListener("click", function() {setMeshTexture(this)}, false );
 			texturepics.appendChild(txtr);
 		}
+		model.innerHTML = "Model -- *"+currentName;
+		JCisStored = false;
 	}
 	
 	//menu choices actions
 
+	//File functions
 	function showFileMenu() {
 		hideSubMenus();
 		subfilemenu.style.visibility="visible";
 		file_.style.borderBottom = "none";
 	}
 	
+	function doStore() {	
+		if(currentName == getRef(currentRef)) {
+			openStoreAs();
+		}
+		else {
+			model.innerHTML = "Model -- "+currentName;
+			JCisStored = true;
+		}
+	}
+	
+	function openStoreAs() {		
+		storeDB.style.visibility = 'visible';
+	}
+	
+	//Cubee functions
 	function showCubeeMenu() {
 		hideSubMenus();
 		subcubeemenu.style.visibility="visible";
 		cubee.style.borderBottom = "none";
 	}
 	
+	//Selection functions
 	function showSelectionMenu() {
 		if(selection.style.color=="rgb(136, 136, 136)") {
 			return
@@ -243,6 +286,45 @@ function main() {
 		}
 	}
 	
+	function Xrotate() {
+//		var serializedScene = BABYLON.SceneSerializer.Serialize(jccsStudio.scene);
+//		var strScene = JSON.stringify(serializedScene);
+//		console.log(strScene);
+		for(var mesh in currentMeshes) {
+			currentMeshes[mesh].rotate(BABYLON.Axis.X, -Math.PI/2, BABYLON.Space.WORLD);		
+		}
+		model.innerHTML = "Model -- *"+currentName;
+		JCisStored = false;
+	}
+
+	function Yrotate() {
+		for(var mesh in currentMeshes) {
+			currentMeshes[mesh].rotate(BABYLON.Axis.Y, -Math.PI/2, BABYLON.Space.WORLD);						
+		}
+		model.innerHTML = "Model -- *"+currentName;
+		JCisStored = false;
+	}
+	
+	function Zrotate() {
+		for(var mesh in currentMeshes) {
+			currentMeshes[mesh].rotate(BABYLON.Axis.Z, -Math.PI/2, BABYLON.Space.WORLD);						
+		}
+		model.innerHTML = "Model -- *"+currentName;
+		JCisStored = false;
+	}
+	
+	//Add to Scene functions	
+	function addtoscene() {
+		 if(!JCisStored) {
+		 	openStoreAs();
+		 }
+		 else {
+		 	
+		 }
+	}	
+	
+	
+	//General Menu functions
 	function resetBorders() {		
 		var elm=menulist.firstChild;		
 		elm=findNextDIV(elm);
@@ -284,40 +366,108 @@ function main() {
 		}
 	}
 	
-	function Xrotate() {
-//		var serializedScene = BABYLON.SceneSerializer.Serialize(jccsStudio.scene);
-//		var strScene = JSON.stringify(serializedScene);
-//		console.log(strScene);
-		for(var mesh in currentMeshes) {
-			rotateMesh(currentMeshes[mesh], axisX, -Math.PI/2);		
-		}
-		
-	}
+	
+	/*-------------DIALOGUE BOX FUNCTIONS--------*/
 
-	function Yrotate() {
-		for(var mesh in currentMeshes) {
-			rotateMesh(currentMeshes[mesh], axisY, -Math.PI/2);						
+	function doClose(box) {
+		box.parentNode.parentNode.parentNode.style.visibility = 'hidden';
+	}
+	
+	//Drag Dialogues
+	function startdbDrag(e, box) {
+		cursorPos = getPosition(e);
+		downMouse = true;
+		dlgbox = box.parentNode.parentNode;				
+	}
+	
+	function doDrag(e, box) {
+		if(!downMouse) {return};
+
+		var cursorNow = getPosition(e);	
+		var dx = cursorNow.x - cursorPos.x;
+		var dy = cursorNow.y - cursorPos.y;
+		cursorPos = cursorNow;
+		dlgbox.style.top = (parseInt(dlgbox.style.top) + dy)+"px";
+		dlgbox.style.left = (parseInt(dlgbox.style.left) + dx)+"px";
+	};
+	
+	function enddbDrag(e) {
+		downMouse = false;				
+	};
+	
+	function inpKeyDown(evt) {		
+		evt.stopPropagation();
+	};
+	
+	//Confirm actions
+	function openConfirmDBox(name) {
+		confirmDB.style.visibility = 'visible';
+	}
+	
+	function doConfirm() {
+		confirmDB.style.visibility = 'hidden';
+		confirmFunc(confirmName);
+	}
+	
+	
+	//Store in app
+	function doStoreAs() {
+		var name = storeIn.value;	
+		if(name in jcModelList) {
+			confirmName = name;
+			confirmFunc = setModelList;
+			confirmAction = 'store';
+			confirmDesc.innerHTML = 'The model <span style="font-style:italic"> '+confirmName+'</span> already exists.<BR>Do you want to continue to '+confirmAction+' this function?'
+			openConfirmDBox();
+		}
+		else {
+			setModelList(name);
 		}
 	}
 	
-	function Zrotate() {
-		for(var mesh in currentMeshes) {
-			rotateMesh(currentMeshes[mesh], axisZ, -Math.PI/2);						
+	function setModelList(name) {		
+		storeDB.style.visibility = 'hidden';
+		var nref;
+		var newRef = (getSubRef(currentRef)+1)+getRef(currentRef);
+		var newSelected = {};
+
+		jcModelList[name] = newRef;
+		jcModels[newRef] = {};
+		var newJCubees = jcModels[newRef];
+		for(var ref in JCubees) {
+			nref = (getSubRef(ref)+1)+getRef(ref);
+			newJCubees[nref]=new JcubeeBlank(nref);
+			newJCubees[nref].Jcubee=JCubees[ref].Jcubee.clone(nref);
+			newJCubees[nref].addMarkers(jccsStudio.scene);
+			if(ref in currentMeshes) {
+				currentMeshes[nref] = newJCubees[nref].Jcubee;
+				delete currentMeshes[ref];
+			}
+			JCubees[ref].disable();
 		}
-	}
+
+		JCubees = newJCubees;
 		
-	function addtoscene() {
-		for(var name in JCubees) {
-			jcssStudio.scene.meshes.push(JCubees[name].Jcubee);
-					
-			
-		}		 
+		currentName = name;
+		currentRef = newRef;
+		model.innerHTML = "Model -- "+currentName;
+		
+		storeIn.value = currentName;
+		JCisStored = true;
 	}
 	
 	/*-------------START LIST OF MODELS---------------*/
-	jcModelList['model0'] = 'model0';
-	model.innerHTML = "Model -- "+jcModelList['model0'];
-	storeIn.value = jcModelList['model0'];
+	var currentRef = 'model'+(num_of_models++);
+	var currentName = currentRef;
+	var subRef = 1000;
+	var currentRef = subRef+currentRef;
+	var JCisStored = false;
+	jcModelList[currentName] = currentRef;
+	jcModels[currentRef] = {};
+	JCubees = jcModels[currentRef];
+	
+	model.innerHTML = "Model -- *"+currentName;
+	storeIn.value = currentName;
 	
 	
 	/*-------------CONSTRUCTION STUDIO ---------------*/	
@@ -419,19 +569,21 @@ function main() {
 	
 	//Make Cubees
 	function makeBox() {
-		var name = "box"+(num_of_boxes++);
+		var name = "1000box"+(num_of_boxes++);
 		var boxMat = new BABYLON.StandardMaterial("blue", jccsStudio.scene);
 		boxMat.emissiveColor = new BABYLON.Color3(colour.colarray[0]/255,colour.colarray[1]/255,colour.colarray[2]/255);
-		JCubees[name]= new JcubeeBox(name, 30, 30 + 13*60, 30, boxMat, jccsStudio.scene);
+		JCubees[name]= new JcubeeBox(name, 30, 30 + 13*60, 30, boxMat, jccsStudio.scene);		
 		JCubees[name].addMarkers(jccsStudio.scene);
 		hideSubMenus();
 		resetBorders();		
 		selection.style.color="#000000";		
 		selectNew(JCubees[name].Jcubee);
+		model.innerHTML = "Model -- *"+currentName;
+		JCisStored = false;
 	}
 	
 	function makeCylinder() {
-		var name = "cylinder"+(num_of_boxes++);
+		var name = "10000cylinder"+(num_of_boxes++);
 		var boxMat = new BABYLON.StandardMaterial("blue", jccsStudio.scene);
 		boxMat.emissiveColor = new BABYLON.Color3(colour.colarray[0]/255,colour.colarray[1]/255,colour.colarray[2]/255);
 		JCubees[name]= new JcubeeCylinder(name, 30, 30 + 13*60, 30, boxMat, jccsStudio.scene);
@@ -440,10 +592,12 @@ function main() {
 		resetBorders();		
 		selection.style.color="#000000";		
 		selectNew(JCubees[name].Jcubee);
+		model.innerHTML = "Model -- *"+currentName;
+		JCisStored = false;
 	}
 	
 	function makeSphere() {
-		var name = "sphere"+(num_of_boxes++);
+		var name = "1000sphere"+(num_of_boxes++);
 		var boxMat = new BABYLON.StandardMaterial("blue", jccsStudio.scene);
 		boxMat.emissiveColor = new BABYLON.Color3(colour.colarray[0]/255,colour.colarray[1]/255,colour.colarray[2]/255);
 		JCubees[name]= new JcubeeSphere(name, 30, 30 + 13*60, 30, boxMat, jccsStudio.scene);
@@ -452,10 +606,12 @@ function main() {
 		resetBorders();		
 		selection.style.color="#000000";		
 		selectNew(JCubees[name].Jcubee);
+		model.innerHTML = "Model -- *"+currentName;
+		JCisStored = false;
 	}
 
 	function makeRoof() {
-		var name = "roof"+(num_of_boxes++);
+		var name = "1000roof"+(num_of_boxes++);
 		var boxMat = new BABYLON.StandardMaterial("blue", jccsStudio.scene);
 		boxMat.emissiveColor = new BABYLON.Color3(colour.colarray[0]/255,colour.colarray[1]/255,colour.colarray[2]/255);
 		JCubees[name]= new JcubeeRoof(name, 30, 30 + 13*60, 30, boxMat, jccsStudio.scene);
@@ -464,6 +620,8 @@ function main() {
 		resetBorders();		
 		selection.style.color="#000000";		
 		selectNew(JCubees[name].Jcubee);
+		model.innerHTML = "Model -- *"+currentName;
+		JCisStored = false;
 	}
 	
 	//select new cubee
@@ -478,9 +636,6 @@ function main() {
 			}
 		}
 	}
-	
-	//Prepare scene studio
-	scene_studio();
 		
 	// Register a render loop to repeatedly render the scene
 	jcEngine.runRenderLoop(function () {
@@ -602,9 +757,10 @@ function main() {
 		else {
 			frontPlane.visibility = 1;
 		}
-	}
+	};
 	
 	var onKeyDown = function(evt) {
+
 	
 		if(evt.keyCode == 16) {
 			if(!shiftDown) {
@@ -684,6 +840,8 @@ function main() {
 				JCubees[name].moveT(currentMeshes[name].position);
 			}
 		}
+		model.innerHTML = "Model -- *"+currentName;
+		JCisStored = false;
 	}
 	
 	function leftMove() {
@@ -694,6 +852,8 @@ function main() {
 				JCubees[name].moveT(currentMeshes[name].position);
 			}
 		}
+		model.innerHTML = "Model -- *"+currentName;
+		JCisStored = false;
 	}
 	
 	function upMove() {
@@ -704,6 +864,8 @@ function main() {
 				JCubees[name].moveT(currentMeshes[name].position);
 			}
 		}
+		model.innerHTML = "Model -- *"+currentName;
+		JCisStored = false;
 	}
 	
 	function downMove() {
@@ -713,7 +875,9 @@ function main() {
 				currentMeshes[name].position.addInPlace(diff);
 				JCubees[name].moveT(currentMeshes[name].position);
 			}
-		}	
+		}
+		model.innerHTML = "Model -- *"+currentName;
+		JCisStored = false;	
 	}
 	
 	function forwardMove() {
@@ -724,6 +888,8 @@ function main() {
 				JCubees[name].moveT(currentMeshes[name].position);
 			}
 		}
+		model.innerHTML = "Model -- *"+currentName;
+		JCisStored = false;
 	}
 	
 	function backMove() {
@@ -734,12 +900,8 @@ function main() {
 				JCubees[name].moveT(currentMeshes[name].position);
 			}
 		}
-	}
-	
-	function rotationZ() {
-		for(var name in currentMeshes) {
-			currentMeshes[name].rotation.z = Math.PI/2;
-		}
+		model.innerHTML = "Model -- *"+currentName;
+		JCisStored = false;
 	}
 
     jcCanvas.addEventListener("mousedown", onPointerDown, false);

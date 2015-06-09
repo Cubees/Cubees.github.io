@@ -177,30 +177,12 @@ function stepsForwardBack(JCubees, currentMeshes) {
 	return {forward:maxStepsForward, back:maxStepsBack}; 
 }
 
-function rotateParoundAxis(p, axis, angle) { //p is position (Vector3) to rotate clockwise about axis (Vector3) through angle where c is centre of rotation (Vector3)
-	//var _p = p.subtract(c);	// translate from centre of rotation to origin	
-	var _p = new BABYLON.Quaternion(p.x, p.y, p.z, 0);  //change _p for quaternion multiplication
-	axis.normalize(); // change axis to unit vector		
-	var q = BABYLON.Quaternion.RotationAxis(axis,angle);  //form quaternion rotation		
-	var qinv = BABYLON.Quaternion.Inverse(q);	
-	var _pdash = q.multiply(_p).multiply(qinv);
-	_pdash = new BABYLON.Vector3(_pdash.x, _pdash.y, _pdash.z); //change to Vector 3 for new position vector;
-	return _pdash;  //translate back from origin to centre of rotation
+function getSubRef(ref) {
+	return parseInt(ref);
 }
 
-function rotateMesh(mesh, axis, angle) {	
-	var positions = mesh.getVerticesData(BABYLON.VertexBuffer.PositionKind);
-	var numberOfPoints = positions.length/3;
-
-	for (var i=0; i<numberOfPoints; i++) {
-		var p = new BABYLON.Vector3(positions[i*3], positions[i*3+1], positions[i*3+2]);  
-		var newp = rotateParoundAxis(p, axis, angle);// new position vectors after rotation around axis
-		positions[i*3]=newp.x;
-		positions[i*3+1]=newp.y;
-		positions[i*3+2]=newp.z;
-	};
-  
-	mesh.updateVerticesData(BABYLON.VertexBuffer.PositionKind, positions);
+function getRef(ref) {
+	return ref.substr(4);
 }
 
 function getPosition(e) {

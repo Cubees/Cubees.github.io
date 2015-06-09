@@ -1,0 +1,90 @@
+.dragDialogueBox {
+	position:absolute;
+	width:240px;
+	height:100px;
+	top:250px;
+	left:500px;
+	border: 1px solid #333333;
+	background-color: #FFFFFF;
+	box-shadow: 5px 5px 2px #111111;
+	z-index:5;
+	visibility:hidden;
+}
+
+.dragDialogueBox div, input {
+	position:absolute;
+}
+
+.dragDialogueBox label, input {
+	margin: 2px 2px 2px 2px;
+}
+
+.heading {
+	border-bottom: 1px solid #666666;
+	width:240px;
+	height:20px;
+	background-color:#AAAAAA;
+}
+
+.titlediv {
+	left:5px;
+	cursor:default;
+}
+
+.closediv {
+	right:2px;
+	opacity:0.6;
+	font-family: sans-serif;
+	cursor:default;
+}
+
+.closedive:hover {
+	opacity:1;
+}
+
+.dragContent {
+	width: 240px;
+	height:80px;
+	top:20px;
+}
+
+.DBBut {
+	top: 50px;
+	left:5px;
+}
+
+.DBCancel {
+	top: 50px;
+	right:5px;
+}
+
+#storeDesc {
+	top:2px;
+	left:5px;
+	color: #666666;
+	cursor: default;
+}
+
+#storeName {
+	top:25px;
+	left:5px;
+}
+
+#confirmDB {
+	height:135px;
+}
+
+#confirmBut {
+	top: 85px;
+	left:5px;
+}
+
+#confirmCancel {
+	top: 85px;
+	right:5px;
+}
+
+#confirmDesc {
+	margin:5px;
+	
+}
