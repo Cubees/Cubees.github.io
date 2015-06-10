@@ -6,6 +6,8 @@ function main() {
     var groundPoint;
 	var currentMeshes={};
     var currentMesh = null;
+    
+    var newModel=true;
 	//var currentMaterial;
 	//var currentMaterials={};
 	var detached = false;
@@ -20,11 +22,26 @@ function main() {
 	var confirmName;
 	var confirmFunc;
 	
-	//axisX = new BABYLON.Vector3(1, 0, 0);
-	//axisY = new BABYLON.Vector3(0, 1, 0);
-	//axisZ = new BABYLON.Vector3(0, 0, 1);
+	var cursorPos;
+	var downMouse = false;
+	var dlgbox;
+		
+	var num_of_boxes = 0;
+	var num_of_models = 0;
+	var sub_num = 0;
+	var JCubees={};
+	var jcCanvas;
+	var jcEngine;
+	var jccsStudio, jcssStudio;
+	var jcModelList={}, jcModels={};
+	var sceneModelList={}, sceneModels={};
+	var doAddToScene = false;
+
 	
-	/*-------------MENU ELEMENTS---------------	*/
+	
+	/***********************************CONSTRUCTION DIALOGUE CODES***********************************/
+	
+	/*-------------CONSTRUCTION MENU ELEMENTS---------------	*/
 	//Get Menu Elements 
 	var menu = document.getElementById("menu");
 	var menulist = document.getElementById("menulist");
@@ -75,7 +92,7 @@ function main() {
 	//*******sub menu list ************
 	var subMenuList = [subfilemenu, subcubeemenu, subselectionmenu];
 	
-	/*--------DIALOGUE BOX ELEMENTS------------------*/
+	/*--------CONSTRUCTION DIALOGUE BOX ELEMENTS------------------*/
 	
 	var ddb = document.getElementsByClassName("dragDialogueBox");
 	var closediv = document.getElementsByClassName("closediv");
@@ -90,7 +107,7 @@ function main() {
 	var confirmDB = document.getElementById("confirmDB"); 
 	var confirmBut = document.getElementById("confirmBut");	
 	
-	/*----------MENU EVENTS--------------------------------*/
+	/*----------CONSTRUCTION MENU EVENTS--------------------------------*/
 
 	//move events
 	leftarrow.addEventListener("mousedown", leftMove, false);
@@ -130,7 +147,7 @@ function main() {
 	
 	
 	
-	/*-----------DIALOGUE BOX EVENTS--------------------*/
+	/*-----------CONSTRUCTION DIALOGUE BOX EVENTS--------------------*/
 	
 	//Drag events
 	window.addEventListener('mousemove', function(e) {doDrag(e)}, false);
@@ -169,7 +186,7 @@ function main() {
 	
 	
 		
-	/*-------------MENU FUNCTIONS ---------------*/
+	/*-------------CONSTRUCTION MENU FUNCTIONS ---------------*/
 	//set colours in selection menu
 	function setColours(colours) {
 		var colarray = [ 
@@ -315,13 +332,41 @@ function main() {
 	
 	//Add to Scene functions	
 	function addtoscene() {
-		 if(!JCisStored) {
+		doAddToScene=false;
+		if(!JCisStored) {
+		 	doAddToScene=true;
 		 	openStoreAs();
 		 }
 		 else {
-		 	
+		 	sceneSwitch();
 		 }
-	}	
+		 hideSubMenus();
+		 menu.style.visibility = 'hidden';
+		 scene_menu.style.visibility = 'visible';
+	}
+	
+	function sceneSwitch() {
+		sceneModels[currentRef+"IParent"] = BABYLON.Mesh.CreateBox(currentRef+"IParent", 5.0, jccsStudio.scene);
+		sceneModels[currentRef+"IParent"].visibility = 0;
+		for(var ref in JCubees) {
+			sceneModels[currentRef+"I"] = JCubees[ref].Jcubee.createInstance(currentRef+"I");
+			sceneModels[currentRef+"I"].material.alpha = 1;
+			sceneModels[currentRef+"I"].parent = sceneModels[currentRef+"IParent"];
+			sceneModels[currentRef+"IParent"].scaling = new BABYLON.Vector3(0.5, 0.5, 0.5);
+			JCubees[ref].disable();
+		}
+		frontPlane.setEnabled(false);
+		backPlane.setEnabled(false);
+		leftSidePlane.setEnabled(false);
+		rightSidePlane.setEnabled(false);
+		ground.material.wireframe = false;
+			
+		for(var Iref in sceneModels) {
+			sceneModels[Iref].setEnabled(true);
+		}
+		
+	}
+		
 	
 	
 	//General Menu functions
@@ -367,7 +412,7 @@ function main() {
 	}
 	
 	
-	/*-------------DIALOGUE BOX FUNCTIONS--------*/
+	/*-------------CONSTRUCTION DIALOGUE BOX FUNCTIONS--------*/
 
 	function doClose(box) {
 		box.parentNode.parentNode.parentNode.style.visibility = 'hidden';
@@ -413,7 +458,7 @@ function main() {
 	//Store in app
 	function doStoreAs() {
 		var name = storeIn.value;	
-		if(name in jcModelList) {
+		if(name in jcModelList && !newModel) {
 			confirmName = name;
 			confirmFunc = setModelList;
 			confirmAction = 'store';
@@ -425,7 +470,8 @@ function main() {
 		}
 	}
 	
-	function setModelList(name) {		
+	function setModelList(name) {
+		newModel = false;		
 		storeDB.style.visibility = 'hidden';
 		var nref;
 		var newRef = (getSubRef(currentRef)+1)+getRef(currentRef);
@@ -454,7 +500,137 @@ function main() {
 		
 		storeIn.value = currentName;
 		JCisStored = true;
+		if(doAddToScene) {
+			sceneSwitch();
+		}
 	}
+	
+	/*********************************************SCENE DIALOGUE CODE****************************************/
+	
+	/*-------------SCENE MENU ELEMENTS---------------	*/
+	//Get Menu Elements 
+	var scene_menu = document.getElementById("scene_menu");
+	scene_menu.style.visibility = 'hidden';
+	var scene_menulist = document.getElementById("scene_menulist");
+	
+	var scene_constructSite = document.getElementById("scene_constructSite");
+	var scene_scene = document.getElementById("scene_scene");
+	
+	var scene_leftarrow = document.getElementById("scene_leftarrow");
+	var scene_rightarrow = document.getElementById("scene_rightarrow");
+	var scene_uparrow = document.getElementById("scene_uparrow");
+	var scene_downarrow = document.getElementById("scene_downarrow");
+	var scene_forwardarrow = document.getElementById("scene_forwardarrow");
+	var scene_backarrow = document.getElementById("scene_backarrow");
+	
+	// File Menu and Sub-Menus
+	var scene_file_ = document.getElementById("scene_file");
+	var scene_subfilemenu = document.getElementById("scene_subfilemenu");
+	var scene_save = document.getElementById("scene_save");
+	var scene_save_as = document.getElementById("scene_save");
+	
+		// Selection Menu and Sub-Menus
+	var scene_selection = document.getElementById("scene_selection");
+	var scene_subselectionmenu = document.getElementById("scene_subselectionmenu");
+	var scene_clear = document.getElementById("scene_clear");
+	var scene_all = document.getElementById("scene_all");
+
+	var scene_rotateX = document.getElementById("scene_rotateX");
+	var scene_rotateY = document.getElementById("scene_rotateY");
+	var scene_rotateZ = document.getElementById("scene_rotateZ");
+	
+	//*******sub menu list ************
+	var scene_subMenuList = [scene_subfilemenu, scene_subselectionmenu];
+	
+	/*----------SCENE MENU EVENTS--------------------------------*/
+
+	//move events
+/* to do	scene_leftarrow.addEventListener("mousedown", scene_leftMove, false);
+	scene_rightarrow.addEventListener("mousedown", scene_rightMove, false);
+	scene_uparrow.addEventListener("mousedown", scene_upMove, false);
+	scene_downarrow.addEventListener("mousedown", scene_downMove, false);
+	scene_forwardarrow.addEventListener("mousedown", scene_forwardMove, false);
+	scene_backarrow.addEventListener("mousedown", scene_backMove, false); */
+	
+	//file events
+	scene_file_.addEventListener('click', scene_showFileMenu, false);
+	//to do scene_save.addEventListener('click', scene_doSave, false);
+	//to do scene_save_as.addEventListener('click', scene_openSaveAs, false);
+	
+	//Selection events
+	scene_selection.addEventListener("click", scene_showSelectionMenu, false);
+	scene_clear.addEventListener("click", scene_clearSelection, false);
+	scene_all.addEventListener("click", scene_selectAll, false);
+	
+/* to do	scene_rotateX.addEventListener("click", scene_Xrotate, false);
+	scene_rotateY.addEventListener("click", scene_Yrotate, false);
+	scene_rotateZ.addEventListener("click", scene_Zrotate, false); */
+	
+	/*-------------SCENE MENU FUNCTIONS ---------------*/
+	
+	//File functions
+	function scene_showFileMenu() {
+		scene_hideSubMenus();
+		scene_subfilemenu.style.visibility="visible";
+		scene_file_.style.borderBottom = "none";
+	}
+	
+	//Selection functions
+	function scene_showSelectionMenu() {
+		if(scene_selection.style.color=="rgb(136, 136, 136)") {
+			return
+		}
+		if(scene_selection.innerHTML == "Selection") {
+			scene_hideSubMenus();
+			scene_subselectionmenu.style.visibility="visible";
+			scene_selection.style.borderBottom = "none";
+		}
+		else {			
+			scene_selectAll();
+			scene_selection.innerHTML="Selection";
+		}
+	}
+	
+	function scene_clearSelection() {
+		for(var mesh in JCubees) {						
+			JCubees[mesh].Jcubee.material.alpha = 1;
+			JCubees[mesh].hideMarkers();
+		}			
+		currentMeshes = {};
+		//currentMaterials = {};
+		hideSubMenus();
+		//selection.style.color="rgb(136, 136, 136)"
+		selection.innerHTML = "Select All";
+	}
+	
+	function scene_selectAll() {
+		for(var mesh in JCubees) {						
+			if(!(mesh in currentMeshes)) {						
+				JCubees[mesh].Jcubee.material.alpha = 1;
+				JCubees[mesh].showMarkers();
+				currentMeshes[mesh] = JCubees[mesh].Jcubee;
+			}
+		}
+	}
+	
+	//General Menu functions
+	function scene_resetBorders() {		
+		var elm=scene_menulist.firstChild;		
+		elm=findNextDIV(elm);
+		while (elm) {			
+			elm.style.borderBottom ="1px solid black";
+			elm=findNextDIV(elm);
+		}
+	}
+	
+	function scene_hideSubMenus() {
+		for(var i=0; i<scene_subMenuList.length;i++) {
+			scene_subMenuList[i].style.visibility="hidden";
+		}		
+		scene_resetBorders();
+	}
+	
+	/***********************************************MODEL CODES************************************/
 	
 	/*-------------START LIST OF MODELS---------------*/
 	var currentRef = 'model'+(num_of_models++);
@@ -657,12 +833,12 @@ function main() {
         }
 
         return null;
-    }
+    };
 
     var onPointerDown = function (evt) {		
         if (evt.button !== 0) {
             return;
-        }
+        };
 
         // check if we are under a pickable mesh			
         var pickInfo = jccsStudio.scene.pick(jccsStudio.scene.pointerX, jccsStudio.scene.pointerY);	
@@ -707,7 +883,7 @@ function main() {
                 }, 0);
             }
         }
-    }
+   };
 
     var onPointerUp = function () {	
 		hideSubMenus();
@@ -728,7 +904,7 @@ function main() {
 			selection.style.color="rgb(136, 136, 136)"
 		}
 		
-    }
+    };
 	
 	var onPointerMove = function() {
 		jccsStudio.camera.alpha +=2*Math.PI;

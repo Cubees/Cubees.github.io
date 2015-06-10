@@ -34,10 +34,6 @@
 	height:20px;
 }
 
-#blank {
-	width:15%;
-}
-
 .arrcontent {
 	display:table-cell;
 	border: 1px solid #666666;
@@ -142,8 +138,27 @@
 	cursor:default;
 }
 
+#blankcontent:hover {
+	background: linear-gradient(to right, #FFFFFF , #FFFFFF); 
+}
+
+.gapcontent {
+	display:table-cell;
+	width:25px;
+	cursor:default;
+	border: 1px solid #666666;
+}
+
+.gapcontent:hover {
+	background: linear-gradient(to right, #FFFFFF , #FFFFFF); 
+}
+
 #box{
 	background-image:url("../images/box.png");
+}
+
+#blank {
+	width:15%;
 }
 
 #cyl{
@@ -268,4 +283,71 @@
 
 #rotateZ {
 	background-image:url("../images/rotZ.png");
+}
+
+/* SCENE CSS */
+
+#scene_menu {
+	top:0px;
+	right:0px;
+	width:100%;
+	height:20px;
+}
+
+#scene_subfilemenu {
+	height:25px;
+}
+
+#scene_blank {
+	width:15%;
+}
+
+#scene_scene {
+	color:#666666;
+}
+
+#scene_scene:hover {
+	background: linear-gradient(to right, #FFFFFF , #FFFFFF); 
+}
+
+#scene_leftarrow{
+	background-color:#4040FF;
+}
+
+#scene_rightarrow {
+	background-color:#FF4040;
+}
+
+#scene_uparrow {
+
+}
+
+#scene_downarrow {
+	background-color:#40FF40;
+}
+
+#scene_forwardarrow {
+	background-color:#FFFF00;
+}
+
+#scene_backarrow {
+	background-color:#804000;
+}
+
+#scene_clear {
+	width:119px;
+	vertical-align: middle;
+}
+
+#scene_clear:hover {
+	background: linear-gradient(to right, #999999 , #FFFFFF); 
+}
+
+#scene_all {
+	width:90px;
+	vertical-align: middle;
+}
+
+#scene_all:hover {
+	background: linear-gradient(to right, #999999 , #FFFFFF); 
 }

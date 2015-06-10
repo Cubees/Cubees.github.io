@@ -36,20 +36,6 @@
 			"use strict";
 			window.onload=main;
 			
-			//GLOBAL VARIABLE
-			var cursorPos;
-			var downMouse = false;
-			var dlgbox;
-			
-			var num_of_boxes = 0;
-			var num_of_models = 0;
-			var sub_num = 0;
-			var JCubees={};
-			var jcCanvas;
-			var jcEngine;
-			var jccsStudio, jcssStudio;
-			var jcModelList={}, jcModels={};
-			
 		</script>
 			
 	</head>
@@ -57,7 +43,9 @@
 	<body>
 		<canvas id="jcCanvas" class="canvas"></canvas>
 		
-		<!--dialogue boxes-->
+		<!-- ****************CONSTRUCTION DIALOGUES******************* -->
+		
+		<!--menu dialogue boxes-->
 		<div id='menu' class="dialogueBox">
 			<div id="menulist" class="row">
 				<div id='file' class='content'>File</div>
@@ -65,9 +53,9 @@
 				<div id='selection' class='content'>Selection</div>
 				<div id='addToScene' class='content'>Add To Scene...</div>
 				<div id='help' class='content'>Help</div> 
-				<div class='content'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</div>
+				<div class='gapcontent'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</div>
 				<div id='model' class='content'>Model</div>
-				<div id='blank' class='content'></div>
+				<div id='blank' class='gapcontent'></div>
 				<div id='leftarrow' class='arrcontent'>&larr;</div>
 				<div id='rightarrow' class='arrcontent'>&rarr;</div>
 				<div id='uparrow' class='arrcontent'>&uarr;</div>
@@ -167,6 +155,55 @@
 					<input id = "confirmBut" class='DBBut' type = 'button' value = "Continue" />
 					<input id = "confirmCancel"  class = 'DBCancel' type = 'button' value = "Cancel" />
 				</div>
+			</div>
+		</div>
+		
+		<!-- ***************SCENE DIALOGUES*************************** -->
+		<!--menu dialogue boxes-->
+		<div id='scene_menu' class="dialogueBox">
+			<div id="scene_menulist" class="row">
+				<div id='scene_file' class='content'>File</div>
+				<div id='scene_selection' class='content'>Selection</div>
+				<div id='scene_constructSite' class='content'>Construction Site</div>
+				<div id='scene_help' class='content'>Help</div> 
+				<div class='gapcontent'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</div>
+				<div id='scene_scene' class='content'>Scene</div>
+				<div id='scene_blank' class='gapcontent'></div>
+				<div id='scene_leftarrow' class='arrcontent'>&larr;</div>
+				<div id='scene_rightarrow' class='arrcontent'>&rarr;</div>
+				<div id='scene_uparrow' class='arrcontent'>&uarr;</div>
+				<div id='scene_downarrow' class='arrcontent'>&darr;</div>
+				<div id='scene_backarrow' class='arrcontent'>&lt;</div>
+				<div id='scene_forwardarrow' class='arrcontent'>&gt;</div>
+			</div>
+		</div>
+		
+		<div id='scene_subfilemenu' class='subMenu'>
+			<div class='row'>
+				<div id='scene_new' class='filecontent'>New...</div>
+				<div id='scene_fetch' class='filecontent'>Fetch...</div>
+				<div id='scene_save' class='filecontent'>Save</div>
+				<div id='scene_save_as' class='filecontent'>Save As...</div>
+				<div id='scene_open' class='filecontent'>Open...</div>
+				<div id='scene_export' class='filecontent'>Export...</div>
+				<div id='scene_import' class='filecontent'>Import...</div>
+				<div class="subcontent"></div>
+			</div>
+		</div>
+
+		<div id='scene_subselectionmenu' class="subMenu">
+			<div class="row">
+				<div class="blankcontent"></div>
+				<div id="scene_clear" class="dividr">Clear Selection</div>
+				<div class="blankcontent"></div>
+				<div id="scene_all" class="dividr">Select All</div>
+				<div class="blankcontent"></div>
+				<div id="scene_rotations" class="dividr">
+					<div id="scene_rotateX" class="rotate"></div>
+					<div id="scene_rotateY" class="rotate"></div>
+					<div id="scene_rotateZ" class="rotate"></div>
+				</div>
+				<div class="subcontent"></div>
 			</div>
 		</div>
 		
