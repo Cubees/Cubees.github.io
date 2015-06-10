@@ -553,8 +553,7 @@ function main() {
 		var newref = jcModelList[name];
 		for(var ref in JCubees) {
 			JCubees[ref].disable();
-		}
-alert('stop');		
+		}		
 		JCubees = jcModels[newref];
 		for(var ref in JCubees) {
 			JCubees[ref].enable();
