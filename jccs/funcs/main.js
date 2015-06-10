@@ -61,6 +61,7 @@ function main() {
 	var subfilemenu = document.getElementById("subfilemenu");
 	var store = document.getElementById("store");
 	var store_as = document.getElementById("store_as");
+	var fetch = document.getElementById("fetch");
 	
 	// Cubee Menu and Sub-Menus
 	var cubee = document.getElementById("cubee");
@@ -104,6 +105,10 @@ function main() {
 	var storeIn = document.getElementById("storeIn");
 	var storeBut = document.getElementById("storeBut");
 	
+	var fetchDB = document.getElementById("fetchDB"); 
+	var fetchList = document.getElementById("fetchList");
+	var fetchBut = document.getElementById("fetchBut");
+	
 	var confirmDB = document.getElementById("confirmDB"); 
 	var confirmBut = document.getElementById("confirmBut");	
 	
@@ -121,6 +126,7 @@ function main() {
 	file_.addEventListener('click', showFileMenu, false);
 	store.addEventListener('click', doStore, false);
 	store_as.addEventListener('click', openStoreAs, false);
+	fetch.addEventListener('click', openFetch, false);
 	
 	//cubee events
 	cubee.addEventListener("click", showCubeeMenu, false);
@@ -183,8 +189,8 @@ function main() {
     //Store As in App
     storeBut.addEventListener('click', doStoreAs, false);
 
-	
-	
+	//Fetch fromApp
+	fetchBut.addEventListener('click', doFetch, false);
 		
 	/*-------------CONSTRUCTION MENU FUNCTIONS ---------------*/
 	//set colours in selection menu
@@ -256,6 +262,43 @@ function main() {
 	
 	function openStoreAs() {		
 		storeDB.style.visibility = 'visible';
+	}
+	
+	function openFetch() {
+		fillFetch();
+		fetchDB.style.visibility = 'visible';
+		
+	}
+	
+	function fillFetch() {
+		var fetch_array =[];
+		for(var name in jcModelList) {
+			fetch_array.push(name);
+		}		
+		fetch_array.sort();
+		var flen=fetch_array.length;
+		var cols = Math.ceil(flen/10);
+		var rows = 10;
+		var len;
+		var fetch_row, fetch_col;
+		var i=0;
+		for(var c=0; c<cols; c++){
+			fetch_col = document.createElement("div");
+			fetch_col.style.left=c*100+"px";
+			fetchList.appendChild(fetch_col);
+			fetch_ul = document.createElement("ul");
+			fetch_col.appendChild(fetch_ul);
+			len = flen - c*10;
+			if(len<10) {
+				rows=len;
+			}
+			for(var r=0; r<rows; r++) {
+				fetch_li = document.createElement("li");
+				fetch_li.innerHTML=fetch_array[i++];
+				fetch_li.addEventListener('click', function() {fetchname.innerHTML = this.innerHTML}, false);
+				fetch_ul.appendChild(fetch_li);
+			}
+		}
 	}
 	
 	//Cubee functions
@@ -503,6 +546,19 @@ function main() {
 		if(doAddToScene) {
 			sceneSwitch();
 		}
+	}
+	
+	function doFetch() {
+		var name = fetchname.innerHTML;
+		var newref = jcModelList[name];
+		for(var ref in JCubees) {
+			JCubees[ref].disable();
+		}
+alert('stop');		
+		JCubees = jcModels[newref];
+		for(var ref in JCubees) {
+			JCubees[ref].enable();
+		} 
 	}
 	
 	/*********************************************SCENE DIALOGUE CODE****************************************/

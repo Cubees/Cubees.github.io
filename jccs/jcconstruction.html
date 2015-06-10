@@ -125,6 +125,7 @@
 		</div>
 		
 		<!--draggable dialogue boxes-->
+		
 		<div id='storeDB' class="dragDialogueBox" draggable="true">
 			<div class="row">
 				<div class="heading"> 
@@ -136,8 +137,28 @@
 					<div id = 'storeName' >
 						<label for="storeIn">Model name: </label><input id="storeIn" class="inpt" type="text" size="15"/>
 					</div>
+				</div>
+				<div class="footer">	
 					<input id = "storeBut" class='DBBut' type = 'button' value = "Store" />
 					<input id = "storeCancel" class = 'DBCancel' type = 'button' value = "Cancel" />
+				</div>
+			</div>
+		</div>
+		
+			<div id='fetchDB' class="dragDialogueBox" draggable="true">
+			<div class="row">
+				<div class="heading"> 
+					<div class="titlediv">Fetch</div>
+					<div class="closediv">X</div>
+				</div>
+				<div class='dragContent'>
+					<div id = 'fetchDesc'>Fetch from App only</div>
+					<div id='fetchList' class = 'getList' ></div>
+				</div>
+				<div class='footer'>
+					<div id='fetchname'></div>
+					<input id = "fetchBut" class='DBBut' type = 'button' value = "Fetch" />
+					<input id = "fetchCancel" class = 'DBCancel' type = 'button' value = "Cancel" />
 				</div>
 			</div>
 		</div>
@@ -152,6 +173,8 @@
 					<div id = 'confirmDesc'>
 						Already exists.
 					</div>
+				</div>
+				<div class="footer">	
 					<input id = "confirmBut" class='DBBut' type = 'button' value = "Continue" />
 					<input id = "confirmCancel"  class = 'DBCancel' type = 'button' value = "Cancel" />
 				</div>
