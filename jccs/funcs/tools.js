@@ -177,13 +177,16 @@ function stepsForwardBack(JCubees, currentMeshes) {
 	return {forward:maxStepsForward, back:maxStepsBack}; 
 }
 
-function getSubRef(ref) {
-	return parseInt(ref);
+function getModelRef(ref) {
+	var i = ref.indexOf('¬') - 1;
+	return ref.substr(1,i);
 }
 
-function getRef(ref) {
-	return ref.substr(4);
+function getNameRef(ref) {
+	var i = ref.indexOf('¬') +1;
+	return ref.substr(i);
 }
+
 
 function getPosition(e) {
     e = e || window.event;

@@ -1,7 +1,7 @@
 Studio = function (engine) {
 	this.engine=engine;
 	this.scene = new BABYLON.Scene(engine);
-}
+};
 
 function JcubeeBlank(name) {
 	this.name = name;

@@ -5,7 +5,7 @@ function main() {
 	// Event variables
     var groundPoint;
 	var currentMeshes={};
-    var currentMesh = null;
+    //var currentMesh = null;
     
     var newModel=true;
 	//var currentMaterial;
@@ -29,11 +29,11 @@ function main() {
 	var num_of_boxes = 0;
 	var num_of_models = 0;
 	var sub_num = 0;
-	var JCubees={};
 	var jcCanvas;
 	var jcEngine;
+	var JCubees = {};
 	var jccsStudio, jcssStudio;
-	var jcModelList={}, jcModels={};
+	var jcModels={};
 	var sceneModelList={}, sceneModels={};
 	var doAddToScene = false;
 
@@ -215,7 +215,7 @@ function main() {
 				colours.appendChild(col);
 			}
 		}
-		model.innerHTML = "Model -- *"+currentName;
+		model.innerHTML = "Model -- *"+currentModelName;
 		JCisStored = false;
 	}
 	
@@ -237,7 +237,7 @@ function main() {
 			txtr.addEventListener("click", function() {setMeshTexture(this)}, false );
 			texturepics.appendChild(txtr);
 		}
-		model.innerHTML = "Model -- *"+currentName;
+		model.innerHTML = "Model -- *"+currentModelName;
 		JCisStored = false;
 	}
 	
@@ -251,12 +251,14 @@ function main() {
 	}
 	
 	function doStore() {	
-		if(currentName == getRef(currentRef)) {
+		if(newModel) {
+			newModel = false;
 			openStoreAs();
 		}
 		else {
-			model.innerHTML = "Model -- "+currentName;
+			model.innerHTML = "Model -- "+currentModelName;
 			JCisStored = true;
+			doStoreModel(currentModelName);
 		}
 	}
 	
@@ -265,14 +267,22 @@ function main() {
 	}
 	
 	function openFetch() {
-		fillFetch();
-		fetchDB.style.visibility = 'visible';
+		if(!JCisStored) 
+		{
+			confirmName = name;
+			confirmFunc = fillFetch;
+			confirmDesc.innerHTML = 'The current model <span style="font-style:italic"> '+confirmName+'</span> has not been stored.<BR>Do you want to continue and overwrite the current model?'
+			openConfirmDBox();
+		}
+		else {
+			fillFetch();
+		}
 		
 	}
 	
 	function fillFetch() {
 		var fetch_array =[];
-		for(var name in jcModelList) {
+		for(var name in jcModels) {
 			fetch_array.push(name);
 		}		
 		fetch_array.sort();
@@ -299,6 +309,7 @@ function main() {
 				fetch_ul.appendChild(fetch_li);
 			}
 		}
+		fetchDB.style.visibility = 'visible';
 	}
 	
 	//Cubee functions
@@ -344,6 +355,8 @@ function main() {
 				currentMeshes[mesh] = JCubees[mesh].Jcubee;
 			}
 		}
+		selection.innerHTML = "Selection";
+		selection.style.color="#000000";
 	}
 	
 	function Xrotate() {
@@ -353,7 +366,7 @@ function main() {
 		for(var mesh in currentMeshes) {
 			currentMeshes[mesh].rotate(BABYLON.Axis.X, -Math.PI/2, BABYLON.Space.WORLD);		
 		}
-		model.innerHTML = "Model -- *"+currentName;
+		model.innerHTML = "Model -- *"+currentModelName;
 		JCisStored = false;
 	}
 
@@ -361,7 +374,7 @@ function main() {
 		for(var mesh in currentMeshes) {
 			currentMeshes[mesh].rotate(BABYLON.Axis.Y, -Math.PI/2, BABYLON.Space.WORLD);						
 		}
-		model.innerHTML = "Model -- *"+currentName;
+		model.innerHTML = "Model -- *"+currentModelName;
 		JCisStored = false;
 	}
 	
@@ -369,7 +382,7 @@ function main() {
 		for(var mesh in currentMeshes) {
 			currentMeshes[mesh].rotate(BABYLON.Axis.Z, -Math.PI/2, BABYLON.Space.WORLD);						
 		}
-		model.innerHTML = "Model -- *"+currentName;
+		model.innerHTML = "Model -- *"+currentModelName;
 		JCisStored = false;
 	}
 	
@@ -389,13 +402,13 @@ function main() {
 	}
 	
 	function sceneSwitch() {
-		sceneModels[currentRef+"IParent"] = BABYLON.Mesh.CreateBox(currentRef+"IParent", 5.0, jccsStudio.scene);
-		sceneModels[currentRef+"IParent"].visibility = 0;
+		sceneModels[currentModelRef+"IParent"] = BABYLON.Mesh.CreateBox(currentModelRef+"IParent", 5.0, jccsStudio.scene);
+		sceneModels[currentModelRef+"IParent"].visibility = 0;
 		for(var ref in JCubees) {
-			sceneModels[currentRef+"I"] = JCubees[ref].Jcubee.createInstance(currentRef+"I");
-			sceneModels[currentRef+"I"].material.alpha = 1;
-			sceneModels[currentRef+"I"].parent = sceneModels[currentRef+"IParent"];
-			sceneModels[currentRef+"IParent"].scaling = new BABYLON.Vector3(0.5, 0.5, 0.5);
+			sceneModels[currentModelRef+"I"] = JCubees[ref].Jcubee.createInstance(currentModelRef+"I");
+			sceneModels[currentModelRef+"I"].material.alpha = 1;
+			sceneModels[currentModelRef+"I"].parent = sceneModels[currentModelRef+"IParent"];
+			sceneModels[currentModelRef+"IParent"].scaling = new BABYLON.Vector3(0.5, 0.5, 0.5);
 			JCubees[ref].disable();
 		}
 		frontPlane.setEnabled(false);
@@ -501,63 +514,73 @@ function main() {
 	//Store in app
 	function doStoreAs() {
 		var name = storeIn.value;	
-		if(name in jcModelList && !newModel) {
+		if(name in jcModels && !newModel) {
 			confirmName = name;
-			confirmFunc = setModelList;
-			confirmAction = 'store';
-			confirmDesc.innerHTML = 'The model <span style="font-style:italic"> '+confirmName+'</span> already exists.<BR>Do you want to continue to '+confirmAction+' this function?'
+			confirmFunc = doStoreModel;
+			confirmDesc.innerHTML = 'The model <span style="font-style:italic"> '+confirmName+'</span> already exists.<BR>Do you want to continue to and overwrite the existing model?';
 			openConfirmDBox();
 		}
 		else {
-			setModelList(name);
+			doStoreModel(name);
 		}
 	}
 	
-	function setModelList(name) {
-		newModel = false;		
+	function doStoreModel(name) {
+		var newRef;				
 		storeDB.style.visibility = 'hidden';
-		var nref;
-		var newRef = (getSubRef(currentRef)+1)+getRef(currentRef);
-		var newSelected = {};
-
-		jcModelList[name] = newRef;
-		jcModels[newRef] = {};
-		var newJCubees = jcModels[newRef];
-		for(var ref in JCubees) {
-			nref = (getSubRef(ref)+1)+getRef(ref);
-			newJCubees[nref]=new JcubeeBlank(nref);
-			newJCubees[nref].Jcubee=JCubees[ref].Jcubee.clone(nref);
-			newJCubees[nref].addMarkers(jccsStudio.scene);
-			if(ref in currentMeshes) {
-				currentMeshes[nref] = newJCubees[nref].Jcubee;
-				delete currentMeshes[ref];
+		if(name in jcModels) {
+			for(var ref in jcModels[name]) {
+				delete jcModels[name][ref];
 			}
-			JCubees[ref].disable();
+		}
+		jcModels[name] = {};
+		for (var ref in JCubees) {			
+			newRef = "S"+getModelRef(ref)+"¬"+getNameRef(ref);
+			jcModels[name][newRef] = new JcubeeBlank(newRef);
+			jcModels[name][newRef].Jcubee = JCubees[ref].Jcubee.clone(newRef);
+			jcModels[name][newRef].addMarkers(jccsStudio.scene);		
+			jcModels[name][newRef].disable();
 		}
 
-		JCubees = newJCubees;
 		
-		currentName = name;
-		currentRef = newRef;
-		model.innerHTML = "Model -- "+currentName;
+		currentModelName = name;
+		model.innerHTML = "Model -- "+currentModelName;
+
+		//selectAll();
 		
-		storeIn.value = currentName;
+		storeIn.value = currentModelName;
 		JCisStored = true;
 		if(doAddToScene) {
 			sceneSwitch();
 		}
+		
 	}
 	
 	function doFetch() {
 		var name = fetchname.innerHTML;
-		var newref = jcModelList[name];
-		for(var ref in JCubees) {
+		for( var ref in JCubees) {
+			if(ref in currentMeshes) {
+				delete currentMeshes[ref];
+			}
 			JCubees[ref].disable();
-		}		
-		JCubees = jcModels[newref];
-		for(var ref in JCubees) {
-			JCubees[ref].enable();
-		} 
+			delete JCubees[ref].Jcubee;
+			delete JCubees[ref];
+		}
+		JCubees ={};
+		currentMeshes ={};
+		for (var ref in jcModels[name]) {
+			newRef = "L"+getModelRef(ref)+"¬"+getNameRef(ref);		
+			JCubees[newRef] = new JcubeeBlank(newRef);		
+			JCubees[newRef].Jcubee = jcModels[name][ref].Jcubee.clone(newRef);
+			JCubees[newRef].addMarkers(jccsStudio.scene);
+			JCubees[newRef].enable();
+		}
+		
+		selectAll();
+		
+		currentModelName = name;
+		model.innerHTML = "Model -- "+currentModelName;
+		fetchDB.style.visibility = 'hidden';
 	}
 	
 	/*********************************************SCENE DIALOGUE CODE****************************************/
@@ -688,17 +711,12 @@ function main() {
 	/***********************************************MODEL CODES************************************/
 	
 	/*-------------START LIST OF MODELS---------------*/
-	var currentRef = 'model'+(num_of_models++);
-	var currentName = currentRef;
-	var subRef = 1000;
-	var currentRef = subRef+currentRef;
+	var currentModelName = 'model'+(num_of_models++);
 	var JCisStored = false;
-	jcModelList[currentName] = currentRef;
-	jcModels[currentRef] = {};
-	JCubees = jcModels[currentRef];
+	JCubees = {};
 	
-	model.innerHTML = "Model -- *"+currentName;
-	storeIn.value = currentName;
+	model.innerHTML = "Model -- *"+currentModelName;
+	storeIn.value = currentModelName;
 	
 	
 	/*-------------CONSTRUCTION STUDIO ---------------*/	
@@ -798,9 +816,9 @@ function main() {
 	rightSidePlane.isPickable = false;
 
 	
-	//Make Cubees
+	//Make Cubees  L prefix for Live Cubee
 	function makeBox() {
-		var name = "1000box"+(num_of_boxes++);
+		var name = "L"+currentModelName+"¬box"+(num_of_boxes++);
 		var boxMat = new BABYLON.StandardMaterial("blue", jccsStudio.scene);
 		boxMat.emissiveColor = new BABYLON.Color3(colour.colarray[0]/255,colour.colarray[1]/255,colour.colarray[2]/255);
 		JCubees[name]= new JcubeeBox(name, 30, 30 + 13*60, 30, boxMat, jccsStudio.scene);		
@@ -809,12 +827,12 @@ function main() {
 		resetBorders();		
 		selection.style.color="#000000";		
 		selectNew(JCubees[name].Jcubee);
-		model.innerHTML = "Model -- *"+currentName;
-		JCisStored = false;
+		model.innerHTML = "Model -- *"+currentModelName;
+		JCisStored = false;		
 	}
 	
 	function makeCylinder() {
-		var name = "10000cylinder"+(num_of_boxes++);
+		var name = "L"+currentModelName+"¬cylinder"+(num_of_boxes++);
 		var boxMat = new BABYLON.StandardMaterial("blue", jccsStudio.scene);
 		boxMat.emissiveColor = new BABYLON.Color3(colour.colarray[0]/255,colour.colarray[1]/255,colour.colarray[2]/255);
 		JCubees[name]= new JcubeeCylinder(name, 30, 30 + 13*60, 30, boxMat, jccsStudio.scene);
@@ -823,12 +841,12 @@ function main() {
 		resetBorders();		
 		selection.style.color="#000000";		
 		selectNew(JCubees[name].Jcubee);
-		model.innerHTML = "Model -- *"+currentName;
+		model.innerHTML = "Model -- *"+currentModelName;
 		JCisStored = false;
 	}
 	
 	function makeSphere() {
-		var name = "1000sphere"+(num_of_boxes++);
+		var name = "L"+currentModelName+"¬sphere"+(num_of_boxes++);
 		var boxMat = new BABYLON.StandardMaterial("blue", jccsStudio.scene);
 		boxMat.emissiveColor = new BABYLON.Color3(colour.colarray[0]/255,colour.colarray[1]/255,colour.colarray[2]/255);
 		JCubees[name]= new JcubeeSphere(name, 30, 30 + 13*60, 30, boxMat, jccsStudio.scene);
@@ -837,12 +855,12 @@ function main() {
 		resetBorders();		
 		selection.style.color="#000000";		
 		selectNew(JCubees[name].Jcubee);
-		model.innerHTML = "Model -- *"+currentName;
+		model.innerHTML = "Model -- *"+currentModelName;
 		JCisStored = false;
 	}
 
 	function makeRoof() {
-		var name = "1000roof"+(num_of_boxes++);
+		var name = "L"+currentModelName+"¬roof"+(num_of_boxes++);
 		var boxMat = new BABYLON.StandardMaterial("blue", jccsStudio.scene);
 		boxMat.emissiveColor = new BABYLON.Color3(colour.colarray[0]/255,colour.colarray[1]/255,colour.colarray[2]/255);
 		JCubees[name]= new JcubeeRoof(name, 30, 30 + 13*60, 30, boxMat, jccsStudio.scene);
@@ -851,7 +869,7 @@ function main() {
 		resetBorders();		
 		selection.style.color="#000000";		
 		selectNew(JCubees[name].Jcubee);
-		model.innerHTML = "Model -- *"+currentName;
+		model.innerHTML = "Model -- *"+currentModelName;
 		JCisStored = false;
 	}
 	
@@ -898,8 +916,9 @@ function main() {
         // check if we are under a pickable mesh			
         var pickInfo = jccsStudio.scene.pick(jccsStudio.scene.pointerX, jccsStudio.scene.pointerY);	
 		if (pickInfo.hit && pickInfo.pickedMesh !==ground) {	
-            currentMesh = pickInfo.pickedMesh;
-			var name = currentMesh.name;			
+            var currentMesh = pickInfo.pickedMesh;
+			var name = currentMesh.name;
+												
 			if(shiftDown) {
 				if(name in currentMeshes) {
 					currentMeshes[name].material.alpha = 0.5;
@@ -927,7 +946,9 @@ function main() {
 					}
 				}
 			}
-			
+			if(selection.innerHTML == "Select All") {
+				slection.innerHTML = "Selection";
+			}
 			selection.style.color="#000000";
 			
             groundPoint = getGroundPosition(evt);
@@ -1066,12 +1087,12 @@ function main() {
 	function rightMove() {
 		if(stepsLeftRight(JCubees, currentMeshes).right>0) {
 			var diff = moveRight;
-			for(var name in currentMeshes) {
-				currentMeshes[name].position.addInPlace(diff);
+			for(var name in currentMeshes) {			
+				currentMeshes[name].position.addInPlace(diff);			
 				JCubees[name].moveT(currentMeshes[name].position);
 			}
 		}
-		model.innerHTML = "Model -- *"+currentName;
+		model.innerHTML = "Model -- *"+currentModelName;
 		JCisStored = false;
 	}
 	
@@ -1083,7 +1104,7 @@ function main() {
 				JCubees[name].moveT(currentMeshes[name].position);
 			}
 		}
-		model.innerHTML = "Model -- *"+currentName;
+		model.innerHTML = "Model -- *"+currentModelName;
 		JCisStored = false;
 	}
 	
@@ -1095,7 +1116,7 @@ function main() {
 				JCubees[name].moveT(currentMeshes[name].position);
 			}
 		}
-		model.innerHTML = "Model -- *"+currentName;
+		model.innerHTML = "Model -- *"+currentModelName;
 		JCisStored = false;
 	}
 	
@@ -1107,7 +1128,7 @@ function main() {
 				JCubees[name].moveT(currentMeshes[name].position);
 			}
 		}
-		model.innerHTML = "Model -- *"+currentName;
+		model.innerHTML = "Model -- *"+currentModelName;
 		JCisStored = false;	
 	}
 	
@@ -1119,7 +1140,7 @@ function main() {
 				JCubees[name].moveT(currentMeshes[name].position);
 			}
 		}
-		model.innerHTML = "Model -- *"+currentName;
+		model.innerHTML = "Model -- *"+currentModelName;
 		JCisStored = false;
 	}
 	
@@ -1131,7 +1152,7 @@ function main() {
 				JCubees[name].moveT(currentMeshes[name].position);
 			}
 		}
-		model.innerHTML = "Model -- *"+currentName;
+		model.innerHTML = "Model -- *"+currentModelName;
 		JCisStored = false;
 	}
 
