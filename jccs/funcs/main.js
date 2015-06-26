@@ -28,13 +28,13 @@ function main() {
 		
 	var num_of_boxes = 0;
 	var num_of_models = 0;
-	var sub_num = 0;
+	var num_of_scenes = 0;
 	var jcCanvas;
 	var jcEngine;
 	var JCubees = {};
 	var jccsStudio, jcssStudio;
 	var jcModels={};
-	var sceneModelList={}, sceneModels={};
+	var sceneModels={};
 	var doAddToScene = false;
 
 	
@@ -402,13 +402,13 @@ function main() {
 	}
 	
 	function sceneSwitch() {
-		sceneModels[currentModelRef+"IParent"] = BABYLON.Mesh.CreateBox(currentModelRef+"IParent", 5.0, jccsStudio.scene);
-		sceneModels[currentModelRef+"IParent"].visibility = 0;
+		sceneModels[currentModelName+"IParent"] = BABYLON.Mesh.CreateBox(currentModelName+"IParent", 5.0, jccsStudio.scene);
+		sceneModels[currentModelName+"IParent"].visibility = 0;
 		for(var ref in JCubees) {
-			sceneModels[currentModelRef+"I"] = JCubees[ref].Jcubee.createInstance(currentModelRef+"I");
-			sceneModels[currentModelRef+"I"].material.alpha = 1;
-			sceneModels[currentModelRef+"I"].parent = sceneModels[currentModelRef+"IParent"];
-			sceneModels[currentModelRef+"IParent"].scaling = new BABYLON.Vector3(0.5, 0.5, 0.5);
+			sceneModels[currentModelName+"I"] = JCubees[ref].Jcubee.createInstance(currentModelName+"I");
+			sceneModels[currentModelName+"I"].material.alpha = 1;
+			sceneModels[currentModelName+"I"].parent = sceneModels[currentModelName+"IParent"];
+			sceneModels[currentModelName+"IParent"].scaling = new BABYLON.Vector3(0.5, 0.5, 0.5);
 			JCubees[ref].disable();
 		}
 		frontPlane.setEnabled(false);
@@ -580,6 +580,7 @@ function main() {
 		
 		currentModelName = name;
 		model.innerHTML = "Model -- "+currentModelName;
+		JCisStored = true;
 		fetchDB.style.visibility = 'hidden';
 	}
 	
