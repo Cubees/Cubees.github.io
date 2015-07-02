@@ -351,3 +351,15 @@
 #scene_all:hover {
 	background: linear-gradient(to right, #999999 , #FFFFFF); 
 }
+
+#scene_rotateX {
+	background-image:url("../images/rotX.png");
+}
+
+#scene_rotateY {
+	background-image:url("../images/rotY.png");
+}
+
+#scene_rotateZ {
+	background-image:url("../images/rotZ.png");
+}

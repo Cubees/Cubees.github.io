@@ -15,9 +15,11 @@ function moveT(vec) {
 	this.groundMarker.position.z=vec.z;
 }
 
+//Calculation of the number of steps (1 per key down) that can be taken without hitting another mesh in JCubbes
+
 function stepsLeftRight(JCubees, currentMeshes) {
 	var blockers={}; //x positions of cubees not in selection for each Z for each Y
-	var movers={}; //x positions of cubees not in selection for each Z for each Y
+	var movers={}; //x positions of cubees in selection for each Z for each Y
 	for(var mesh in JCubees) {
 		var Y=JCubees[mesh].Jcubee.position.y;
 		var Z=JCubees[mesh].Jcubee.position.z;
@@ -71,7 +73,7 @@ function stepsLeftRight(JCubees, currentMeshes) {
 
 function stepsUpDown(JCubees, currentMeshes) {
 	var blockers={}; //y positions of cubees not in selection for each X for each Z
-	var movers={}; //y positions of cubees not in selection for each X for each Z
+	var movers={}; //y positions of cubees  in selection for each X for each Z
 	for(var mesh in JCubees) {
 		var Z=JCubees[mesh].Jcubee.position.z;
 		var X=JCubees[mesh].Jcubee.position.x;
@@ -125,7 +127,7 @@ function stepsUpDown(JCubees, currentMeshes) {
 
 function stepsForwardBack(JCubees, currentMeshes) {
 	var blockers={}; //z positions of cubees not in selection for each Y for each X
-	var movers={}; //z positions of cubees not in selection for each Y for each X
+	var movers={}; //z positions of cubees in selection for each Y for each X
 	for(var mesh in JCubees) {
 		var X=JCubees[mesh].Jcubee.position.x;
 		var Y=JCubees[mesh].Jcubee.position.y;
@@ -177,6 +179,13 @@ function stepsForwardBack(JCubees, currentMeshes) {
 	return {forward:maxStepsForward, back:maxStepsBack}; 
 }
 
+//Calculation of the number of steps (1 per key down) that can be taken without hitting another model in sceneParents
+function modelStepsLeftRight(parents) {
+	for(var model in parents) {
+console.log(parents[model].position);
+	}	
+	
+}
 function getModelRef(ref) {
 	var i = ref.indexOf('¬') - 1;
 	return ref.substr(1,i);

@@ -95,47 +95,49 @@ function JcubeeRoof(name, x, y, z, material, scene) {
 	this.enable = enable;	
 }
 
-function addMarkers(scene) {
+function addMarkers(scene,scale) {
 	var _blackMat = new BABYLON.StandardMaterial("black", scene);
 	_blackMat.emissiveColor = new BABYLON.Color3(0,0,0);
 	
-	this.backMarker=BABYLON.Mesh.CreatePlane("backMarker"+name,60, scene);	
+	scale = scale||1;
+	
+	this.backMarker=BABYLON.Mesh.CreatePlane("backMarker"+name,60*scale, scene);	
 	this.backMarker.material = _blackMat;
-	this.backMarker.position.x=this.Jcubee.position.x;
-	this.backMarker.position.y=this.Jcubee.position.y;
+	this.backMarker.position.x=this.Jcubee.position.x*scale;
+	this.backMarker.position.y=this.Jcubee.position.y*scale;
 	this.backMarker.position.z=598;
 	this.backMarker.isPickable = false;
 	
-	this.leftMarker=BABYLON.Mesh.CreatePlane("leftMarker"+name,60, scene);	
+	this.leftMarker=BABYLON.Mesh.CreatePlane("leftMarker"+name,60*scale, scene);	
 	this.leftMarker.material = _blackMat;
 	this.leftMarker.rotation.y = -Math.PI/2;
 	this.leftMarker.position.x=-598;
-	this.leftMarker.position.y=this.Jcubee.position.y;
-	this.leftMarker.position.z=this.Jcubee.position.z;
+	this.leftMarker.position.y=this.Jcubee.position.y*scale;
+	this.leftMarker.position.z=this.Jcubee.position.z*scale;
 	this.leftMarker.isPickable = false;
 	
-	this.frontMarker=BABYLON.Mesh.CreatePlane("frontMarker"+name,60, scene);	
+	this.frontMarker=BABYLON.Mesh.CreatePlane("frontMarker"+name,60*scale, scene);	
 	this.frontMarker.material = _blackMat;
 	this.frontMarker.rotation.y = -Math.PI;
-	this.frontMarker.position.x=this.Jcubee.position.x;
-	this.frontMarker.position.y=this.Jcubee.position.y;
+	this.frontMarker.position.x=this.Jcubee.position.x*scale;
+	this.frontMarker.position.y=this.Jcubee.position.y*scale;
 	this.frontMarker.position.z=-598;
 	this.frontMarker.isPickable = false;
 	
-	this.rightMarker=BABYLON.Mesh.CreatePlane("rightMarker"+name,60, scene);	
+	this.rightMarker=BABYLON.Mesh.CreatePlane("rightMarker"+name,60*scale, scene);	
 	this.rightMarker.material = _blackMat;
 	this.rightMarker.rotation.y = Math.PI/2;
 	this.rightMarker.position.x=598;
-	this.rightMarker.position.y=this.Jcubee.position.y;
-	this.rightMarker.position.z=this.Jcubee.position.z;
+	this.rightMarker.position.y=this.Jcubee.position.y*scale;
+	this.rightMarker.position.z=this.Jcubee.position.z*scale;
 	this.rightMarker.isPickable = false;
 	
-	this.groundMarker=BABYLON.Mesh.CreatePlane("groundMarker"+name,60, scene);	
+	this.groundMarker=BABYLON.Mesh.CreatePlane("groundMarker"+name,60*scale, scene);	
 	this.groundMarker.material = _blackMat;
 	this.groundMarker.rotation.x = Math.PI/2;
-	this.groundMarker.position.x=this.Jcubee.position.x;
+	this.groundMarker.position.x=this.Jcubee.position.x*scale;
 	this.groundMarker.position.y=2;
-	this.groundMarker.position.z=this.Jcubee.position.z;
+	this.groundMarker.position.z=this.Jcubee.position.z*scale;
 	this.groundMarker.isPickable = false;	
 }
 	

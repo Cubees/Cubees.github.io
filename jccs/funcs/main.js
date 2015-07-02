@@ -5,6 +5,7 @@ function main() {
 	// Event variables
     var groundPoint;
 	var currentMeshes={};
+	var currentParents={};
     //var currentMesh = null;
     
     var newModel=true;
@@ -28,16 +29,26 @@ function main() {
 		
 	var num_of_boxes = 0;
 	var num_of_models = 0;
-	var num_of_scenes = 0;
+	var num_in_scene = 0;
 	var jcCanvas;
 	var jcEngine;
 	var JCubees = {};
 	var jccsStudio, jcssStudio;
 	var jcModels={};
-	var sceneModels={};
+	var sceneParents={}, sceneModels={}, modelChildren={};
 	var doAddToScene = false;
-
+	var inScene=false;
 	
+	var frontOfLeftFace={};
+	var frontOfRightFace={};
+	var frontOfUpFace={};
+	var frontOfDownFace={};
+	var frontOfFrontFace={};
+	var frontOfBackFace={};
+	var bounds={};
+	
+	
+		
 	
 	/***********************************CONSTRUCTION DIALOGUE CODES***********************************/
 	
@@ -360,9 +371,6 @@ function main() {
 	}
 	
 	function Xrotate() {
-//		var serializedScene = BABYLON.SceneSerializer.Serialize(jccsStudio.scene);
-//		var strScene = JSON.stringify(serializedScene);
-//		console.log(strScene);
 		for(var mesh in currentMeshes) {
 			currentMeshes[mesh].rotate(BABYLON.Axis.X, -Math.PI/2, BABYLON.Space.WORLD);		
 		}
@@ -388,42 +396,53 @@ function main() {
 	
 	//Add to Scene functions	
 	function addtoscene() {
-		doAddToScene=false;
+/*		doAddToScene=false;
 		if(!JCisStored) {
 		 	doAddToScene=true;
 		 	openStoreAs();
 		 }
 		 else {
-		 	sceneSwitch();
+		 	sceneSwitch(currentModelName);
 		 }
+*/		 
+		 sceneSwitch(currentModelName);
 		 hideSubMenus();
 		 menu.style.visibility = 'hidden';
 		 scene_menu.style.visibility = 'visible';
 	}
 	
-	function sceneSwitch() {
-		sceneModels[currentModelName+"IParent"] = BABYLON.Mesh.CreateBox(currentModelName+"IParent", 5.0, jccsStudio.scene);
-		sceneModels[currentModelName+"IParent"].visibility = 0;
-		for(var ref in JCubees) {
-			sceneModels[currentModelName+"I"] = JCubees[ref].Jcubee.createInstance(currentModelName+"I");
-			sceneModels[currentModelName+"I"].material.alpha = 1;
-			sceneModels[currentModelName+"I"].parent = sceneModels[currentModelName+"IParent"];
-			sceneModels[currentModelName+"IParent"].scaling = new BABYLON.Vector3(0.5, 0.5, 0.5);
+	function sceneSwitch(name) {
+		for(var model in sceneParents) {
+			sceneParents[model].setEnabled(true);
+			for(var i=0; i<modelChildren[model].length;i++) {
+				modelChildren[model][i].enable();
+			}
+		}
+		
+		var modelParent = "Iparent"+name+num_in_scene;
+		var modelName = "I"+name+num_in_scene;
+		sceneParents[modelParent] = BABYLON.Mesh.CreateBox(modelParent, 60.0, jccsStudio.scene);
+		sceneParents[modelParent].visibility = 0;
+		selectNewModel(sceneParents[modelParent]);
+		modelChildren[modelParent] = [];	
+	
+		for(var ref in JCubees) {			
+			sceneModels[modelName+ref] = new JcubeeBlank(modelName+ref);
+			sceneModels[modelName+ref].Jcubee = JCubees[ref].Jcubee.clone(modelName+ref);
+			sceneModels[modelName+ref].Jcubee.material = JCubees[ref].Jcubee.material.clone();
+			sceneModels[modelName+ref].Jcubee.material.alpha = 1;			
+			sceneModels[modelName+ref].Jcubee.parent = sceneParents[modelParent];
+			sceneModels[modelName+ref].addMarkers(jccsStudio.scene,0.5);
+			modelChildren[modelParent].push(sceneModels[modelName+ref]);				
 			JCubees[ref].disable();
 		}
-		frontPlane.setEnabled(false);
-		backPlane.setEnabled(false);
-		leftSidePlane.setEnabled(false);
-		rightSidePlane.setEnabled(false);
-		ground.material.wireframe = false;
+		
+		sceneParents[modelParent].scaling = new BABYLON.Vector3(0.5, 0.5, 0.5);		
+		
+		num_in_scene++;			
 			
-		for(var Iref in sceneModels) {
-			sceneModels[Iref].setEnabled(true);
-		}
-		
+		inScene=true;
 	}
-		
-	
 	
 	//General Menu functions
 	function resetBorders() {		
@@ -550,9 +569,9 @@ function main() {
 		
 		storeIn.value = currentModelName;
 		JCisStored = true;
-		if(doAddToScene) {
-			sceneSwitch();
-		}
+/*		if(doAddToScene) {
+			sceneSwitch(currentModelName);
+	} */
 		
 	}
 	
@@ -624,26 +643,29 @@ function main() {
 	/*----------SCENE MENU EVENTS--------------------------------*/
 
 	//move events
-/* to do	scene_leftarrow.addEventListener("mousedown", scene_leftMove, false);
-	scene_rightarrow.addEventListener("mousedown", scene_rightMove, false);
-	scene_uparrow.addEventListener("mousedown", scene_upMove, false);
-	scene_downarrow.addEventListener("mousedown", scene_downMove, false);
-	scene_forwardarrow.addEventListener("mousedown", scene_forwardMove, false);
-	scene_backarrow.addEventListener("mousedown", scene_backMove, false); */
+	scene_leftarrow.addEventListener("mousedown", leftModelMove, false);
+	scene_rightarrow.addEventListener("mousedown", rightModelMove, false);
+	scene_uparrow.addEventListener("mousedown", upModelMove, false);
+	scene_downarrow.addEventListener("mousedown", downModelMove, false);
+	scene_forwardarrow.addEventListener("mousedown", forwardModelMove, false);
+	scene_backarrow.addEventListener("mousedown", backModelMove, false);
 	
 	//file events
 	scene_file_.addEventListener('click', scene_showFileMenu, false);
 	//to do scene_save.addEventListener('click', scene_doSave, false);
 	//to do scene_save_as.addEventListener('click', scene_openSaveAs, false);
 	
+	//return to construction site event
+	scene_constructSite.addEventListener('click', scene_to_construct, false);
+	
 	//Selection events
 	scene_selection.addEventListener("click", scene_showSelectionMenu, false);
 	scene_clear.addEventListener("click", scene_clearSelection, false);
 	scene_all.addEventListener("click", scene_selectAll, false);
 	
-/* to do	scene_rotateX.addEventListener("click", scene_Xrotate, false);
+	scene_rotateX.addEventListener("click", scene_Xrotate, false);
 	scene_rotateY.addEventListener("click", scene_Yrotate, false);
-	scene_rotateZ.addEventListener("click", scene_Zrotate, false); */
+	scene_rotateZ.addEventListener("click", scene_Zrotate, false); 
 	
 	/*-------------SCENE MENU FUNCTIONS ---------------*/
 	
@@ -692,6 +714,51 @@ function main() {
 		}
 	}
 	
+	//rotation functions
+	function scene_Xrotate() {
+		for(var model in currentParents) {
+			currentParents[model].rotate(BABYLON.Axis.X, -Math.PI/2, BABYLON.Space.WORLD);	
+			for(var i=0; i<modelChildren[model].length;i++) {
+				modelChildren[model][i].moveT(modelChildren[model][i].Jcubee.getAbsolutePosition());
+			}			
+		}
+	}
+	
+	function scene_Yrotate() {
+		for(var model in currentParents) {
+			currentParents[model].rotate(BABYLON.Axis.Y, -Math.PI/2, BABYLON.Space.WORLD);
+			for(var i=0; i<modelChildren[model].length;i++) {
+				modelChildren[model][i].moveT(modelChildren[model][i].Jcubee.getAbsolutePosition());
+			}		
+		}
+	}
+	
+	function scene_Zrotate() {
+		for(var model in currentParents) {
+			currentParents[model].rotate(BABYLON.Axis.Z, -Math.PI/2, BABYLON.Space.WORLD);
+			for(var i=0; i<modelChildren[model].length;i++) {
+				modelChildren[model][i].moveT(modelChildren[model][i].Jcubee.getAbsolutePosition());
+			}		
+		}
+	}
+	
+	//Return to construction site
+	function scene_to_construct() {
+		for(var model in sceneParents) {
+			sceneParents[model].setEnabled(false);
+			for(var child in modelChildren[model]) {
+				modelChildren[model][child].disable();
+			}
+		}
+		for(var ref in JCubees) {
+			JCubees[ref].enable()
+		}
+		scene_hideSubMenus();
+		menu.style.visibility = 'visible';
+		scene_menu.style.visibility = 'hidden';
+		inScene = false;
+	}
+	
 	//General Menu functions
 	function scene_resetBorders() {		
 		var elm=scene_menulist.firstChild;		
@@ -708,6 +775,7 @@ function main() {
 		}		
 		scene_resetBorders();
 	}
+	
 	
 	/***********************************************MODEL CODES************************************/
 	
@@ -769,7 +837,9 @@ function main() {
 	
 	var redMat = new BABYLON.StandardMaterial("red", jccsStudio.scene);
 	redMat.emissiveColor = new BABYLON.Color3(1,0,0);
-
+	
+	var blackMat = new BABYLON.StandardMaterial("black", jccsStudio.scene);
+	blackMat.emissiveColor = new BABYLON.Color3(0,0,0);
 	
 	//Create Ground
 	var ground=BABYLON.Mesh.CreateGround("ground",1200, 1200, 20, jccsStudio.scene,  false, BABYLON.Mesh.DOUBLESIDE);	
@@ -886,9 +956,22 @@ function main() {
 			}
 		}
 	}
+	
+	function selectNewModel(scene_model) {
+		currentParents = {};		
+		currentParents[scene_model.name] = scene_model;
+		for(var model in sceneParents) {		
+			if(!(model in currentParents))	{					
+				for(var i=0; i<modelChildren[model].length;i++) {
+					modelChildren[model][i].Jcubee.material.alpha = 0.5;
+					modelChildren[model][i].hideMarkers();					
+				}
+			}
+		}
+	}
 		
 	// Register a render loop to repeatedly render the scene
-	jcEngine.runRenderLoop(function () {
+	jcEngine.runRenderLoop(function () {			
 		jccsStudio.scene.render();
 	}); 
 	
@@ -919,7 +1002,26 @@ function main() {
 		if (pickInfo.hit && pickInfo.pickedMesh !==ground) {	
             var currentMesh = pickInfo.pickedMesh;
 			var name = currentMesh.name;
-												
+console.log(name);			
+			if(name.charAt(0)=="I") {
+				var currentParent = sceneModels[name].Jcubee.parent;
+				name = currentParent.name;
+				updateCurrentModels()
+			}
+			else {
+				updateCurrentMeshes();
+			}												
+			
+            groundPoint = getGroundPosition(evt);
+
+            if (groundPoint) { // we need to disconnect jccsStudio.camera from jcCanvas
+                setTimeout(function () {
+                    jccsStudio.camera.detachControl(jcCanvas);
+                }, 0);
+            }
+        }
+        
+         function updateCurrentMeshes() {
 			if(shiftDown) {
 				if(name in currentMeshes) {
 					currentMeshes[name].material.alpha = 0.5;
@@ -948,22 +1050,48 @@ function main() {
 				}
 			}
 			if(selection.innerHTML == "Select All") {
-				slection.innerHTML = "Selection";
+				selection.innerHTML = "Selection";
 			}
 			selection.style.color="#000000";
-			
-            groundPoint = getGroundPosition(evt);
+		}
 
-            if (groundPoint) { // we need to disconnect jccsStudio.camera from jcCanvas
-                setTimeout(function () {
-                    jccsStudio.camera.detachControl(jcCanvas);
-                }, 0);
-            }
-        }
+		function updateCurrentModels() {
+			if(shiftDown) {
+				if(name in currentParents) {
+					//currentParents[name].material.alpha = 0.5;
+					delete currentParents[name];
+				}
+				else {
+					currentParents[name] = currentParent;
+					//currentParent.material.alpha = 1;						
+				}
+			}
+			else {			
+				for(var model in sceneParents) {						
+					for(var i=0; i<modelChildren[model].length;i++) {
+						modelChildren[model][i].Jcubee.material.alpha = 1;
+					}
+				}			
+				currentParents = {}; 
+				currentParents[name] = currentParent;
+				for(var model in sceneParents) {						
+					if(!(model in currentParents)) {						
+						for(var i=0; i<modelChildren[model].length;i++) {
+						modelChildren[model][i].Jcubee.material.alpha = 0.5;
+						}
+					}
+				}
+			}
+			if(scene_selection.innerHTML == "Select All") {
+				scene_selection.innerHTML = "Selection";
+			}
+			scene_selection.style.color="#000000";
+		} 
    };
 
     var onPointerUp = function () {	
 		hideSubMenus();
+		scene_hideSubMenus();
 		
         if (groundPoint) {
             jccsStudio.camera.attachControl(jcCanvas, true);
@@ -981,7 +1109,18 @@ function main() {
 			selection.style.color="rgb(136, 136, 136)"
 		}
 		
+		if(currentParents === {}) {
+			scene_selection.innerHTML = "Select All";
+			scene_selection.style.color="#000000";
+		}
+		
+		if(sceneParents === {} ) {
+			scene_selection.innerHTML = "Selection";
+			scene_selection.style.color="rgb(136, 136, 136)"
+		}
+		
     };
+      
 	
 	var onPointerMove = function() {
 		jccsStudio.camera.alpha +=2*Math.PI;
@@ -1019,23 +1158,33 @@ function main() {
 			if(!shiftDown) {
 				shiftDown=true;
 			}
-		}
+		};
 	
 		if(evt.keyCode==39) {
 			if(!detached) {
 				jccsStudio.camera.detachControl(jcCanvas);
 				detached = true;
 			}
-			rightMove();
+			if(inScene) {
+				rightModelMove();
+			}
+			else {
+				rightMove();
+			}
 			return;
-		}
+		};
 		
 		if(evt.keyCode==37) {
 			if(!detached) {
 				jccsStudio.camera.detachControl(jcCanvas);
 				detached = true;
 			}
-			leftMove();
+			if(inScene) {
+				leftModelMove();
+			}
+			else {
+				leftMove();
+			}
 			return;
 		}
 		
@@ -1044,7 +1193,12 @@ function main() {
 				jccsStudio.camera.detachControl(jcCanvas);
 				detached = true;
 			}
-			downMove();
+			if(inScene) {
+				downModelMove();
+			}
+			else {
+				downMove();
+			}
 			return;
 		}
 		
@@ -1053,7 +1207,12 @@ function main() {
 				jccsStudio.camera.detachControl(jcCanvas);
 				detached = true;
 			}
-			upMove();			
+			if(inScene) {
+				upModelMove();
+			}
+			else {
+				upMove();
+			}			
 			return;
 		}
 		
@@ -1062,7 +1221,12 @@ function main() {
 				jccsStudio.camera.detachControl(jcCanvas);
 				detached = true;
 			}
-			forwardMove();			
+			if(inScene) {
+				forwardModelMove();
+			}
+			else {
+				forwardMove();
+			}			
 			return;
 		}
 		
@@ -1071,10 +1235,15 @@ function main() {
 				jccsStudio.camera.detachControl(jcCanvas);
 				detached = true;
 			}
-			backMove();			
+			if(inScene) {
+				backModelMove();
+			}
+			else {
+				backMove();
+			}			
 			return;
 		}
-	}
+	};
 	
 	var onKeyUp = function () {
         if (detached) {
@@ -1126,7 +1295,7 @@ function main() {
 			var diff = moveDown;
 			for(var name in currentMeshes) {
 				currentMeshes[name].position.addInPlace(diff);
-				JCubees[name].moveT(currentMeshes[name].position);
+				JCubees[name].moveT(currentMeshes[name].getAbsolutePosition());
 			}
 		}
 		model.innerHTML = "Model -- *"+currentModelName;
@@ -1155,6 +1324,68 @@ function main() {
 		}
 		model.innerHTML = "Model -- *"+currentModelName;
 		JCisStored = false;
+	}
+	
+	function leftModelMove() {
+		modelStepsLeftRight(sceneParents);
+		var diff = moveLeft.scale(0.5);
+		for(var name in currentParents) {
+console.log(name);			
+			currentParents[name].position.addInPlace(diff);			
+			for(var i=0; i<modelChildren[name].length;i++) {
+				modelChildren[name][i].moveT(modelChildren[name][i].Jcubee.getAbsolutePosition());
+			}
+		}
+	}
+	
+	function rightModelMove() {
+		var diff = moveRight.scale(0.5);
+		for(var name in currentParents) {
+			currentParents[name].position.addInPlace(diff);
+			for(var i=0; i<modelChildren[name].length;i++) {
+				modelChildren[name][i].moveT(modelChildren[name][i].Jcubee.getAbsolutePosition());
+			}			
+		}
+	}
+	
+	function upModelMove() {
+		var diff = moveUp.scale(0.5);
+		for(var name in currentParents) {
+			currentParents[name].position.addInPlace(diff);
+			for(var i=0; i<modelChildren[name].length;i++) {
+				modelChildren[name][i].moveT(modelChildren[name][i].Jcubee.getAbsolutePosition());
+			}			
+		}
+	}
+	
+	function downModelMove() {
+		var diff = moveDown.scale(0.5);
+		for(var name in currentParents) {
+			currentParents[name].position.addInPlace(diff);
+			for(var i=0; i<modelChildren[name].length;i++) {
+				modelChildren[name][i].moveT(modelChildren[name][i].Jcubee.getAbsolutePosition());
+			}			
+		}
+	}
+	
+	function backModelMove() {
+		var diff = moveBackward.scale(0.5);
+		for(var name in currentParents) {
+			currentParents[name].position.addInPlace(diff);
+			for(var i=0; i<modelChildren[name].length;i++) {
+				modelChildren[name][i].moveT(modelChildren[name][i].Jcubee.getAbsolutePosition());
+			}			
+		}
+	}
+	
+	function forwardModelMove() {
+		var diff = moveForward.scale(0.5);
+		for(var name in currentParents) {
+			currentParents[name].position.addInPlace(diff);
+			for(var i=0; i<modelChildren[name].length;i++) {
+				modelChildren[name][i].moveT(modelChildren[name][i].Jcubee.getAbsolutePosition());
+			}			
+		}
 	}
 
     jcCanvas.addEventListener("mousedown", onPointerDown, false);
