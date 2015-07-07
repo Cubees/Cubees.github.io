@@ -26,7 +26,8 @@
 		<link rel="stylesheet" type="text/css" href="styles/menu.css">
 		<link rel="stylesheet" type="text/css" href="styles/dialogues.css">
 		
-		<script src="../Babylon/babylon2.1a.js"></script>
+		<script src="../Babylon/babylon2.2_min.js"></script>
+		<!-- <script src="../Babylon/babylon2.1a.js"></script> -->
 		<script src="../Babylon/hand.min.js"></script>
 		<script src="funcs/classes.js"></script>
 		<script src="funcs/tools.js"></script> 		
@@ -45,13 +46,17 @@
 		
 		<!-- ****************CONSTRUCTION DIALOGUES******************* -->
 		
+		<!-- Header -->
+		<div id='Header' class = 'headerBox'>Construction Site</div>
+		
 		<!--menu dialogue boxes-->
 		<div id='menu' class="dialogueBox">
 			<div id="menulist" class="row">
 				<div id='file' class='content'>File</div>
 				<div id='cubee' class='content'>New Cubee</div>
 				<div id='selection' class='content'>Selection</div>
-				<div id='addToScene' class='content'>Add To Scene...</div>
+				<div id='switchToScene' class='content'>Switch To Scene</div>
+				<div id='addToScene' class='content'>Add To Scene</div>
 				<div id='help' class='content'>Help</div> 
 				<div class='gapcontent'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</div>
 				<div id='model' class='content'>Model</div>
@@ -68,7 +73,7 @@
 		<div id='subfilemenu' class='subMenu'>
 			<div class='row'>
 				
-				<div id='new' class='filecontent'>New...</div>
+				<div id='newmodel' class='filecontent'>New...</div>
 				<div id='store' class='filecontent'>Store</div>
 				<div id='store_as' class='filecontent'>Store As...</div>
 				<div id='fetch' class='filecontent'>Fetch...</div>
@@ -187,7 +192,7 @@
 			<div id="scene_menulist" class="row">
 				<div id='scene_file' class='content'>File</div>
 				<div id='scene_selection' class='content'>Selection</div>
-				<div id='scene_constructSite' class='content'>Construction Site</div>
+				<div id='scene_constructSite' class='content'>Switch To Construction Site</div>
 				<div id='scene_help' class='content'>Help</div> 
 				<div class='gapcontent'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</div>
 				<div id='scene_scene' class='content'>Scene</div>

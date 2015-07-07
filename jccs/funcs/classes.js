@@ -12,7 +12,8 @@ function JcubeeBlank(name) {
 	this.showMarkers = showMarkers;
 	this.hideMarkers = hideMarkers;
 	this.disable = disable;
-	this.enable = enable;	
+	this.enable = enable;
+	this.destroy = destroy;	
 }
 
 function JcubeeBox(name, x, y, z, material, scene) {
@@ -29,7 +30,8 @@ function JcubeeBox(name, x, y, z, material, scene) {
 	this.showMarkers = showMarkers;
 	this.hideMarkers = hideMarkers;
 	this.disable = disable;
-	this.enable = enable;	
+	this.enable = enable;
+	this.destroy = destroy;		
 }
 
 function JcubeeCylinder(name, x, y, z, material, scene) {
@@ -46,7 +48,8 @@ function JcubeeCylinder(name, x, y, z, material, scene) {
 	this.showMarkers = showMarkers;
 	this.hideMarkers = hideMarkers;
 	this.disable = disable;
-	this.enable = enable;	
+	this.enable = enable;
+	this.destroy = destroy;		
 }
 
 function JcubeeSphere(name, x, y, z, material, scene) {
@@ -63,7 +66,8 @@ function JcubeeSphere(name, x, y, z, material, scene) {
 	this.showMarkers = showMarkers;
 	this.hideMarkers = hideMarkers;
 	this.disable = disable;
-	this.enable = enable;	
+	this.enable = enable;
+	this.destroy = destroy;		
 }
 
 function JcubeeRoof(name, x, y, z, material, scene) {
@@ -92,7 +96,8 @@ function JcubeeRoof(name, x, y, z, material, scene) {
 	this.showMarkers = showMarkers;
 	this.hideMarkers = hideMarkers; 
 	this.disable = disable;
-	this.enable = enable;	
+	this.enable = enable;
+	this.destroy = destroy;		
 }
 
 function addMarkers(scene,scale) {
@@ -147,24 +152,14 @@ function showMarkers() {
 	this.frontMarker.material.alpha = 1;
 	this.rightMarker.material.alpha = 1;
 	this.groundMarker.material.alpha = 1;
-/*	this.backMarker.visibility = 1;
-	this.leftMarker.visibility = 1;
-	this.frontMarker.visibility = 1;
-	this.rightMarker.visibility = 1;
-	this.groundMarker.visibility = 1; */
 }
 	
 function hideMarkers() {
-	this.backMarker.material.alpha = 0.5;
-	this.leftMarker.material.alpha = 0.5;
-	this.frontMarker.material.alpha = 0.5;
-	this.rightMarker.material.alpha = 0.5;
-	this.groundMarker.material.alpha = 0.5;
-/*	this.backMarker.visibility = 0;
-	this.leftMarker.visibility = 0;
-	this.frontMarker.visibility = 0;
-	this.rightMarker.visibility = 0;
-	this.groundMarker.visibility = 0; */
+	this.backMarker.material.alpha = 0.4;
+	this.leftMarker.material.alpha = 0.4;
+	this.frontMarker.material.alpha = 0.4;
+	this.rightMarker.material.alpha = 0.4;
+	this.groundMarker.material.alpha = 0.4;
 }
 
 function disable() {
@@ -183,6 +178,15 @@ function enable() {
 	this.frontMarker.setEnabled(true);
 	this.rightMarker.setEnabled(true);
 	this.groundMarker.setEnabled(true);
+}
+
+function destroy() {
+	this.Jcubee.dispose();
+	this.backMarker.dispose();
+	this.leftMarker.dispose();
+	this.frontMarker.dispose();
+	this.rightMarker.dispose();
+	this.groundMarker.dispose();
 }
 	
 

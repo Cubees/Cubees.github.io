@@ -1,6 +1,10 @@
 function main() {
 
 	/*-------------MAIN VARIABLES ---------------*/	
+	//Saved or not saved icons
+	var storeIcon = "&#10022;";
+	var saveIcon = "&#10039;";
+	var exportIcon = "&#10047;";
 	
 	// Event variables
     var groundPoint;
@@ -54,9 +58,11 @@ function main() {
 	
 	/*-------------CONSTRUCTION MENU ELEMENTS---------------	*/
 	//Get Menu Elements 
+	var Header = document.getElementById("Header");
 	var menu = document.getElementById("menu");
 	var menulist = document.getElementById("menulist");
 	
+	var switch_to_scene = document.getElementById("switchToScene");
 	var add_to_scene = document.getElementById("addToScene");
 	var model = document.getElementById("model");
 	
@@ -69,10 +75,14 @@ function main() {
 	
 	// File Menu and Sub-Menus
 	var file_ = document.getElementById("file");
+	var newmodel = document.getElementById("newmodel");
 	var subfilemenu = document.getElementById("subfilemenu");
 	var store = document.getElementById("store");
 	var store_as = document.getElementById("store_as");
 	var fetch = document.getElementById("fetch");
+	var save = document.getElementById("save");
+	var save_as = document.getElementById("save_as");
+	var openFile  = document.getElementById("open"); 
 	
 	// Cubee Menu and Sub-Menus
 	var cubee = document.getElementById("cubee");
@@ -135,9 +145,16 @@ function main() {
 	
 	//file events
 	file_.addEventListener('click', showFileMenu, false);
+	newmodel.addEventListener('click', doNew, false);
 	store.addEventListener('click', doStore, false);
 	store_as.addEventListener('click', openStoreAs, false);
 	fetch.addEventListener('click', openFetch, false);
+	
+	if(typeof(Storage) !== "undefined") {
+		save.addEventListener('click', doSave, false);
+		//save_as.addEventListener('click', doSaveAs, false);
+		//openFile.addEventListener('click', doOpen, false);
+	}
 	
 	//cubee events
 	cubee.addEventListener("click", showCubeeMenu, false);
@@ -159,7 +176,8 @@ function main() {
 	//Set readable styles for Selection
 	selection.style.color="#888888";
 	
-	//add to scene event
+	//To scene event
+	switch_to_scene.addEventListener("click", construct_to_scene, false);
 	add_to_scene.addEventListener("click", addtoscene, false);
 	
 	
@@ -226,7 +244,7 @@ function main() {
 				colours.appendChild(col);
 			}
 		}
-		model.innerHTML = "Model -- *"+currentModelName;
+		model.innerHTML = "Model -- "+currentModelName+storeIcon+saveIcon+exportIcon;;
 		JCisStored = false;
 	}
 	
@@ -248,7 +266,7 @@ function main() {
 			txtr.addEventListener("click", function() {setMeshTexture(this)}, false );
 			texturepics.appendChild(txtr);
 		}
-		model.innerHTML = "Model -- *"+currentModelName;
+		model.innerHTML = "Model -- "+currentModelName+storeIcon+saveIcon+exportIcon;;
 		JCisStored = false;
 	}
 	
@@ -259,6 +277,37 @@ function main() {
 		hideSubMenus();
 		subfilemenu.style.visibility="visible";
 		file_.style.borderBottom = "none";
+	}
+	
+	function doNew() {
+		if(!JCisStored) 
+		{
+			confirmName = name;
+			confirmFunc = newJCubees;
+			confirmDesc.innerHTML = 'The current model <span style="font-style:italic"> '+confirmName+'</span> has not been stored.<BR>Do you want to continue and delete the current model?'
+			openConfirmDBox();
+		}
+		else {
+			newJCubees();
+		}
+	}
+	
+	function newJCubees() {
+		hideSubMenus();
+		currentModelName = 'model'+(num_of_models++);
+		JCisStored = false;
+		for(var mesh in JCubees) {
+			JCubees[mesh].destroy();
+			delete JCubees[mesh];
+		}
+		JCubees = {};
+		currentMeshes = {};
+	
+		model.innerHTML = "Model -- "+currentModelName+storeIcon+saveIcon+exportIcon;
+		storeIn.value = currentModelName;
+		
+		selection.innerHTML="Selection";
+		selection.style.color=="rgb(136, 136, 136)"
 	}
 	
 	function doStore() {	
@@ -288,7 +337,6 @@ function main() {
 		else {
 			fillFetch();
 		}
-		
 	}
 	
 	function fillFetch() {
@@ -321,6 +369,20 @@ function main() {
 			}
 		}
 		fetchDB.style.visibility = 'visible';
+	}
+	
+	function doSave() {
+		//var serializedMeshes=[];
+		for(var ref in JCubees) {
+			//serializedMeshes.push(JCubees[ref].Jcubee.name);
+console.log(JCubees[ref].Jcubee.name);					
+		
+		
+			var serializedMesh = BABYLON.SceneSerializer.SerializeMesh(JCubees[ref].Jcubee);
+			console.log("mesh",serializedMesh);
+			var strMesh = JSON.stringify(serializedMesh);
+			console.log("string",strMesh);
+		}
 	}
 	
 	//Cubee functions
@@ -374,7 +436,7 @@ function main() {
 		for(var mesh in currentMeshes) {
 			currentMeshes[mesh].rotate(BABYLON.Axis.X, -Math.PI/2, BABYLON.Space.WORLD);		
 		}
-		model.innerHTML = "Model -- *"+currentModelName;
+		model.innerHTML = "Model -- "+currentModelName+storeIcon+saveIcon+exportIcon;;
 		JCisStored = false;
 	}
 
@@ -382,7 +444,7 @@ function main() {
 		for(var mesh in currentMeshes) {
 			currentMeshes[mesh].rotate(BABYLON.Axis.Y, -Math.PI/2, BABYLON.Space.WORLD);						
 		}
-		model.innerHTML = "Model -- *"+currentModelName;
+		model.innerHTML = "Model -- "+currentModelName+storeIcon+saveIcon+exportIcon;;
 		JCisStored = false;
 	}
 	
@@ -390,25 +452,17 @@ function main() {
 		for(var mesh in currentMeshes) {
 			currentMeshes[mesh].rotate(BABYLON.Axis.Z, -Math.PI/2, BABYLON.Space.WORLD);						
 		}
-		model.innerHTML = "Model -- *"+currentModelName;
+		model.innerHTML = "Model -- "+currentModelName+storeIcon+saveIcon+exportIcon;;
 		JCisStored = false;
 	}
 	
 	//Add to Scene functions	
 	function addtoscene() {
-/*		doAddToScene=false;
-		if(!JCisStored) {
-		 	doAddToScene=true;
-		 	openStoreAs();
-		 }
-		 else {
-		 	sceneSwitch(currentModelName);
-		 }
-*/		 
 		 sceneSwitch(currentModelName);
 		 hideSubMenus();
 		 menu.style.visibility = 'hidden';
 		 scene_menu.style.visibility = 'visible';
+		 Header.innerHTML ='Scene';
 	}
 	
 	function sceneSwitch(name) {
@@ -484,6 +538,24 @@ function main() {
 		for(var mesh in currentMeshes) {						
 			currentMeshes[mesh].material = elmTxtrMat;
 		}
+	}
+	
+	//Return to scene
+	function construct_to_scene() {
+		for(var model in sceneParents) {
+			sceneParents[model].setEnabled(true);
+			for(var child in modelChildren[model]) {
+				modelChildren[model][child].enable();
+			}
+		}
+		for(var ref in JCubees) {
+			JCubees[ref].disable()
+		}
+		hideSubMenus();
+		menu.style.visibility = 'hidden';
+		scene_menu.style.visibility = 'visible';
+		Header.innerHTML = 'scene';
+		inScene = true;
 	}
 	
 	
@@ -563,19 +635,22 @@ function main() {
 
 		
 		currentModelName = name;
-		model.innerHTML = "Model -- "+currentModelName;
-
-		//selectAll();
+		model.innerHTML = "Model -- "+currentModelName+"&nbsp;&nbsp"+saveIcon+exportIcon;
 		
 		storeIn.value = currentModelName;
-		JCisStored = true;
-/*		if(doAddToScene) {
-			sceneSwitch(currentModelName);
-	} */
-		
+		JCisStored = true;		
 	}
 	
 	function doFetch() {
+		if(inScene) {
+			doFetchToScene();
+		}
+		else {
+			doFetchToConstruct()
+		}
+	}
+	
+	function doFetchToConstruct() {
 		var name = fetchname.innerHTML;
 		for( var ref in JCubees) {
 			if(ref in currentMeshes) {
@@ -603,6 +678,38 @@ function main() {
 		fetchDB.style.visibility = 'hidden';
 	}
 	
+		function doFetchToScene() {
+		var name = fetchname.innerHTML;
+		for(var model in sceneParents) {
+			sceneParents[model].setEnabled(true);
+			for(var i=0; i<modelChildren[model].length;i++) {
+				modelChildren[model][i].enable();
+			}
+		}
+		
+		var modelParent = "Iparent"+name+num_in_scene;
+		var modelName = "I"+name+num_in_scene;
+		sceneParents[modelParent] = BABYLON.Mesh.CreateBox(modelParent, 60.0, jccsStudio.scene);
+		sceneParents[modelParent].visibility = 0;
+		selectNewModel(sceneParents[modelParent]);
+		modelChildren[modelParent] = [];	
+	
+		for(var ref in jcModels[name]) {			
+			sceneModels[modelName+ref] = new JcubeeBlank(modelName+ref);
+			sceneModels[modelName+ref].Jcubee = jcModels[name][ref].Jcubee.clone(modelName+ref);
+			sceneModels[modelName+ref].Jcubee.material = jcModels[name][ref].Jcubee.material.clone();
+			sceneModels[modelName+ref].Jcubee.material.alpha = 1;			
+			sceneModels[modelName+ref].Jcubee.parent = sceneParents[modelParent];
+			sceneModels[modelName+ref].addMarkers(jccsStudio.scene,0.5);
+			modelChildren[modelParent].push(sceneModels[modelName+ref]);				
+		}
+		
+		sceneParents[modelParent].scaling = new BABYLON.Vector3(0.5, 0.5, 0.5);		
+		
+		num_in_scene++;	
+		fetchDB.style.visibility = 'hidden';
+	}
+	
 	/*********************************************SCENE DIALOGUE CODE****************************************/
 	
 	/*-------------SCENE MENU ELEMENTS---------------	*/
@@ -624,8 +731,10 @@ function main() {
 	// File Menu and Sub-Menus
 	var scene_file_ = document.getElementById("scene_file");
 	var scene_subfilemenu = document.getElementById("scene_subfilemenu");
+	var scene_fetch = document.getElementById("scene_fetch");
 	var scene_save = document.getElementById("scene_save");
-	var scene_save_as = document.getElementById("scene_save");
+	var scene_save_as = document.getElementById("scene_save_as");
+	var scene_openFile = document.getElementById("scene_open");
 	
 		// Selection Menu and Sub-Menus
 	var scene_selection = document.getElementById("scene_selection");
@@ -640,6 +749,16 @@ function main() {
 	//*******sub menu list ************
 	var scene_subMenuList = [scene_subfilemenu, scene_subselectionmenu];
 	
+		/*  -------LOCAL STORAGE CHECK----------------*/
+	if(typeof(Storage) === "undefined") {
+		save.parentNode.removeChild(save);
+		save_as.parentNode.removeChild(save_as);
+		openFile.parentNode.removeChild(openFile);
+		scene_save.parentNode.removeChild(scene_save);
+		scene_save_as.parentNode.removeChild(scene_save_as);
+		scene_openFile.parentNode.removeChild(scene_openFile);
+	}
+	
 	/*----------SCENE MENU EVENTS--------------------------------*/
 
 	//move events
@@ -652,6 +771,7 @@ function main() {
 	
 	//file events
 	scene_file_.addEventListener('click', scene_showFileMenu, false);
+	scene_fetch.addEventListener('click', fillFetch, false);
 	//to do scene_save.addEventListener('click', scene_doSave, false);
 	//to do scene_save_as.addEventListener('click', scene_openSaveAs, false);
 	
@@ -693,23 +813,25 @@ function main() {
 	}
 	
 	function scene_clearSelection() {
-		for(var mesh in JCubees) {						
-			JCubees[mesh].Jcubee.material.alpha = 1;
-			JCubees[mesh].hideMarkers();
+		for(var model in sceneParents) {						
+			for(var i=0; i<modelChildren[model].length;i++) {
+				modelChildren[model][i].Jcubee.material.alpha = 1;
+				modelChildren[model][i].hideMarkers();
+			}
 		}			
-		currentMeshes = {};
-		//currentMaterials = {};
-		hideSubMenus();
-		//selection.style.color="rgb(136, 136, 136)"
-		selection.innerHTML = "Select All";
+		currentParents = {};
+		scene_hideSubMenus();
+		scene_selection.innerHTML = "Select All";
 	}
 	
 	function scene_selectAll() {
-		for(var mesh in JCubees) {						
-			if(!(mesh in currentMeshes)) {						
-				JCubees[mesh].Jcubee.material.alpha = 1;
-				JCubees[mesh].showMarkers();
-				currentMeshes[mesh] = JCubees[mesh].Jcubee;
+		for(var model in sceneParents) {						
+			if(!(model in currentParents)) {
+				for(var i=0; i<modelChildren[model].length;i++) {
+					modelChildren[model][i].Jcubee.material.alpha = 1;
+					modelChildren[model][i].showMarkers();
+				}						
+				currentParents[model] = sceneParents[model];
 			}
 		}
 	}
@@ -756,6 +878,7 @@ function main() {
 		scene_hideSubMenus();
 		menu.style.visibility = 'visible';
 		scene_menu.style.visibility = 'hidden';
+		Header.innerHTML = 'Construction Site';
 		inScene = false;
 	}
 	
@@ -784,7 +907,7 @@ function main() {
 	var JCisStored = false;
 	JCubees = {};
 	
-	model.innerHTML = "Model -- *"+currentModelName;
+	model.innerHTML = "Model -- "+currentModelName+storeIcon+saveIcon+exportIcon;
 	storeIn.value = currentModelName;
 	
 	
@@ -898,7 +1021,7 @@ function main() {
 		resetBorders();		
 		selection.style.color="#000000";		
 		selectNew(JCubees[name].Jcubee);
-		model.innerHTML = "Model -- *"+currentModelName;
+		model.innerHTML = "Model -- "+currentModelName+storeIcon+saveIcon+exportIcon;;
 		JCisStored = false;		
 	}
 	
@@ -912,7 +1035,7 @@ function main() {
 		resetBorders();		
 		selection.style.color="#000000";		
 		selectNew(JCubees[name].Jcubee);
-		model.innerHTML = "Model -- *"+currentModelName;
+		model.innerHTML = "Model -- "+currentModelName+storeIcon+saveIcon+exportIcon;;
 		JCisStored = false;
 	}
 	
@@ -926,7 +1049,7 @@ function main() {
 		resetBorders();		
 		selection.style.color="#000000";		
 		selectNew(JCubees[name].Jcubee);
-		model.innerHTML = "Model -- *"+currentModelName;
+		model.innerHTML = "Model -- "+currentModelName+storeIcon+saveIcon+exportIcon;;
 		JCisStored = false;
 	}
 
@@ -940,7 +1063,7 @@ function main() {
 		resetBorders();		
 		selection.style.color="#000000";		
 		selectNew(JCubees[name].Jcubee);
-		model.innerHTML = "Model -- *"+currentModelName;
+		model.innerHTML = "Model -- "+currentModelName+storeIcon+saveIcon+exportIcon;;
 		JCisStored = false;
 	}
 	
@@ -1001,8 +1124,7 @@ function main() {
         var pickInfo = jccsStudio.scene.pick(jccsStudio.scene.pointerX, jccsStudio.scene.pointerY);	
 		if (pickInfo.hit && pickInfo.pickedMesh !==ground) {	
             var currentMesh = pickInfo.pickedMesh;
-			var name = currentMesh.name;
-console.log(name);			
+			var name = currentMesh.name;			
 			if(name.charAt(0)=="I") {
 				var currentParent = sceneModels[name].Jcubee.parent;
 				name = currentParent.name;
@@ -1262,7 +1384,7 @@ console.log(name);
 				JCubees[name].moveT(currentMeshes[name].position);
 			}
 		}
-		model.innerHTML = "Model -- *"+currentModelName;
+		model.innerHTML = "Model -- "+currentModelName+storeIcon+saveIcon+exportIcon;;
 		JCisStored = false;
 	}
 	
@@ -1274,7 +1396,7 @@ console.log(name);
 				JCubees[name].moveT(currentMeshes[name].position);
 			}
 		}
-		model.innerHTML = "Model -- *"+currentModelName;
+		model.innerHTML = "Model -- "+currentModelName+storeIcon+saveIcon+exportIcon;;
 		JCisStored = false;
 	}
 	
@@ -1286,7 +1408,7 @@ console.log(name);
 				JCubees[name].moveT(currentMeshes[name].position);
 			}
 		}
-		model.innerHTML = "Model -- *"+currentModelName;
+		model.innerHTML = "Model -- "+currentModelName+storeIcon+saveIcon+exportIcon;;
 		JCisStored = false;
 	}
 	
@@ -1298,7 +1420,7 @@ console.log(name);
 				JCubees[name].moveT(currentMeshes[name].getAbsolutePosition());
 			}
 		}
-		model.innerHTML = "Model -- *"+currentModelName;
+		model.innerHTML = "Model -- "+currentModelName+storeIcon+saveIcon+exportIcon;;
 		JCisStored = false;	
 	}
 	
@@ -1310,7 +1432,7 @@ console.log(name);
 				JCubees[name].moveT(currentMeshes[name].position);
 			}
 		}
-		model.innerHTML = "Model -- *"+currentModelName;
+		model.innerHTML = "Model -- "+currentModelName+storeIcon+saveIcon+exportIcon;;
 		JCisStored = false;
 	}
 	
@@ -1322,15 +1444,13 @@ console.log(name);
 				JCubees[name].moveT(currentMeshes[name].position);
 			}
 		}
-		model.innerHTML = "Model -- *"+currentModelName;
+		model.innerHTML = "Model -- "+currentModelName+storeIcon+saveIcon+exportIcon;;
 		JCisStored = false;
 	}
 	
 	function leftModelMove() {
-		modelStepsLeftRight(sceneParents);
 		var diff = moveLeft.scale(0.5);
-		for(var name in currentParents) {
-console.log(name);			
+		for(var name in currentParents) {			
 			currentParents[name].position.addInPlace(diff);			
 			for(var i=0; i<modelChildren[name].length;i++) {
 				modelChildren[name][i].moveT(modelChildren[name][i].Jcubee.getAbsolutePosition());

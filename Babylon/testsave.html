@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+		<title>Tester</title>
+	  
+		<style>
+			html, body {
+				overflow: hidden;
+				width: 100%;
+				height: 100%;
+				margin: 0;
+				padding: 0;
+			}
+			
+			.canvas {
+				width: 100%;
+				height: 100%;
+				touch-action: none;
+				float:left;
+			}
+
+
+		</style>
+		
+		<script src="babylon2.2_min.js"></script>
+		<script src="hand.min.js"></script>		
+			
+		<script>
+			"use strict";
+			window.onload=main;
+			
+			function main() {
+				//Set Scene
+				var canvas = document.getElementById("canvas");
+				var engine = new BABYLON.Engine(canvas, true);
+				var scene = createScene(engine,canvas);
+				
+				var camera = new BABYLON.ArcRotateCamera("Camera", 0, 50, 300, new BABYLON.Vector3(0, 300, 0), scene);
+				camera.setPosition(new BABYLON.Vector3(0, 200, -1400));	
+				camera.lowerBetaLimit = 0.1;
+				camera.upperBetaLimit = (Math.PI / 2) * 0.9;
+				camera.attachControl(canvas, true);
+				
+				//Create Materials
+				var blueInMat = new BABYLON.StandardMaterial("blueIn", scene);
+				blueInMat.emissiveColor = new BABYLON.Color3(0.2,0.2,1);
+				
+				var redInMat = new BABYLON.StandardMaterial("redIn", scene);
+				redInMat.emissiveColor = new BABYLON.Color3(1,0,0);
+				
+				//Create Ground
+				var groundin=BABYLON.Mesh.CreateGround("groundIn",1200, 1200, 20, scene,  false, BABYLON.Mesh.DOUBLESIDE);	
+				groundin.material = blueInMat;
+					
+	
+				// Watch for browser/canvas resize events
+				window.addEventListener("resize", function () {
+					engine.resize();
+				});
+
+	
+				
+}
+
+function createScene(engine, canvas) {
+	var canvas = document.getElementById("canvas");
+
+	var engine = new BABYLON.Engine(canvas, true);
+
+	var scene = new BABYLON.Scene(engine);
+	
+	scene.clearColor = new BABYLON.Color3(0.75, 0.75, 0.75);
+	
+	var blueInMat = new BABYLON.StandardMaterial("blueIn", scene);
+	blueInMat.emissiveColor = new BABYLON.Color3(0.2,0.2,1);
+	
+	//scene.activeCameras.push(camera);
+	
+	var frontLight = new BABYLON.PointLight("omni", new BABYLON.Vector3(-3000, 6000, 2000), scene);
+	var backLight = new BABYLON.PointLight("omni", new BABYLON.Vector3(3000, -6000, 2000), scene);
+	var bottomLight = new BABYLON.PointLight("omni", new BABYLON.Vector3(-3000, 6000, -2000), scene);
+	frontLight.intensity = 0.2;
+	backLight.intensity = 0.2;
+	bottomLight.intensity = 0.2;
+	
+	var box = BABYLON.Mesh.CreateBox("box0", 60.0, scene);
+	box.material = blueInMat;
+	box.position = new BABYLON.Vector3(30,30,30);
+	
+	var serializedMesh = BABYLON.SceneSerializer.SerializeMesh(box);
+	var strMesh = JSON.stringify(serializedMesh);
+	console.log(strMesh)
+	
+	// Register a render loop to repeatedly render the scene
+	engine.runRenderLoop(function () {			
+		scene.render();
+	});
+	
+	return scene;	
+}
+
+			
+		</script>
+			
+	</head>
+
+	<body>
+		<canvas id="canvas" class="canvas"></canvas>
+		
+	</body>
+
+</html>

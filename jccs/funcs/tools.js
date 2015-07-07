@@ -179,13 +179,6 @@ function stepsForwardBack(JCubees, currentMeshes) {
 	return {forward:maxStepsForward, back:maxStepsBack}; 
 }
 
-//Calculation of the number of steps (1 per key down) that can be taken without hitting another model in sceneParents
-function modelStepsLeftRight(parents) {
-	for(var model in parents) {
-console.log(parents[model].position);
-	}	
-	
-}
 function getModelRef(ref) {
 	var i = ref.indexOf('¬') - 1;
 	return ref.substr(1,i);
