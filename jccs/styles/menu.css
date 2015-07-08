@@ -204,6 +204,26 @@
 	background: linear-gradient(to right, #999999 , #FFFFFF); 
 }
 
+#copy {
+	width:90px;
+	vertical-align: middle;
+}
+
+#copy:hover {
+	background: linear-gradient(to right, #999999 , #FFFFFF); 
+}
+
+#delete_ {
+	width:90px;
+	vertical-align: middle;
+}
+
+#delete_:hover {
+	background: linear-gradient(to right, #999999 , #FFFFFF); 
+}
+
+
+
 .chart {
 	width:10px;
 	height:10px;
@@ -236,7 +256,7 @@
 }
 
 #textures {
-	width:40%;
+	width:30%;
 }
 
 #texturepics {

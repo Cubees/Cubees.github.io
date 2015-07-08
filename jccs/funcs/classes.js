@@ -8,6 +8,7 @@ function JcubeeBlank(name) {
 		
 	//methods
 	this.addMarkers = addMarkers;
+	this.disableMarkers = disableMarkers;
 	this.moveT = moveT;
 	this.showMarkers = showMarkers;
 	this.hideMarkers = hideMarkers;
@@ -26,6 +27,7 @@ function JcubeeBox(name, x, y, z, material, scene) {
 		
 	//methods
 	this.addMarkers = addMarkers;
+	this.disableMarkers = disableMarkers;
 	this.moveT = moveT;
 	this.showMarkers = showMarkers;
 	this.hideMarkers = hideMarkers;
@@ -44,6 +46,7 @@ function JcubeeCylinder(name, x, y, z, material, scene) {
 		
 	//methods
 	this.addMarkers = addMarkers;
+	this.disableMarkers = disableMarkers;
 	this.moveT = moveT;
 	this.showMarkers = showMarkers;
 	this.hideMarkers = hideMarkers;
@@ -62,6 +65,7 @@ function JcubeeSphere(name, x, y, z, material, scene) {
 		
 	//methods
 	this.addMarkers = addMarkers;
+	this.disableMarkers = disableMarkers;
 	this.moveT = moveT;
 	this.showMarkers = showMarkers;
 	this.hideMarkers = hideMarkers;
@@ -92,6 +96,7 @@ function JcubeeRoof(name, x, y, z, material, scene) {
 		
 	//methods
 	this.addMarkers = addMarkers;
+	this.disableMarkers = disableMarkers;
 	this.moveT = moveT;
 	this.showMarkers = showMarkers;
 	this.hideMarkers = hideMarkers; 
@@ -160,6 +165,15 @@ function hideMarkers() {
 	this.frontMarker.material.alpha = 0.4;
 	this.rightMarker.material.alpha = 0.4;
 	this.groundMarker.material.alpha = 0.4;
+}
+
+function disableMarkers() {
+	this.backMarker.setEnabled(false);
+	this.leftMarker.setEnabled(false);
+	this.frontMarker.setEnabled(false);
+	this.rightMarker.setEnabled(false);
+	this.rightMarker.setEnabled(false);
+	this.groundMarker.setEnabled(false);
 }
 
 function disable() {

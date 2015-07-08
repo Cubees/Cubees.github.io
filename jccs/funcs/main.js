@@ -5,6 +5,9 @@ function main() {
 	var storeIcon = "&#10022;";
 	var saveIcon = "&#10039;";
 	var exportIcon = "&#10047;";
+	var storeBlank = "&nbsp;&nbsp;";
+	var saveBlank = "&nbsp;&nbsp;";
+	var exportBlank = "&nbsp;&nbsp;";
 	
 	// Event variables
     var groundPoint;
@@ -42,6 +45,7 @@ function main() {
 	var sceneParents={}, sceneModels={}, modelChildren={};
 	var doAddToScene = false;
 	var inScene=false;
+	var viewcamera = false;
 	
 	var frontOfLeftFace={};
 	var frontOfRightFace={};
@@ -98,6 +102,8 @@ function main() {
 	var subselectionmenu = document.getElementById("subselectionmenu");
 	var clear = document.getElementById("clear");
 	var all = document.getElementById("all");
+	var copy = document.getElementById("copy");
+	vardelete_ = document.getElementById("delete_");
 	var colour = document.getElementById("colour");
 	colour.colarray=[0,0,255];
 	
@@ -167,6 +173,8 @@ function main() {
 	selection.addEventListener("click", showSelectionMenu, false);
 	clear.addEventListener("click", clearSelection, false);
 	all.addEventListener("click", selectAll, false);
+	copy.addEventListener("click", doCopy, false);
+	delete_.addEventListener("click", doDelete, false);
 	colour.addEventListener("click", function() {setMeshColour(this)}, false );
 	
 	rotateX.addEventListener("click", Xrotate, false);
@@ -372,17 +380,18 @@ function main() {
 	}
 	
 	function doSave() {
-		//var serializedMeshes=[];
+		var serializedMeshes=[];
 		for(var ref in JCubees) {
-			//serializedMeshes.push(JCubees[ref].Jcubee.name);
+			serializedMeshes.push(JCubees[ref].Jcubee.name);
 console.log(JCubees[ref].Jcubee.name);					
 		
-		
-			var serializedMesh = BABYLON.SceneSerializer.SerializeMesh(JCubees[ref].Jcubee);
+		}
+			var serializedMesh = BABYLON.SceneSerializer.SerializeMesh(serializedMeshes);
+			//var serializedMesh = BABYLON.SceneSerializer.SerializeMesh(JCubees[ref].Jcubee);
 			console.log("mesh",serializedMesh);
 			var strMesh = JSON.stringify(serializedMesh);
 			console.log("string",strMesh);
-		}
+		
 	}
 	
 	//Cubee functions
@@ -431,6 +440,48 @@ console.log(JCubees[ref].Jcubee.name);
 		selection.innerHTML = "Selection";
 		selection.style.color="#000000";
 	}
+	
+	function doCopy() {
+		var newRef;
+		var tempMeshes=[];
+		var name;
+		for(var ref in currentMeshes) {
+			newRef = "L"+currentModelName+"¬"+getType(ref)+(num_of_boxes++);			
+			JCubees[newRef] = new JcubeeBlank(newRef);
+			JCubees[newRef].Jcubee = JCubees[ref].Jcubee.clone(newRef);
+			JCubees[newRef].Jcubee.position.y= 30 + 12*60;			
+			JCubees[newRef].Jcubee.material = JCubees[ref].Jcubee.material.clone();			
+			JCubees[newRef].Jcubee.material.alpha = 1;			
+			JCubees[newRef].addMarkers(jccsStudio.scene);		
+			JCubees[ref].Jcubee.material.alpha= 0.5;
+			JCubees[ref].hideMarkers();
+			delete currentMeshes[ref];
+			tempMeshes.push(JCubees[newRef].Jcubee);			
+		}
+		currentMeshes={};
+		for(var i=0;i<tempMeshes.length;i++) {
+			name = tempMeshes[i].name;		
+			currentMeshes[name] = tempMeshes[i];
+		};
+		hideSubMenus();
+	};
+	
+	function doDelete() {
+		confirmFunc = doDeletion;
+		confirmDesc.innerHTML = 'Do you want to continue to and delete the current selection?';
+		openConfirmDBox();
+	}
+	
+	function doDeletion() {
+		for(var ref in currentMeshes) {
+			JCubees[ref].destroy();
+			delete JCubees[ref];
+			delete currentMeshes[ref];
+		}
+		clearSelection();
+	}
+	
+	
 	
 	function Xrotate() {
 		for(var mesh in currentMeshes) {
@@ -635,7 +686,7 @@ console.log(JCubees[ref].Jcubee.name);
 
 		
 		currentModelName = name;
-		model.innerHTML = "Model -- "+currentModelName+"&nbsp;&nbsp"+saveIcon+exportIcon;
+		model.innerHTML = "Model -- "+currentModelName+storeBlank+saveIcon+exportIcon;
 		
 		storeIn.value = currentModelName;
 		JCisStored = true;		
@@ -719,6 +770,8 @@ console.log(JCubees[ref].Jcubee.name);
 	var scene_menulist = document.getElementById("scene_menulist");
 	
 	var scene_constructSite = document.getElementById("scene_constructSite");
+	var scene_camera = document.getElementById("scene_camera");
+	
 	var scene_scene = document.getElementById("scene_scene");
 	
 	var scene_leftarrow = document.getElementById("scene_leftarrow");
@@ -757,6 +810,8 @@ console.log(JCubees[ref].Jcubee.name);
 		scene_save.parentNode.removeChild(scene_save);
 		scene_save_as.parentNode.removeChild(scene_save_as);
 		scene_openFile.parentNode.removeChild(scene_openFile);
+		saveIcon="";
+		saveBlank="";
 	}
 	
 	/*----------SCENE MENU EVENTS--------------------------------*/
@@ -777,6 +832,9 @@ console.log(JCubees[ref].Jcubee.name);
 	
 	//return to construction site event
 	scene_constructSite.addEventListener('click', scene_to_construct, false);
+	
+	//camera switch event
+	scene_camera.addEventListener('click', switch_camera, false);
 	
 	//Selection events
 	scene_selection.addEventListener("click", scene_showSelectionMenu, false);
@@ -833,6 +891,45 @@ console.log(JCubees[ref].Jcubee.name);
 				}						
 				currentParents[model] = sceneParents[model];
 			}
+		}
+	}
+	
+	//switch camera functions
+	function switch_camera() {
+		if(scene_camera.innerHTML =='View Camera') {
+			scene_camera.innerHTML = 'Build Camera';
+			for(var model in sceneParents) {
+				for(var i=0; i<modelChildren[model].length;i++) {
+					modelChildren[model][i].disableMarkers();
+				}		
+			}
+			frontPlane.setEnabled(false);
+			backPlane.setEnabled(false);
+			leftSidePlane.setEnabled(false);
+			rightSidePlane.setEnabled(false);
+			ground.material.wireframe = false;
+			skybox.isVisible=true;
+			jccsStudio.followCamera.target = target;
+			jccsStudio.scene.activeCameras[0] = jccsStudio.followCamera;
+			jccsStudio.followCamera.position = holder.position;	
+			jccsStudio.followCamera.setTarget(target.getAbsolutePosition());
+			viewcamera = true;
+		}
+		else {
+			scene_camera.innerHTML = 'View Camera';
+			for(var model in sceneParents) {
+				for(var i=0; i<modelChildren[model].length;i++) {
+					modelChildren[model][i].enable();
+				}		
+			}
+			frontPlane.setEnabled(true);
+			backPlane.setEnabled(true);
+			leftSidePlane.setEnabled(true);
+			rightSidePlane.setEnabled(true);
+			ground.material.wireframe = true;
+			skybox.isVisible=false;
+			jccsStudio.scene.activeCameras[0] = jccsStudio.camera;
+			viewcamera = false;
 		}
 	}
 	
@@ -927,7 +1024,10 @@ console.log(JCubees[ref].Jcubee.name);
 	jccsStudio.camera.upperBetaLimit = (Math.PI / 2) * 0.9;
 	jccsStudio.camera.attachControl(jcCanvas, true);
 	
-	//jccsStudio.scene.activeCameras.push(jccsStudio.camera);
+	jccsStudio.followCamera = new BABYLON.TargetCamera("followCamera", new BABYLON.Vector3(0, 60, 0), jccsStudio.scene);	
+	jccsStudio.followCamera.attachControl(jcCanvas, true);
+	
+	jccsStudio.scene.activeCameras.push(jccsStudio.camera);
 	
 	jccsStudio.frontLight = new BABYLON.PointLight("omni", new BABYLON.Vector3(-3000, 6000, 2000), jccsStudio.scene);
 	jccsStudio.backLight = new BABYLON.PointLight("omni", new BABYLON.Vector3(3000, -6000, 2000), jccsStudio.scene);
@@ -963,6 +1063,19 @@ console.log(JCubees[ref].Jcubee.name);
 	
 	var blackMat = new BABYLON.StandardMaterial("black", jccsStudio.scene);
 	blackMat.emissiveColor = new BABYLON.Color3(0,0,0);
+	
+	//Follow Camera holder and Target
+	var holder = BABYLON.Mesh.CreateBox('holder', 1, jccsStudio.scene);
+	holder.position.y = 60;
+	holder.isVisible = false;
+	
+	var target = BABYLON.Mesh.CreateBox('target', 1, jccsStudio.scene);
+	target.position = new BABYLON.Vector3(0, 60, 13*60);
+	//target.material = blackMat;
+	target.isVisible = false;
+	target.parent = holder;
+	jccsStudio.followCamera.position = holder.position;	
+	jccsStudio.followCamera.setTarget(target.getAbsolutePosition());
 	
 	//Create Ground
 	var ground=BABYLON.Mesh.CreateGround("ground",1200, 1200, 20, jccsStudio.scene,  false, BABYLON.Mesh.DOUBLESIDE);	
@@ -1008,6 +1121,16 @@ console.log(JCubees[ref].Jcubee.name);
 	rightSidePlane.position.y=600;
 	rightSidePlane.position.z=0;	
 	rightSidePlane.isPickable = false;
+	
+	var skybox = BABYLON.Mesh.CreateBox("skyBox", 1250.0, jccsStudio.scene);
+	skybox.isVisible=false;
+	var skyboxMaterial = new BABYLON.StandardMaterial("skyBox", jccsStudio.scene);
+	skyboxMaterial.backFaceCulling = false;
+	skyboxMaterial.reflectionTexture = new BABYLON.CubeTexture("../images/skybox/skybox", jccsStudio.scene);
+	skyboxMaterial.reflectionTexture.coordinatesMode = BABYLON.Texture.SKYBOX_MODE;
+	skyboxMaterial.diffuseColor = new BABYLON.Color3(0, 0, 0);
+	skyboxMaterial.specularColor = new BABYLON.Color3(0, 0, 0);
+	skybox.material = skyboxMaterial;
 
 	
 	//Make Cubees  L prefix for Live Cubee
@@ -1015,7 +1138,7 @@ console.log(JCubees[ref].Jcubee.name);
 		var name = "L"+currentModelName+"¬box"+(num_of_boxes++);
 		var boxMat = new BABYLON.StandardMaterial("blue", jccsStudio.scene);
 		boxMat.emissiveColor = new BABYLON.Color3(colour.colarray[0]/255,colour.colarray[1]/255,colour.colarray[2]/255);
-		JCubees[name]= new JcubeeBox(name, 30, 30 + 13*60, 30, boxMat, jccsStudio.scene);		
+		JCubees[name]= new JcubeeBox(name, 30, 30 + 12*60, 30, boxMat, jccsStudio.scene);		
 		JCubees[name].addMarkers(jccsStudio.scene);
 		hideSubMenus();
 		resetBorders();		
@@ -1026,10 +1149,10 @@ console.log(JCubees[ref].Jcubee.name);
 	}
 	
 	function makeCylinder() {
-		var name = "L"+currentModelName+"¬cylinder"+(num_of_boxes++);
+		var name = "L"+currentModelName+"¬cyl"+(num_of_boxes++);
 		var boxMat = new BABYLON.StandardMaterial("blue", jccsStudio.scene);
 		boxMat.emissiveColor = new BABYLON.Color3(colour.colarray[0]/255,colour.colarray[1]/255,colour.colarray[2]/255);
-		JCubees[name]= new JcubeeCylinder(name, 30, 30 + 13*60, 30, boxMat, jccsStudio.scene);
+		JCubees[name]= new JcubeeCylinder(name, 30, 30 + 12*60, 30, boxMat, jccsStudio.scene);
 		JCubees[name].addMarkers(jccsStudio.scene);
 		hideSubMenus();
 		resetBorders();		
@@ -1040,10 +1163,10 @@ console.log(JCubees[ref].Jcubee.name);
 	}
 	
 	function makeSphere() {
-		var name = "L"+currentModelName+"¬sphere"+(num_of_boxes++);
+		var name = "L"+currentModelName+"¬sph"+(num_of_boxes++);
 		var boxMat = new BABYLON.StandardMaterial("blue", jccsStudio.scene);
 		boxMat.emissiveColor = new BABYLON.Color3(colour.colarray[0]/255,colour.colarray[1]/255,colour.colarray[2]/255);
-		JCubees[name]= new JcubeeSphere(name, 30, 30 + 13*60, 30, boxMat, jccsStudio.scene);
+		JCubees[name]= new JcubeeSphere(name, 30, 30 + 12*60, 30, boxMat, jccsStudio.scene);
 		JCubees[name].addMarkers(jccsStudio.scene);
 		hideSubMenus();
 		resetBorders();		
@@ -1054,10 +1177,10 @@ console.log(JCubees[ref].Jcubee.name);
 	}
 
 	function makeRoof() {
-		var name = "L"+currentModelName+"¬roof"+(num_of_boxes++);
+		var name = "L"+currentModelName+"¬rof"+(num_of_boxes++);
 		var boxMat = new BABYLON.StandardMaterial("blue", jccsStudio.scene);
 		boxMat.emissiveColor = new BABYLON.Color3(colour.colarray[0]/255,colour.colarray[1]/255,colour.colarray[2]/255);
-		JCubees[name]= new JcubeeRoof(name, 30, 30 + 13*60, 30, boxMat, jccsStudio.scene);
+		JCubees[name]= new JcubeeRoof(name, 30, 30 + 12*60, 30, boxMat, jccsStudio.scene);
 		JCubees[name].addMarkers(jccsStudio.scene);
 		hideSubMenus();
 		resetBorders();		
@@ -1274,15 +1397,65 @@ console.log(JCubees[ref].Jcubee.name);
 	};
 	
 	var onKeyDown = function(evt) {
-
 	
 		if(evt.keyCode == 16) {
 			if(!shiftDown) {
 				shiftDown=true;
 			}
 		};
+		
+		if(evt.keyCode == 101 && viewcamera) {
+			if(!detached) {
+				jccsStudio.camera.detachControl(jcCanvas);
+				detached = true;
+			}
+			holder.locallyTranslate(BABYLON.Axis.Z,1,BABYLON.Space.LOCAL);		
+			jccsStudio.followCamera.position = holder.position;	
+			jccsStudio.followCamera.setTarget(target.getAbsolutePosition());		
+		}
+		
+		if(evt.keyCode == 100 && viewcamera) {
+			if(!detached) {
+				jccsStudio.camera.detachControl(jcCanvas);
+				detached = true;
+			}
+			holder.rotate(BABYLON.Axis.Y,-0.01,BABYLON.Space.WORLD);		
+			jccsStudio.followCamera.position = holder.position;	
+			jccsStudio.followCamera.setTarget(target.getAbsolutePosition());		
+		}
+		
+		if(evt.keyCode == 102 && viewcamera) {
+			if(!detached) {
+				jccsStudio.camera.detachControl(jcCanvas);
+				detached = true;
+			}
+			holder.rotate(BABYLON.Axis.Y,0.01,BABYLON.Space.WORLD);		
+			jccsStudio.followCamera.position = holder.position;	
+			jccsStudio.followCamera.setTarget(target.getAbsolutePosition());		
+		}
+		
+		
+		if(evt.keyCode == 98 && viewcamera) {
+			if(!detached) {
+				jccsStudio.camera.detachControl(jcCanvas);
+				detached = true;
+			}
+			holder.translate(BABYLON.Axis.Y,-1,BABYLON.Space.WORLD);		
+			jccsStudio.followCamera.position = holder.position;	
+			jccsStudio.followCamera.setTarget(target.getAbsolutePosition());		
+		}
+		
+		if(evt.keyCode == 104 && viewcamera) {
+			if(!detached) {
+				jccsStudio.camera.detachControl(jcCanvas);
+				detached = true;
+			}
+			holder.translate(BABYLON.Axis.Y,1,BABYLON.Space.WORLD);		
+			jccsStudio.followCamera.position = holder.position;	
+			jccsStudio.followCamera.setTarget(target.getAbsolutePosition());		
+		}
 	
-		if(evt.keyCode==39) {
+		if(evt.keyCode==39 && !viewcamera) {
 			if(!detached) {
 				jccsStudio.camera.detachControl(jcCanvas);
 				detached = true;
@@ -1296,7 +1469,7 @@ console.log(JCubees[ref].Jcubee.name);
 			return;
 		};
 		
-		if(evt.keyCode==37) {
+		if(evt.keyCode==37 && !viewcamera) {
 			if(!detached) {
 				jccsStudio.camera.detachControl(jcCanvas);
 				detached = true;
@@ -1310,7 +1483,7 @@ console.log(JCubees[ref].Jcubee.name);
 			return;
 		}
 		
-		if(evt.keyCode==40) {
+		if(evt.keyCode==40 && !viewcamera) {
 			if(!detached) {
 				jccsStudio.camera.detachControl(jcCanvas);
 				detached = true;
@@ -1324,7 +1497,7 @@ console.log(JCubees[ref].Jcubee.name);
 			return;
 		}
 		
-		if(evt.keyCode==38) {
+		if(evt.keyCode==38 && !viewcamera) {
 			if(!detached) {
 				jccsStudio.camera.detachControl(jcCanvas);
 				detached = true;
@@ -1338,7 +1511,7 @@ console.log(JCubees[ref].Jcubee.name);
 			return;
 		}
 		
-		if(evt.keyCode==190) {
+		if(evt.keyCode==190 && !viewcamera) {
 			if(!detached) {
 				jccsStudio.camera.detachControl(jcCanvas);
 				detached = true;
@@ -1352,7 +1525,7 @@ console.log(JCubees[ref].Jcubee.name);
 			return;
 		}
 		
-		if(evt.keyCode==188) {
+		if(evt.keyCode==188 && !viewcamera) {
 			if(!detached) {
 				jccsStudio.camera.detachControl(jcCanvas);
 				detached = true;

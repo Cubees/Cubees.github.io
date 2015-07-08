@@ -189,6 +189,11 @@ function getNameRef(ref) {
 	return ref.substr(i);
 }
 
+function getType(ref) {
+	var name = getNameRef(ref);
+	return name.substr(0,3);
+}
+
 
 function getPosition(e) {
     e = e || window.event;
