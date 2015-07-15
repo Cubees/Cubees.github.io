@@ -384,6 +384,24 @@
 	background: linear-gradient(to right, #999999 , #FFFFFF); 
 }
 
+#scene_copy {
+	width:90px;
+	vertical-align: middle;
+}
+
+#scene_copy:hover {
+	background: linear-gradient(to right, #999999 , #FFFFFF); 
+}
+
+#scene_delete {
+	width:90px;
+	vertical-align: middle;
+}
+
+#scene_delete_:hover {
+	background: linear-gradient(to right, #999999 , #FFFFFF); 
+}
+
 #scene_rotateX {
 	background-image:url("../images/rotX.png");
 }

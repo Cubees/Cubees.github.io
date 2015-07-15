@@ -52,6 +52,8 @@ function main() {
 	var backwardOK=true;
 	
 	var collide = {left:false, right:false, up:false, down:false, front:false, back:false};	
+	var collideCamera = {left:false, right:false, up:false, down:false, front:false, back:false, lookup:false, lookdown:false};
+	var cameraSpeed = 1;
 	
 		
 	
@@ -100,7 +102,7 @@ function main() {
 	var clear = document.getElementById("clear");
 	var all = document.getElementById("all");
 	var copy = document.getElementById("copy");
-	vardelete_ = document.getElementById("delete_");
+	var delete_ = document.getElementById("delete_");
 	var colour = document.getElementById("colour");
 	colour.colarray=[0,0,255];
 	
@@ -378,6 +380,28 @@ function main() {
 	}
 	
 	function doSave() {
+		var alpha = {};
+		var meshes_to_save = [];
+		
+		for(var ref in JCubees) {
+			alpha[ref] = JCubees[ref].Jcubee.material.alpha;
+			JCubees[ref].Jcubee.material.alpha = 1;
+			meshes_to_save.push(JCubees[ref].Jcubee);
+		}
+		
+		var serializedMesh = BABYLON.SceneSerializer.SerializeMesh(meshes_to_save);
+		
+		var strMesh = JSON.stringify(serializedMesh);
+		console.log(strMesh);
+		
+		for(var ref in JCubees) {
+			JCubees[ref].Jcubee.material.alpha = alpha[ref];
+		}
+		
+		
+	}
+/*	
+	function doSave() {
 		var alpha;
 		var strMesh;
 		var serializedMesh;
@@ -408,7 +432,7 @@ function main() {
 		console.log(strMesh);
 		
 	}
-	
+*/	
 	//Cubee functions
 	function showCubeeMenu() {
 		hideSubMenus();
@@ -464,7 +488,7 @@ function main() {
 			newRef = "L"+currentModelName+"¬"+getType(ref)+(num_of_boxes++);			
 			JCubees[newRef] = new JcubeeBlank(newRef);
 			JCubees[newRef].Jcubee = JCubees[ref].Jcubee.clone(newRef);
-			JCubees[newRef].Jcubee.position.y= 30 + 12*60;			
+			JCubees[newRef].Jcubee.position.y += 6*60;			
 			JCubees[newRef].Jcubee.material = JCubees[ref].Jcubee.material.clone();			
 			JCubees[newRef].Jcubee.material.alpha = 1;			
 			JCubees[newRef].addMarkers(jccsStudio.scene);		
@@ -539,6 +563,8 @@ function main() {
 			}
 		}
 		
+		collide = {left:false, right:false, up:false, down:false, front:false, back:false};
+		
 		var parentName = "Iparent"+name+num_in_scene;
 		var modelName = "I"+name+num_in_scene;
 		sceneParents[parentName] ={};
@@ -560,7 +586,8 @@ function main() {
 			JCubees[ref].disable();
 		}
 		
-		sceneParents[parentName].model.position.y = 12.5*60;
+		sceneParents[parentName].model.position.y = 9.5*60;
+		sceneParents[parentName].model.scaling = new BABYLON.Vector3(0.5, 0.5, 0.5);
 		sceneParents[parentName].model.computeWorldMatrix(true);
 		
 		for(var i=0; i<sceneParents[parentName].modelChildren.length;i++) {
@@ -570,8 +597,6 @@ function main() {
 		
 		sceneParents[parentName].modelBoundary = childrenBoundary(sceneParents[parentName], jccsStudio.scene );
 		sceneParents[parentName].modelBoundary.parent = sceneParents[parentName].model;
-		
-		sceneParents[parentName].model.scaling = new BABYLON.Vector3(0.5, 0.5, 0.5);		
 		
 		num_in_scene++;			
 			
@@ -766,6 +791,8 @@ function main() {
 			}
 		}
 		
+		collide = {left:false, right:false, up:false, down:false, front:false, back:false};
+		
 		var parentName = "Iparent"+name+num_in_scene;
 		var modelName = "I"+name+num_in_scene;
 		sceneParents[parentName] ={};
@@ -781,17 +808,26 @@ function main() {
 			sceneModels[modelName+ref].Jcubee.material = JCubees[ref].Jcubee.material.clone();
 			sceneModels[modelName+ref].Jcubee.material.alpha = 1;			
 			sceneModels[modelName+ref].Jcubee.parent = sceneParents[parentName].model;
+			sceneModels[modelName+ref].parent = sceneParents[parentName];
 			sceneModels[modelName+ref].addMarkers(jccsStudio.scene,0.5);
 			sceneParents[parentName].modelChildren.push(sceneModels[modelName+ref]);				
 			JCubees[ref].disable();
 		}
 		
+		sceneParents[parentName].model.position.y = 9.5*60;
+		sceneParents[parentName].model.scaling = new BABYLON.Vector3(0.5, 0.5, 0.5);
+		sceneParents[parentName].model.computeWorldMatrix(true);
+		
+		for(var i=0; i<sceneParents[parentName].modelChildren.length;i++) {
+			sceneParents[parentName].modelChildren[i].Jcubee.computeWorldMatrix(true);
+			sceneParents[parentName].modelChildren[i].moveT(sceneParents[parentName].modelChildren[i].Jcubee.getAbsolutePosition());		
+		}
+		
 		sceneParents[parentName].modelBoundary = childrenBoundary(sceneParents[parentName], jccsStudio.scene );
 		sceneParents[parentName].modelBoundary.parent = sceneParents[parentName].model;
 		
-		sceneParents[parentName].model.scaling = new BABYLON.Vector3(0.5, 0.5, 0.5);		
-		
-		num_in_scene++;	
+		num_in_scene++;			
+			
 		fetchDB.style.visibility = 'hidden';
 	}
 	
@@ -828,6 +864,8 @@ function main() {
 	var scene_subselectionmenu = document.getElementById("scene_subselectionmenu");
 	var scene_clear = document.getElementById("scene_clear");
 	var scene_all = document.getElementById("scene_all");
+	var scene_copy = document.getElementById("scene_copy");
+	var scene_delete = document.getElementById("scene_delete");
 
 	var scene_rotateX = document.getElementById("scene_rotateX");
 	var scene_rotateY = document.getElementById("scene_rotateY");
@@ -874,6 +912,8 @@ function main() {
 	scene_selection.addEventListener("click", scene_showSelectionMenu, false);
 	scene_clear.addEventListener("click", scene_clearSelection, false);
 	scene_all.addEventListener("click", scene_selectAll, false);
+	scene_copy.addEventListener("click", scene_doCopy, false);
+	scene_delete.addEventListener("click", scene_doDelete, false);
 	
 	scene_rotateX.addEventListener("click", scene_Xrotate, false);
 	scene_rotateY.addEventListener("click", scene_Yrotate, false);
@@ -947,7 +987,7 @@ function main() {
 		skybox.isVisible=true;
 		jccsStudio.followCamera.target = target;
 		jccsStudio.scene.activeCameras[0] = jccsStudio.followCamera;
-		jccsStudio.followCamera.position = holder.position;	
+		jccsStudio.followCamera.position = viewer.back.getAbsolutePosition();	
 		jccsStudio.followCamera.setTarget(target.getAbsolutePosition());
 		viewcamera = true;
 	}
@@ -972,6 +1012,83 @@ function main() {
 		skybox.isVisible=false;
 		jccsStudio.scene.activeCameras[0] = jccsStudio.camera;
 		viewcamera = false;
+	}
+	
+		function scene_doCopy() {
+		var newRef;
+		var currentMesh;
+		var tempMeshes=[];
+		var modelName;
+		
+		for(var model in currentParents) {
+			var parentName = "Iparentcopy"+(num_in_scene++);
+			sceneParents[parentName] ={};
+			sceneParents[parentName].name = parentName;
+			sceneParents[parentName].model = currentParents[model].model.clone(parentName, "", true);
+			sceneParents[parentName].model.position.y += 6*60;
+			sceneParents[parentName].model.visibility = 0;
+			sceneParents[parentName].modelChildren = [];
+			tempMeshes.push(sceneParents[parentName]);	
+			
+			
+			for(var i=0; i<currentParents[model].modelChildren.length;i++) {
+				currentMesh = currentParents[model].modelChildren[i].Jcubee;
+				modelName = "L"+getNameRef(currentMesh.name)+"¬"+getType(currentMesh.name)+(num_of_boxes++);
+				sceneModels[modelName] = new JcubeeBlank(modelName);
+				sceneModels[modelName].Jcubee = currentMesh.clone(modelName);				
+				//sceneModels[modelName].Jcubee.position.y +=6*60;
+				sceneModels[modelName].Jcubee.material = currentMesh.material.clone();
+				sceneModels[modelName].Jcubee.material.alpha = 1;
+				currentMesh.material.alpha = 0.5;			
+				sceneModels[modelName].Jcubee.parent = sceneParents[parentName].model;
+				sceneModels[modelName].parent = sceneParents[parentName];
+				sceneModels[modelName].addMarkers(jccsStudio.scene,0.5);
+				sceneParents[parentName].modelChildren.push(sceneModels[modelName]);
+				currentParents[model].modelChildren[i].hideMarkers();				
+			}
+			
+			sceneParents[parentName].model.computeWorldMatrix(true);
+		
+			for(var i=0; i<sceneParents[parentName].modelChildren.length;i++) {
+				sceneParents[parentName].modelChildren[i].Jcubee.computeWorldMatrix(true);
+				sceneParents[parentName].modelChildren[i].moveT(sceneParents[parentName].modelChildren[i].Jcubee.getAbsolutePosition());		
+			}
+		
+			sceneParents[parentName].modelBoundary = childrenBoundary(sceneParents[parentName], jccsStudio.scene );
+			sceneParents[parentName].modelBoundary.parent = sceneParents[parentName].model;
+			
+			delete currentParents[model];
+		}	
+		
+		currentParents ={};
+		for(var i=0;i<tempMeshes.length;i++) {		
+			name = tempMeshes[i].name;		
+			currentParents[name] = tempMeshes[i];
+		};
+		scene_hideSubMenus();
+		
+		collide = {left:false, right:false, up:false, down:false, front:false, back:false};
+	}
+	
+	function scene_doDelete() {
+		confirmFunc = scene_doDeletion;
+		confirmDesc.innerHTML = 'Do you want to continue to and delete the current selection?';
+		openConfirmDBox();
+	}
+	
+	function scene_doDeletion() {
+		var child;
+		for(var model in currentParents) {
+			while(currentParents[model].modelChildren.length>0) {
+				child = currentParents[model].modelChildren.pop();
+				child.destroy();
+				delete child;
+			}
+			currentParents[model].model.dispose();
+			delete sceneParents[model];
+			delete currentParents[model];
+		}
+		scene_clearSelection();
 	}
 	
 	//rotation functions
@@ -1110,25 +1227,58 @@ function main() {
 	colour.material = blueMat;
 	
 	//Follow Camera holder and Target
-	var holder = BABYLON.Mesh.CreateBox('holder', 1, jccsStudio.scene);
-	holder.position.y = 60;
+	
+	var holder = new CreateCuboid('holder', 6, 60, 6, jccsStudio.scene);
+	//holder.material = blackMat;
+	//holder.material.alpha = 0.3;
 	holder.isVisible = false;
 	
-	var viewer = new BABYLON.Mesh.CreateCylinder("viewer", 20, 10, 20, 6, 1 , jccsStudio.scene);
-  	//var greyMat = new BABYLON.StandardMaterial("grey", jccsStudio.scene);
-  	//greyMat.emissiveColor = new BABYLON.Color3(0.2,0.2,0.2);
-  	viewer.position = new BABYLON.Vector3(0, 60, 0);
-  	viewer.rotation.x = Math.PI/2;
-	//viewer.material = greyMat;
-	viewer.parent = holder;
-	viewer.isVisible = false;
+	var viewer = {};
+	viewer.front = new CreateCuboid('viewerfront', 6, 1, 6, jccsStudio.scene);
+	viewer.front.position.z = 30;
+	viewer.front.parent = holder;
+	//viewer.front.material = redMat;
+	viewer.front.isVisible = false;
+	viewer.back = new CreateCuboid('viewerback', 6, 1, 6, jccsStudio.scene);
+	viewer.back.parent = holder;
+	viewer.back.position.z = -30;
+	viewer.back.isVisible = false;;
+	viewer.left = new CreateCuboid('viewerleft', 1, 60, 6, jccsStudio.scene);
+	viewer.left.position.x = -3;
+	viewer.left.parent = holder;
+	viewer.left.isVisible = false;
+	viewer.right = new CreateCuboid('viewerright', 1, 60, 6, jccsStudio.scene);
+	viewer.right.position.x = 3;
+	viewer.right.parent = holder;
+	viewer.right.isVisible = false;;
+	viewer.top = new CreateCuboid('viewertop', 6, 60, 1, jccsStudio.scene);
+	viewer.top.position.y = 3;
+	viewer.top.parent = holder;
+	viewer.top.isVisible = false;;
+	viewer.bottom = new CreateCuboid('viewerbottom', 6, 60, 1, jccsStudio.scene);
+	viewer.bottom.position.y = -3;
+	viewer.bottom.parent = holder;
+	viewer.bottom.isVisible = false;
+	
+	var crosshairdown = BABYLON.Mesh.CreateLines('crosshairdown', [new BABYLON.Vector3(0,1,0), new BABYLON.Vector3(0,-1,0)], jccsStudio.scene);
+	crosshairdown.material = blackMat;
+	crosshairdown.position.z = 30;
+	crosshairdown.parent = holder;
+	
+	var crosshairacross = BABYLON.Mesh.CreateLines('crosshairacross', [new BABYLON.Vector3(1,0,0), new BABYLON.Vector3(-1,0,0)], jccsStudio.scene);
+	crosshairacross.material = blackMat;
+	crosshairacross.position.z = 30;
+	crosshairacross.parent = holder;
 	
 	var target = BABYLON.Mesh.CreateBox('target', 1, jccsStudio.scene);
-	target.position = new BABYLON.Vector3(0, 60, 13*60);
+	target.position = new BABYLON.Vector3(0, 0, 13*60);
 	//target.material = blackMat;
 	target.isVisible = false;
 	target.parent = holder;
-	jccsStudio.followCamera.position = holder.position;	
+	
+	holder.position = new BABYLON.Vector3(15,585, -585);
+	holder.rotation.x = Math.PI/4;
+	jccsStudio.followCamera.position = viewer.back.getAbsolutePosition();	
 	jccsStudio.followCamera.setTarget(target.getAbsolutePosition());
 	
 	//Create Ground
@@ -1384,6 +1534,7 @@ function main() {
 					currentParents[name] = currentParent;
 					for(var i=0; i<currentParent.modelChildren.length;i++) {
 						currentParent.modelChildren[i].Jcubee.material.alpha = 1;
+						currentParent.modelChildren[i].showMarkers();
 					}						
 				}
 			}
@@ -1391,6 +1542,7 @@ function main() {
 				for(var model in sceneParents) {						
 					for(var i=0; i<sceneParents[model].modelChildren.length;i++) {
 						sceneParents[model].modelChildren[i].Jcubee.material.alpha = 1;
+						sceneParents[model].modelChildren[i].showMarkers();
 					}
 				}			
 				currentParents = {}; 
@@ -1399,6 +1551,7 @@ function main() {
 					if(!(model in currentParents)) {						
 						for(var i=0; i<sceneParents[model].modelChildren.length;i++) {
 							sceneParents[model].modelChildren[i].Jcubee.material.alpha = 0.5;
+							sceneParents[model].modelChildren[i].hideMarkers();
 						}
 					}
 				}
@@ -1488,21 +1641,27 @@ function main() {
 			return;
 		};
 		
+		if(evt.keyCode == 107  && viewcamera) {
+			if(cameraSpeed<5) {
+				cameraSpeed +=0.25;
+			}
+			return;
+		};
+		
+		if(evt.keyCode == 109  && viewcamera) {
+			if(cameraSpeed>1) {
+				cameraSpeed -=0.25;
+			}
+			return;
+		};
+		
 		if(evt.keyCode == 101 && viewcamera) {
 			if(!detached) {
 				jccsStudio.camera.detachControl(jcCanvas);
 				detached = true;
 			}
-			
-			if(!(-350<holder.position.x && holder.position.x<350 && -350<holder.position.z && holder.position.z<350)) {
-				forwardOK=false;
-				backwardOK=true;
-			}
-			if(forwardOK) {
-				holder.locallyTranslate(BABYLON.Axis.Z,1,BABYLON.Space.LOCAL);		
-				jccsStudio.followCamera.position = holder.position;	
-				jccsStudio.followCamera.setTarget(target.getAbsolutePosition());
-			}		
+			cameraMove(collideCamera.front, 1*cameraSpeed, BABYLON.Axis.Z, BABYLON.Space.LOCAL, true);
+			return;		
 		}
 		
 		if(evt.keyCode == 96 && viewcamera) {
@@ -1510,11 +1669,8 @@ function main() {
 				jccsStudio.camera.detachControl(jcCanvas);
 				detached = true;
 			}			
-
-				holder.locallyTranslate(BABYLON.Axis.Z,-1,BABYLON.Space.LOCAL);		
-				jccsStudio.followCamera.position = holder.position;	
-				jccsStudio.followCamera.setTarget(target.getAbsolutePosition());
-		
+			cameraMove(collideCamera.back, -1*cameraSpeed, BABYLON.Axis.Z, BABYLON.Space.LOCAL, true);
+			return;	
 		}
 		
 		if(evt.keyCode == 100 && viewcamera) {
@@ -1522,9 +1678,8 @@ function main() {
 				jccsStudio.camera.detachControl(jcCanvas);
 				detached = true;
 			}
-			holder.rotate(BABYLON.Axis.Y,-0.005,BABYLON.Space.WORLD);		
-			jccsStudio.followCamera.position = holder.position;	
-			jccsStudio.followCamera.setTarget(target.getAbsolutePosition());		
+			cameraMove(collideCamera.left, -0.005*cameraSpeed, BABYLON.Axis.Y, BABYLON.Space.WORLD, false);	
+			return;		
 		}
 		
 		if(evt.keyCode == 102 && viewcamera) {
@@ -1532,9 +1687,8 @@ function main() {
 				jccsStudio.camera.detachControl(jcCanvas);
 				detached = true;
 			}
-			holder.rotate(BABYLON.Axis.Y,0.005,BABYLON.Space.WORLD);		
-			jccsStudio.followCamera.position = holder.position;	
-			jccsStudio.followCamera.setTarget(target.getAbsolutePosition());		
+			cameraMove(collideCamera.right, 0.005*cameraSpeed, BABYLON.Axis.Y, BABYLON.Space.WORLD, false);
+			return;			
 		}
 		
 		
@@ -1543,12 +1697,8 @@ function main() {
 				jccsStudio.camera.detachControl(jcCanvas);
 				detached = true;
 			}
-			if(viewup>30) {
-				holder.translate(BABYLON.Axis.Y,-1,BABYLON.Space.WORLD);		
-				jccsStudio.followCamera.position = holder.position;	
-				viewup -=1;				
-				jccsStudio.followCamera.setTarget(target.getAbsolutePosition());
-			}		
+			cameraMove(collideCamera.down, -1*cameraSpeed, BABYLON.Axis.Y, BABYLON.Space.WORLD, true);
+			return;			
 		}
 		
 		if(evt.keyCode == 104 && viewcamera) {
@@ -1556,25 +1706,17 @@ function main() {
 				jccsStudio.camera.detachControl(jcCanvas);
 				detached = true;
 			}
-			if(viewup<368) {
-				holder.translate(BABYLON.Axis.Y,1,BABYLON.Space.WORLD);		
-				jccsStudio.followCamera.position = holder.position;	
-				viewup +=1;			
-				jccsStudio.followCamera.setTarget(target.getAbsolutePosition());
-			}	
+			cameraMove(collideCamera.up, 1*cameraSpeed, BABYLON.Axis.Y, BABYLON.Space.WORLD, true);	
+			return;	
 		}
 		
 		if((evt.keyCode == 97 || evt.keyCode == 99) && viewcamera) {
 			if(!detached) {
 				jccsStudio.camera.detachControl(jcCanvas);
 				detached = true;
-			}			
-			if(viewangle<0.18) {
-				holder.rotate(BABYLON.Axis.X,0.005,BABYLON.Space.LOCAL);
-				viewangle +=0.005;	
-				jccsStudio.followCamera.position = holder.position;	
-				jccsStudio.followCamera.setTarget(target.getAbsolutePosition());
-			}		
+			}
+			cameraMove(collideCamera.lookup, 0.005*cameraSpeed, BABYLON.Axis.X, BABYLON.Space.LOCAL, false);
+			return;						
 		}
 		
 		if((evt.keyCode == 103 || evt.keyCode == 105) && viewcamera) {
@@ -1582,12 +1724,8 @@ function main() {
 				jccsStudio.camera.detachControl(jcCanvas);
 				detached = true;
 			}			
-			if(viewangle>-0.53) {
-				holder.rotate(BABYLON.Axis.X,-0.005,BABYLON.Space.LOCAL);
-				viewangle -=0.005;	
-				jccsStudio.followCamera.position = holder.position;	
-				jccsStudio.followCamera.setTarget(target.getAbsolutePosition());
-			}		
+			cameraMove(collideCamera.lookdown, -0.005*cameraSpeed, BABYLON.Axis.X, BABYLON.Space.LOCAL, false);	
+			return;		
 		}
 	
 		if(evt.keyCode==39 && !viewcamera) {
@@ -1623,7 +1761,7 @@ function main() {
 				jccsStudio.camera.detachControl(jcCanvas);
 				detached = true;
 			}
-			if(inScene) {
+			if(inScene) {				
 				modelMove(collide.down, moveDown);
 			}
 			else {
@@ -1773,8 +1911,9 @@ function main() {
 		}
 	}
 	
+	
 	function collideEdges(model) {
-		var collide = {left:false, right:false, up:false, down:false, front:false, back:false};
+		var collide = {left:false, right:false, up:false, down:false, front:false, back:false};		
 		for(var i=0; i<model.modelChildren.length; i++) {
 			model.modelChildren[i].Jcubee.computeWorldMatrix(true);
 			ground.computeWorldMatrix(true);
@@ -1783,27 +1922,72 @@ function main() {
 			rightSidePlane.computeWorldMatrix(true);
 			frontPlane.computeWorldMatrix(true);
 			backPlaneBlock.computeWorldMatrix(true);
-			if(model.modelChildren[i].Jcubee.intersectsMesh(ground, true)) {
-				collide.down = true;
-			}
-			if(model.modelChildren[i].Jcubee.intersectsMesh(ceiling, true)) {
-				collide.up = true;
-			}
-			if(model.modelChildren[i].Jcubee.intersectsMesh(leftSideBlock, true)) {
-				collide.left = true;
-			}
-			if(model.modelChildren[i].Jcubee.intersectsMesh(rightSidePlane, true)) {
-				collide.right = true;
-			}
-			if(model.modelChildren[i].Jcubee.intersectsMesh(frontPlane, true)) {
-				collide.back = true;
-			}
-			if(model.modelChildren[i].Jcubee.intersectsMesh(backPlaneBlock, true)) {
-				collide.front = true;
-			}
+			collide.down = collide.down || model.modelChildren[i].Jcubee.intersectsMesh(ground, true);
+			collide.up = collide.up || model.modelChildren[i].Jcubee.intersectsMesh(ceiling, true);
+			collide.left = collide.left || model.modelChildren[i].Jcubee.intersectsMesh(leftSideBlock, true);
+			collide.right = collide.right || model.modelChildren[i].Jcubee.intersectsMesh(rightSidePlane, true);
+			collide.back = collide.back || model.modelChildren[i].Jcubee.intersectsMesh(frontPlane, true);
+			collide.front = collide.front || model.modelChildren[i].Jcubee.intersectsMesh(backPlaneBlock, true);
 		}
 		return collide;
 	}
+	
+	function cameraMove(blocked, diff, axis, space, translate) {
+		if(!blocked) {
+			if(translate) {
+				if(axis === BABYLON.Axis.Z) {
+					holder.locallyTranslate(axis.scale(diff));
+				}
+				else {
+					holder.translate(axis,diff,space);
+				}
+			}
+			else {
+				holder.rotate(axis,diff,space);
+			}
+			jccsStudio.followCamera.position = viewer.back.getAbsolutePosition();	
+			jccsStudio.followCamera.setTarget(target.getAbsolutePosition());
+			collideCamera = collisionCamera(holder, sceneParents, viewer);
+			var edgeCollide = collideEdgesCamera(viewer);
+			for(var dir in collide)	{
+				collideCamera[dir] = collideCamera[dir] || edgeCollide[dir];
+			}		
+		}
+	}
+	
+	function collideEdgesCamera(viewer) {
+		var collide = {left:false, right:false, up:false, down:false, front:false, back:false, lookup:false, lookdown:false};		
+		viewer.front.computeWorldMatrix(true);
+		viewer.back.computeWorldMatrix(true);
+		viewer.top.computeWorldMatrix(true);
+		viewer.bottom.computeWorldMatrix(true);
+		ground.computeWorldMatrix(true);
+		ceiling.computeWorldMatrix(true);
+		leftSidePlane.computeWorldMatrix(true);
+		rightSidePlane.computeWorldMatrix(true);
+		frontPlane.computeWorldMatrix(true);
+		backPlane.computeWorldMatrix(true);
+		
+		collide.front = viewer.front.intersectsMesh(backPlane, true);
+		collide.front = collide.front || viewer.front.intersectsMesh(frontPlane, true);
+		collide.front = collide.front || viewer.front.intersectsMesh(ceiling, true);
+		collide.front = collide.front || viewer.front.intersectsMesh(ground, true);
+		collide.front = collide.front || viewer.front.intersectsMesh(leftSidePlane, true);
+		collide.front = collide.front || viewer.front.intersectsMesh(rightSidePlane, true);
+		
+		collide.back = viewer.back.intersectsMesh(backPlane, true);
+		collide.back = collide.back || viewer.back.intersectsMesh(frontPlane, true);
+		collide.back = collide.back || viewer.back.intersectsMesh(ceiling, true);
+		collide.back = collide.back || viewer.back.intersectsMesh(ground, true);
+		collide.back = collide.back || viewer.back.intersectsMesh(leftSidePlane, true);
+		collide.back = collide.back || viewer.back.intersectsMesh(rightSidePlane, true);
+		
+		collide.up = viewer.top.intersectsMesh(ceiling, true);
+		
+		collide.down = viewer.bottom.intersectsMesh(ground, true);
+
+		return collide;
+	}	
 	
     jcCanvas.addEventListener("mousedown", onPointerDown, false);
     jcCanvas.addEventListener("mouseup", onPointerUp, false);

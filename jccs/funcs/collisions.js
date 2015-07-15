@@ -186,24 +186,12 @@ function childCollision(modelA, modelB) { //modelA is one moving
 			modelB.modelChildren[B].Jcubee.computeWorldMatrix(true);
 			Bposition = modelB.modelChildren[B].Jcubee.getAbsolutePosition();
 			if(modelA.modelChildren[A].Jcubee.intersectsMesh(modelB.modelChildren[B].Jcubee, true)) {
-				if(modelA.modelChildren[A].Jcubee.intersectsPoint(Bposition.add(xOffset))) {
-					collide.left = true;
-				}
-				if(modelA.modelChildren[A].Jcubee.intersectsPoint(Bposition.subtract(xOffset))) {
-					collide.right = true;
-				}
-				if(modelA.modelChildren[A].Jcubee.intersectsPoint(Bposition.add(yOffset))) {
-					collide.down = true;
-				}
-				if(modelA.modelChildren[A].Jcubee.intersectsPoint(Bposition.subtract(yOffset))) {
-					collide.up = true;
-				}
-				if(modelA.modelChildren[A].Jcubee.intersectsPoint(Bposition.subtract(zOffset))) {
-					collide.front = true;
-				}
-				if(modelA.modelChildren[A].Jcubee.intersectsPoint(Bposition.add(zOffset))) {
-					collide.back = true;
-				}
+				collide.left = modelA.modelChildren[A].Jcubee.intersectsPoint(Bposition.add(xOffset));
+				collide.right = modelA.modelChildren[A].Jcubee.intersectsPoint(Bposition.subtract(xOffset));
+				collide.down = modelA.modelChildren[A].Jcubee.intersectsPoint(Bposition.add(yOffset));
+				collide.up = modelA.modelChildren[A].Jcubee.intersectsPoint(Bposition.subtract(yOffset));
+				collide.front = modelA.modelChildren[A].Jcubee.intersectsPoint(Bposition.subtract(zOffset));
+				collide.back = modelA.modelChildren[A].Jcubee.intersectsPoint(Bposition.add(zOffset));
 			}		
 			B++;
 		}
@@ -211,4 +199,54 @@ function childCollision(modelA, modelB) { //modelA is one moving
 	}
 	return collide;
 }
-			
+
+function collisionCamera(model, modelGroup, viewer) {
+	var collide = {left:false, right:false, up:false, down:false, front:false, back:false, lookup:false, lookdown:false};
+	var childCollide;
+	model.computeWorldMatrix(true);
+	for(var ref in modelGroup) {
+		modelGroup[ref].modelBoundary.computeWorldMatrix(true);
+		if (model.intersectsMesh(modelGroup[ref].modelBoundary, true)) {
+			childCollide = childCollisionCamera(viewer, modelGroup[ref]);			
+			for(var dir in collide) {
+				collide[dir] = collide[dir] || childCollide[dir];
+			}
+		}
+	}	
+	return collide;
+}
+
+
+function childCollisionCamera(viewer, model) { 
+	var collide = {left:false, right:false, up:false, down:false, front:false, back:false, lookup:false, lookdown:false};
+	i=0;
+	while(i<model.modelChildren.length) {
+		viewer.front.computeWorldMatrix(true);
+		viewer.back.computeWorldMatrix(true);
+		viewer.top.computeWorldMatrix(true);
+		viewer.bottom.computeWorldMatrix(true);
+		model.modelChildren[i].Jcubee.computeWorldMatrix(true);
+		if(viewer.left.intersectsMesh(model.modelChildren[i].Jcubee)) {
+			collide.left = true;
+		}
+		if(viewer.right.intersectsMesh(model.modelChildren[i].Jcubee)) {
+			collide.right = true;
+		}
+		if(viewer.bottom.intersectsMesh(model.modelChildren[i].Jcubee)) {
+			collide.down = true;
+			collide.lookdown = true;
+		}
+		if(viewer.top.intersectsMesh(model.modelChildren[i].Jcubee)) {
+			collide.up = true;
+			collide.lookup = true;
+		}
+		if(viewer.front.intersectsMesh(model.modelChildren[i].Jcubee)) {
+			collide.front = true;
+		}
+		if(viewer.back.intersectsMesh(model.modelChildren[i].Jcubee)) {
+			collide.back = true;
+		}	
+		i++;
+	}
+	return collide;
+}			
