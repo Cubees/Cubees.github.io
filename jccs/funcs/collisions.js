@@ -200,7 +200,7 @@ function childCollision(modelA, modelB) { //modelA is one moving
 	return collide;
 }
 
-function collisionCamera(model, modelGroup, viewer) {
+function collisionCamera(model, modelGroup, viewer) {	
 	var collide = {left:false, right:false, up:false, down:false, front:false, back:false, lookup:false, lookdown:false};
 	var childCollide;
 	model.computeWorldMatrix(true);
@@ -238,7 +238,7 @@ function childCollisionCamera(viewer, model) {
 		}
 		if(viewer.top.intersectsMesh(model.modelChildren[i].Jcubee)) {
 			collide.up = true;
-			collide.lookup = true;
+			collide.lookup = true;			
 		}
 		if(viewer.front.intersectsMesh(model.modelChildren[i].Jcubee)) {
 			collide.front = true;

@@ -46,8 +46,7 @@ function main() {
 	var doAddToScene = false;
 	var inScene=false;
 	var viewcamera = false;
-	var viewangle=0;
-	var viewup=60;
+	var viewangle=5*Math.PI/180;
 	var forwardOK=true;
 	var backwardOK=true;
 	
@@ -67,6 +66,7 @@ function main() {
 	
 	var switch_to_scene = document.getElementById("switchToScene");
 	var add_to_scene = document.getElementById("addToScene");
+	var solid = document.getElementById("solid");
 	var model = document.getElementById("model");
 	
 	var leftarrow = document.getElementById("leftarrow");
@@ -117,6 +117,7 @@ function main() {
 	
 	//*******sub menu list ************
 	var subMenuList = [subfilemenu, subcubeemenu, subselectionmenu];
+		
 	
 	/*--------CONSTRUCTION DIALOGUE BOX ELEMENTS------------------*/
 	
@@ -1276,8 +1277,8 @@ function main() {
 	target.isVisible = false;
 	target.parent = holder;
 	
-	holder.position = new BABYLON.Vector3(15,585, -585);
-	holder.rotation.x = Math.PI/4;
+	holder.position = new BABYLON.Vector3(15,52, -585);
+	holder.rotation.x = 5*Math.PI/180;
 	jccsStudio.followCamera.position = viewer.back.getAbsolutePosition();	
 	jccsStudio.followCamera.setTarget(target.getAbsolutePosition());
 	
@@ -1715,7 +1716,11 @@ function main() {
 				jccsStudio.camera.detachControl(jcCanvas);
 				detached = true;
 			}
-			cameraMove(collideCamera.lookup, 0.005*cameraSpeed, BABYLON.Axis.X, BABYLON.Space.LOCAL, false);
+console.log("A",viewangle*180/Math.PI);				
+			if(viewangle> 6 * Math.PI/180 ) {
+				cameraMove(collideCamera.lookup, 0.005*cameraSpeed, BABYLON.Axis.X, BABYLON.Space.LOCAL, false);
+				viewangle -=0.005*cameraSpeed;
+			}
 			return;						
 		}
 		
@@ -1723,8 +1728,12 @@ function main() {
 			if(!detached) {
 				jccsStudio.camera.detachControl(jcCanvas);
 				detached = true;
-			}			
-			cameraMove(collideCamera.lookdown, -0.005*cameraSpeed, BABYLON.Axis.X, BABYLON.Space.LOCAL, false);	
+			}
+console.log("B",viewangle*180/Math.PI);			
+			if(viewangle< 50 * Math.PI/180 ) {			
+				cameraMove(collideCamera.lookdown, -0.005*cameraSpeed, BABYLON.Axis.X, BABYLON.Space.LOCAL, false);
+				viewangle +=0.005*cameraSpeed;	
+			}
 			return;		
 		}
 	
@@ -1823,7 +1832,7 @@ function main() {
    };
 	
 	function rightMove() {
-		if(stepsLeftRight(JCubees, currentMeshes).right>0) {
+		if(stepsLeftRight(JCubees, currentMeshes).right>0  || !solid.checked) {
 			var diff = moveRight;
 			for(var name in currentMeshes) {			
 				currentMeshes[name].position.addInPlace(diff);			
@@ -1835,7 +1844,7 @@ function main() {
 	}
 	
 	function leftMove() {
-		if(stepsLeftRight(JCubees, currentMeshes).left>0) {
+		if(stepsLeftRight(JCubees, currentMeshes).left>0  || !solid.checked) {
 			var diff = moveLeft;
 			for(var name in currentMeshes) {
 				currentMeshes[name].position.addInPlace(diff);
@@ -1847,7 +1856,7 @@ function main() {
 	}
 	
 	function upMove() {
-		if(stepsUpDown(JCubees, currentMeshes).up>0) {
+		if(stepsUpDown(JCubees, currentMeshes).up>0  || !solid.checked) {
 			var diff = moveUp;
 			for(var name in currentMeshes) {
 				currentMeshes[name].position.addInPlace(diff);
@@ -1859,7 +1868,7 @@ function main() {
 	}
 	
 	function downMove() {
-		if(stepsUpDown(JCubees, currentMeshes).down>0) {
+		if(stepsUpDown(JCubees, currentMeshes).down>0  || !solid.checked) {
 			var diff = moveDown;
 			for(var name in currentMeshes) {
 				currentMeshes[name].position.addInPlace(diff);
@@ -1871,7 +1880,7 @@ function main() {
 	}
 	
 	function forwardMove() {
-		if(stepsForwardBack(JCubees, currentMeshes).forward>0) {
+		if(stepsForwardBack(JCubees, currentMeshes).forward>0  || !solid.checked) {
 			var diff = moveForward;
 			for(var name in currentMeshes) {
 				currentMeshes[name].position.addInPlace(diff);
@@ -1883,7 +1892,7 @@ function main() {
 	}
 	
 	function backMove() {
-		if(stepsForwardBack(JCubees, currentMeshes).back>0) {
+		if(stepsForwardBack(JCubees, currentMeshes).back>0  || !solid.checked) {
 			var diff = moveBackward;
 			for(var name in currentMeshes) {
 				currentMeshes[name].position.addInPlace(diff);
@@ -1895,7 +1904,7 @@ function main() {
 	}
 	
 	function modelMove(blocked, diff) {
-		if(!blocked) {
+		if(!blocked  || !scene_solid.checked) {
 			diff = diff.scale(0.5);
 			for(var name in currentParents) {			
 				currentParents[name].model.position.addInPlace(diff);
@@ -1943,7 +1952,7 @@ function main() {
 				}
 			}
 			else {
-				holder.rotate(axis,diff,space);
+				holder.rotate(axis,diff,space);				
 			}
 			jccsStudio.followCamera.position = viewer.back.getAbsolutePosition();	
 			jccsStudio.followCamera.setTarget(target.getAbsolutePosition());
