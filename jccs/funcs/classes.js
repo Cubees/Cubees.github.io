@@ -17,10 +17,10 @@ function JcubeeBlank(name) {
 	this.destroy = destroy;	
 }
 
-function JcubeeBox(name, x, y, z, material, scene) {
+function JcubeeBox(name, x, y, z, material, n, scene) {
 	this.name = name;
 	this.Jcubee = BABYLON.Mesh.CreateBox(name, 60.0, scene, true);	
-	this.Jcubee.material = material.clone();
+	this.Jcubee.material = material.clone(material.name+n);
 	this.Jcubee.position.x = x;
 	this.Jcubee.position.y = y;
 	this.Jcubee.position.z = z;	
@@ -36,10 +36,10 @@ function JcubeeBox(name, x, y, z, material, scene) {
 	this.destroy = destroy;		
 }
 
-function JcubeeCylinder(name, x, y, z, material, scene) {
+function JcubeeCylinder(name, x, y, z, material, n, scene) {
 	this.name = name;
 	this.Jcubee = BABYLON.Mesh.CreateCylinder(name, 60, 60, 60, 60, 1, scene, true);
-	this.Jcubee.material = material.clone();
+	this.Jcubee.material = material.clone(material.name+n);
 	this.Jcubee.position.x = x;
 	this.Jcubee.position.y = y;
 	this.Jcubee.position.z = z;
@@ -55,10 +55,10 @@ function JcubeeCylinder(name, x, y, z, material, scene) {
 	this.destroy = destroy;		
 }
 
-function JcubeeSphere(name, x, y, z, material, scene) {
+function JcubeeSphere(name, x, y, z, material, n, scene) {
 	this.name = name;
 	this.Jcubee = BABYLON.Mesh.CreateSphere(name, 60.0, 60.0, scene, true);
-	this.Jcubee.material = material.clone();
+	this.Jcubee.material = material.clone(material.name+n);
 	this.Jcubee.position.x = x;
 	this.Jcubee.position.y = y;
 	this.Jcubee.position.z = z;
@@ -74,7 +74,7 @@ function JcubeeSphere(name, x, y, z, material, scene) {
 	this.destroy = destroy;		
 }
 
-function JcubeeRoof(name, x, y, z, material, scene) {
+function JcubeeRoof(name, x, y, z, material, n, scene) {
 	this.name = name;
 	var shape = [
 		new BABYLON.Vector3(30, 30, -30),
@@ -89,7 +89,7 @@ function JcubeeRoof(name, x, y, z, material, scene) {
 	];
 	
 	this.Jcubee = BABYLON.Mesh.ExtrudeShape(name, shape, path, 1, 0, BABYLON.Mesh.CAP_ALL, scene, true, BABYLON.Mesh.DOUBLESIDE);
-	this.Jcubee.material = material.clone();
+	this.Jcubee.material = material.clone(material.name+n);
 	this.Jcubee.position.x = x;
 	this.Jcubee.position.y = y;
 	this.Jcubee.position.z = z;

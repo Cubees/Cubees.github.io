@@ -160,7 +160,7 @@
 			<div id='fetchDB' class="dragDialogueBox" draggable="true">
 			<div class="row">
 				<div class="heading"> 
-					<div class="titlediv">Fetch</div>
+					<div id="fetchTitle" class="titlediv">Fetch</div>
 					<div class="closediv">X</div>
 				</div>
 				<div class='dragContent'>
@@ -171,6 +171,25 @@
 					<div id='fetchname'></div>
 					<input id = "fetchBut" class='DBBut' type = 'button' value = "Fetch" />
 					<input id = "fetchCancel" class = 'DBCancel' type = 'button' value = "Cancel" />
+				</div>
+			</div>
+		</div>
+		
+		<div id='saveDB' class="dragDialogueBox" draggable="true">
+			<div class="row">
+				<div class="heading"> 
+					<div class="titlediv">Save As</div>
+					<div class="closediv">X</div>
+				</div>
+				<div class='dragContent'>
+					<div id = 'saveDesc'>Save in Local Storage</div>
+					<div id = 'saveName' >
+						<label for="saveIn">Model name: </label><input id="saveIn" class="inpt" type="text" size="15"/>
+					</div>
+				</div>
+				<div class="footer">	
+					<input id = "saveBut" class='DBBut' type = 'button' value = "Save" />
+					<input id = "saveCancel" class = 'DBCancel' type = 'button' value = "Cancel" />
 				</div>
 			</div>
 		</div>

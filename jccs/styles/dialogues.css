@@ -110,6 +110,18 @@ li:hover {
 	left:5px;
 }
 
+#saveDesc {
+	top:2px;
+	left:5px;
+	color: #666666;
+	cursor: default;
+}
+
+#saveName {
+	top:25px;
+	left:5px;
+}
+
 #fetchDB {
 	width:340px;
 	height:210px;

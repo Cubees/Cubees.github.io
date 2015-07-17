@@ -85,11 +85,15 @@ function createScene(engine, canvas) {
 	backLight.intensity = 0.2;
 	bottomLight.intensity = 0.2;
 	
-	var box = BABYLON.Mesh.CreateBox("box0", 60.0, scene);
-	box.material = blueInMat;
-	box.position = new BABYLON.Vector3(30,30,30);
+	var box0 = BABYLON.Mesh.CreateBox("box0", 60.0, scene);
+	box0.material = blueInMat;
+	box0.position = new BABYLON.Vector3(30,30,30);
 	
-	var serializedMesh = BABYLON.SceneSerializer.SerializeMesh(box);
+	var box1 = BABYLON.Mesh.CreateBox("box1", 60.0, scene);
+	box1.material = blueInMat;
+	box1.position = new BABYLON.Vector3(30,30,30);
+	
+	var serializedMesh = BABYLON.SceneSerializer.SerializeMesh([box0, box1]);
 	var strMesh = JSON.stringify(serializedMesh);
 	console.log(strMesh)
 	
