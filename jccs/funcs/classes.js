@@ -20,7 +20,7 @@ function JcubeeBlank(name) {
 function JcubeeBox(name, x, y, z, material, n, scene) {
 	this.name = name;
 	this.Jcubee = BABYLON.Mesh.CreateBox(name, 60.0, scene, true);	
-	this.Jcubee.material = material.clone(material.name+n);
+	this.Jcubee.material = material.clone(material.name.substr(0,5)+n);
 	this.Jcubee.position.x = x;
 	this.Jcubee.position.y = y;
 	this.Jcubee.position.z = z;	
@@ -39,7 +39,7 @@ function JcubeeBox(name, x, y, z, material, n, scene) {
 function JcubeeCylinder(name, x, y, z, material, n, scene) {
 	this.name = name;
 	this.Jcubee = BABYLON.Mesh.CreateCylinder(name, 60, 60, 60, 60, 1, scene, true);
-	this.Jcubee.material = material.clone(material.name+n);
+	this.Jcubee.material = material.clone(material.name.substr(0,5)+n);
 	this.Jcubee.position.x = x;
 	this.Jcubee.position.y = y;
 	this.Jcubee.position.z = z;
@@ -58,7 +58,7 @@ function JcubeeCylinder(name, x, y, z, material, n, scene) {
 function JcubeeSphere(name, x, y, z, material, n, scene) {
 	this.name = name;
 	this.Jcubee = BABYLON.Mesh.CreateSphere(name, 60.0, 60.0, scene, true);
-	this.Jcubee.material = material.clone(material.name+n);
+	this.Jcubee.material = material.clone(material.name.substr(0,5)+n);
 	this.Jcubee.position.x = x;
 	this.Jcubee.position.y = y;
 	this.Jcubee.position.z = z;
@@ -89,7 +89,7 @@ function JcubeeRoof(name, x, y, z, material, n, scene) {
 	];
 	
 	this.Jcubee = BABYLON.Mesh.ExtrudeShape(name, shape, path, 1, 0, BABYLON.Mesh.CAP_ALL, scene, true, BABYLON.Mesh.DOUBLESIDE);
-	this.Jcubee.material = material.clone(material.name+n);
+	this.Jcubee.material = material.clone(material.name.substr(0,5)+n);
 	this.Jcubee.position.x = x;
 	this.Jcubee.position.y = y;
 	this.Jcubee.position.z = z;

@@ -138,10 +138,14 @@ function main() {
 	
 	var fetchDB = document.getElementById("fetchDB"); 
 	var fetchTitle= document.getElementById("fetchTitle");
-console.log(fetchTitle.id);	
+	
 	var fetchDesc= document.getElementById("fetchDesc"); 
 	var fetchList = document.getElementById("fetchList");
 	var fetchBut = document.getElementById("fetchBut");
+	
+	var importDesc= document.getElementById("importDesc"); 
+	var importList = document.getElementById("importList");
+	var importBut = document.getElementById("importBut");
 	
 	var saveDB = document.getElementById("saveDB"); 
 	var saveIn = document.getElementById("saveIn");
@@ -174,7 +178,7 @@ console.log(fetchTitle.id);
 	}
 	
 	export_.addEventListener('click', doExport, false);
-	import_.addEventListener('click', doImport, false);
+	import_.addEventListener('click', openImport, false);
 	
 	//cubee events
 	cubee.addEventListener("click", showCubeeMenu, false);
@@ -242,7 +246,7 @@ console.log(fetchTitle.id);
 
 	//Fetch fromApp
 	fetchBut.addEventListener('click', doFetch, false);
-	
+	importBut.addEventListener('click', doImport, false);
 	saveBut.addEventListener('click', doSaveAs, false);
 		
 	/*-------------CONSTRUCTION MENU FUNCTIONS ---------------*/
@@ -453,11 +457,11 @@ console.log(fetchTitle.id);
 	}
 	
 	function doSaveAs() {
-		var name = saveIn.value;	
-		if(foundInSaved(name)) {  ///<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+		var name = saveIn.value;			
+		if(foundInSaved(name)) {
 			confirmName = name;
 			confirmFunc = doSaveModel;
-			confirmDesc.innerHTML = 'The model <span style="font-style:italic"> '+confirmName+'</span> already exists.<BR>Do you want to continue to and overwrite the existing model?';
+			confirmDesc.innerHTML = 'The model <span style="font-style:italic"> '+confirmName+'</span> is already stored.<BR>Do you want to continue to and overwrite the stored model?';
 			openConfirmDBox();
 		}
 		else {
@@ -470,26 +474,33 @@ console.log(fetchTitle.id);
 		var found = false;
 		name = "CUBEE"+name;
 		var i=0;
-		while(i<localStorage.length && !found ) {
+		while(i<localStorage.length && !found ) {			
 			found = (name == localStorage.key(i));
 			i++;
 		}
+		return found;
 	};
 	
 	function doSaveModel(name) {
 		var alpha = {};
-		var meshes_to_save = [];
+		var names_to_save = [];
+		var types_to_save = [];
+		var materials_to_save = [];
+		var positions_to_save = [];
 		
 		for(var ref in JCubees) {
 			alpha[ref] = JCubees[ref].Jcubee.material.alpha;
 			JCubees[ref].Jcubee.material.alpha = 1;
-			meshes_to_save.push(JCubees[ref].Jcubee);
+			names_to_save.push(getNameRef(JCubees[ref].name));
+			types_to_save.push(getType(JCubees[ref].name));
+			materials_to_save.push(JCubees[ref].Jcubee.material.name.substr(0,5));
+			positions_to_save.push([JCubees[ref].Jcubee.position.x, JCubees[ref].Jcubee.position.y, JCubees[ref].Jcubee.position.z]);
 		}
 		
-		var serializedMesh = BABYLON.SceneSerializer.SerializeMesh(meshes_to_save);
+		var saveMesh = {n:names_to_save,t:types_to_save, m:materials_to_save, p:positions_to_save};
+		var strMesh = JSON.stringify(saveMesh);
+		var key = "CUBEE"+name;;
 		
-		var strMesh = JSON.stringify(serializedMesh);
-		var key = "CUBEE"+name;
 		localStorage.setItem(key, strMesh);
 		
 		for(var ref in JCubees) {
@@ -588,7 +599,7 @@ console.log(fetchTitle.id);
 			JCubees[newRef] = new JcubeeBlank(newRef);
 			JCubees[newRef].Jcubee = JCubees[ref].Jcubee.clone(newRef);
 			JCubees[newRef].Jcubee.position.y += 6*60;			
-			JCubees[newRef].Jcubee.material = JCubees[ref].Jcubee.material.clone(JCubees[ref].Jcubee.material.name+(num_of_mats++));			
+			JCubees[newRef].Jcubee.material = JCubees[ref].Jcubee.material.clone(JCubees[ref].Jcubee.material.name.substr(0,5)+(num_of_mats++));			
 			JCubees[newRef].Jcubee.material.alpha = 1;			
 			JCubees[newRef].addMarkers(jccsStudio.scene);		
 			JCubees[ref].Jcubee.material.alpha= 0.5;
@@ -691,7 +702,7 @@ console.log(fetchTitle.id);
 		for(var ref in JCubees) {			
 			sceneModels[modelName+ref] = new JcubeeBlank(modelName+ref);
 			sceneModels[modelName+ref].Jcubee = JCubees[ref].Jcubee.clone(modelName+ref);
-			sceneModels[modelName+ref].Jcubee.material = JCubees[ref].Jcubee.material.clone(JCubees[ref].Jcubee.material.name+(num_of_mats++));
+			sceneModels[modelName+ref].Jcubee.material = JCubees[ref].Jcubee.material.clone(JCubees[ref].Jcubee.material.name.substr(0,5)+(num_of_mats++));
 			sceneModels[modelName+ref].Jcubee.material.alpha = 1;			
 			sceneModels[modelName+ref].Jcubee.parent = sceneParents[parentName].model;
 			sceneModels[modelName+ref].parent = sceneParents[parentName];
@@ -883,10 +894,11 @@ console.log(fetchTitle.id);
 		currentMeshes ={};
 		for (var ref in jcModels[name]) {
 			newRef = "L"+getModelRef(ref)+"¬"+getNameRef(ref);					
-			JCubees[newRef] = new JcubeeBlank(newRef);		
-			JCubees[newRef].Jcubee = jcModels[name][ref].Jcubee.clone(newRef);
+			JCubees[newRef] = new JcubeeBlank(newRef);					
+			JCubees[newRef].Jcubee = jcModels[name][ref].Jcubee.clone(newRef);			
+			JCubees[newRef].Jcubee.material = jcModels[name][ref].Jcubee.material.clone(jcModels[name][ref].Jcubee.material.name.substr(0,5)+(num_of_mats++));		
 			JCubees[newRef].addMarkers(jccsStudio.scene);
-			JCubees[newRef].enable();
+			JCubees[newRef].enable();			
 		}
 		
 		selectAll();
@@ -897,7 +909,7 @@ console.log(fetchTitle.id);
 		exportMarker = exportIcon;
 		model.innerHTML = "Model -- "+currentModelName+storeMarker+saveMarker+exportMarker;
 		stored[currentModelName] = true;
-		fetchDB.style.visibility = 'hidden';
+		fetchDB.style.visibility = 'hidden';		
 	}
 	
 	function doFetchToScene() {
@@ -917,7 +929,7 @@ console.log(fetchTitle.id);
 		for(var ref in jcModels[name]) {						
 			sceneModels[modelName+ref] = new JcubeeBlank(modelName+ref);
 			sceneModels[modelName+ref].Jcubee = jcModels[name][ref].Jcubee.clone(modelName+ref);
-			sceneModels[modelName+ref].Jcubee.material = jcModels[name][ref].Jcubee.material.clone(jcModels[name][ref].Jcubee.material+(num_of_mats++));
+			sceneModels[modelName+ref].Jcubee.material = jcModels[name][ref].Jcubee.material.clone(jcModels[name][ref].Jcubee.material.name.substr(0,5)+(num_of_mats++));
 			sceneModels[modelName+ref].Jcubee.material.alpha = 1;			
 			sceneModels[modelName+ref].Jcubee.parent = sceneParents[parentName].model;
 			sceneModels[modelName+ref].parent = sceneParents[parentName];
@@ -952,39 +964,60 @@ console.log(fetchTitle.id);
 	}
 	
 	function doOpenToConstruct() {
-		var name = fetchname.innerHTML;		
+		var name = fetchname.innerHTML;	
+		currentModelName = name;
+		
+		var type;
+		var saveName,JCname;
+		var matName;
+			
 		for( var ref in JCubees) {
 			if(ref in currentMeshes) {
 				delete currentMeshes[ref];
 			}
-			JCubees[ref].disable();
-			delete JCubees[ref].Jcubee;
+			JCubees[ref].destroy();
 			delete JCubees[ref];
 		}
 		JCubees ={};
-		currentMeshes ={};
-		
+		currentMeshes ={};		
 		var strModels=localStorage.getItem('CUBEE'+name);
-		var models = JSON.parse(strModel);
-		
-		for (var ref in jcModels[name]) {
-			newRef = "L"+getModelRef(ref)+"¬"+getNameRef(ref);					
-			JCubees[newRef] = new JcubeeBlank(newRef);		
-			JCubees[newRef].Jcubee = jcModels[name][ref].Jcubee.clone(newRef);
-			JCubees[newRef].addMarkers(jccsStudio.scene);
-			JCubees[newRef].enable();
+		var models = JSON.parse(strModels);
+
+		for(var i=0; i<models.n.length; i++) {
+			saveName = models.n[i];
+			type = models.t[i];
+			matName = models.m[i];			
+			switch (type) {
+				case "box":
+					JCname = makeBox();
+				break
+				case "cyl":
+					JCname = makeCylinder();
+				break
+				case "sph":
+					JCname = makeSphere();
+				break
+				case "rof":
+					JCname = makeRoof();
+				break
+			}			
+			JCubees[JCname].Jcubee.material = jccsStudio.scene.getMaterialByName(matName).clone(matName+(num_of_mats++));
+			JCubees[JCname].Jcubee.position.x = models.p[i][0];
+			JCubees[JCname].Jcubee.position.y = models.p[i][1];
+			JCubees[JCname].Jcubee.position.z = models.p[i][2];
+			JCubees[JCname].moveT(JCubees[JCname].Jcubee.position);
 		}
+		
 		
 		selectAll();
 		
 		currentModelName = name;
-		storeMarker = storeIcon; 
-		saveMarker = saveIcon; 
+		storeMarker = storeMarker; 
+		saveMarker = Blank; 
 		exportMarker = exportIcon;
 		model.innerHTML = "Model -- "+currentModelName+storeMarker+saveMarker+exportMarker;
 		stored[currentModelName] = false;
-		saved[currentModelName] = false;
-		exported[currentModelName] = false;
+		saved[currentModelName] = true;
 		fetchDB.style.visibility = 'hidden';
 	}
 	
@@ -1005,7 +1038,7 @@ console.log(fetchTitle.id);
 		for(var ref in jcModels[name]) {						
 			sceneModels[modelName+ref] = new JcubeeBlank(modelName+ref);
 			sceneModels[modelName+ref].Jcubee = jcModels[name][ref].Jcubee.clone(modelName+ref);
-			sceneModels[modelName+ref].Jcubee.material = jcModels[name][ref].Jcubee.material.clone(jcModels[name][ref].Jcubee.material+(num_of_mats++));
+			sceneModels[modelName+ref].Jcubee.material = jcModels[name][ref].Jcubee.material.clone(jcModels[name][ref].Jcubee.material.name.substr(0,5)+(num_of_mats++));
 			sceneModels[modelName+ref].Jcubee.material.alpha = 1;			
 			sceneModels[modelName+ref].Jcubee.parent = sceneParents[parentName].model;
 			sceneModels[modelName+ref].parent = sceneParents[parentName];
@@ -1030,17 +1063,60 @@ console.log(fetchTitle.id);
 		fetchDB.style.visibility = 'hidden';
 	}
 	
-	function doImport() {
-		if(inScene) {
-			doFetchToScene();
+	function openFetch() {
+		fetchTitle.innerHTML = "Fetch";
+		fetchDesc.innerHTML = "Fetch from App only";
+		fetchBut.value =  "Fetch";	
+		fetchBut.addEventListener('click', doFetch, false);	
+		if(!stored[currentModelName] && !inScene) 
+		{
+			confirmName = currentModelName;
+			confirmFunc = fillFetch;
+			confirmDesc.innerHTML = 'The current model <span style="font-style:italic"> '+confirmName+'</span> has not been stored.<BR>Do you want to continue and overwrite the current model?';
+			openConfirmDBox();
 		}
 		else {
-			doFetchToConstruct()
+			fillFetch();
 		}
 	}
 	
-	function doImportToConstruct() {
-		var name = fetchname.innerHTML;		
+	function openImport() {	
+		if(!stored[currentModelName] && !inScene) {
+			confirmName = currentModelName;
+			confirmFunc = function() {importDB.style.visibility = 'visible';};
+			confirmDesc.innerHTML = 'The current model <span style="font-style:italic"> '+confirmName+'</span> has not been stored.<BR>Do you want to continue and overwrite the current model?';
+			openConfirmDBox();
+		}
+		else {	
+			importDB.style.visibility = 'visible';
+		}
+	}
+	
+	function doImport(evt) {
+		var files = evt.target.files;
+		var f = files[0];
+		if (f) 
+		{
+			var r = new FileReader();
+			r.onloadend = function(evt) {parseImport(evt.target.result) };
+			r.readAsText(f);
+		} 
+		else 
+		{ 
+			alert("Failed to load file"); 
+		}				
+	};
+	
+	function parseImport(data) {
+		if(inScene) {
+			doImportToScene(data);
+		}
+		else {
+			doImportToConstruct(data)
+		}
+	};
+	
+	function doImportToConstruct(data) {
 		for( var ref in JCubees) {
 			if(ref in currentMeshes) {
 				delete currentMeshes[ref];
@@ -1051,25 +1127,33 @@ console.log(fetchTitle.id);
 		}
 		JCubees ={};
 		currentMeshes ={};
-		for (var ref in jcModels[name]) {
-			newRef = "L"+getModelRef(ref)+"¬"+getNameRef(ref);					
-			JCubees[newRef] = new JcubeeBlank(newRef);		
-			JCubees[newRef].Jcubee = jcModels[name][ref].Jcubee.clone(newRef);
-			JCubees[newRef].addMarkers(jccsStudio.scene);
-			JCubees[newRef].enable();
-		}
 		
-		selectAll();
+		var re = /\s*/gi;
+		data = data.replace(re, '');
 		
-		currentModelName = name;
-		storeMarker = storeIcon; 
-		saveMarker = saveIcon; 
-		exportMarker = exportIcon;
-		model.innerHTML = "Model -- "+currentModelName+storeMarker+saveMarker+exportMarker;
-		stored[currentModelName] = false;
-		saved[currentModelName] = false;
-		exported[currentModelName] = false;
-		fetchDB.style.visibility = 'hidden';
+		BABYLON.SceneLoader.ImportMesh("", "", 'data:'+data, jccsStudio.scene, function (meshes, particleSystems, skeletons) {
+				var newRef;
+				var modelName= getModelRef(meshes[0].name);
+				for (var i=0; i<meshes.length; i++) {			
+					newRef = "L"+modelName+"¬"+getNameRef(meshes[i].name);					
+					JCubees[newRef] = new JcubeeBlank(newRef);		
+					JCubees[newRef].Jcubee = meshes[i];
+					JCubees[newRef].addMarkers(jccsStudio.scene);
+					JCubees[newRef].enable();
+				} 
+				
+				selectAll();		
+				currentModelName = modelName;
+				storeMarker = storeIcon; 
+				saveMarker = saveIcon; 
+				exportMarker = exportIcon;
+				model.innerHTML = "Model -- "+currentModelName+storeMarker+saveMarker+exportMarker;
+				stored[currentModelName] = false;
+				saved[currentModelName] = false;
+				exported[currentModelName] = false;
+				importDB.style.visibility = 'hidden'; 
+		});
+		
 	}
 	
 	function doImportToScene() {
@@ -1089,7 +1173,7 @@ console.log(fetchTitle.id);
 		for(var ref in jcModels[name]) {						
 			sceneModels[modelName+ref] = new JcubeeBlank(modelName+ref);
 			sceneModels[modelName+ref].Jcubee = jcModels[name][ref].Jcubee.clone(modelName+ref);
-			sceneModels[modelName+ref].Jcubee.material = jcModels[name][ref].Jcubee.material.clone(jcModels[name][ref].Jcubee.material+(num_of_mats++));
+			sceneModels[modelName+ref].Jcubee.material = jcModels[name][ref].Jcubee.material.clone(jcModels[name][ref].Jcubee.material.name.substr(0,5)+(num_of_mats++));
 			sceneModels[modelName+ref].Jcubee.material.alpha = 1;			
 			sceneModels[modelName+ref].Jcubee.parent = sceneParents[parentName].model;
 			sceneModels[modelName+ref].parent = sceneParents[parentName];
@@ -1320,7 +1404,7 @@ console.log(fetchTitle.id);
 				sceneModels[modelName] = new JcubeeBlank(modelName);
 				sceneModels[modelName].Jcubee = currentMesh.clone(modelName);				
 				//sceneModels[modelName].Jcubee.position.y +=6*60;
-				sceneModels[modelName].Jcubee.material = currentMesh.material.clone(currentMesh.material.name+(num_of_mats++));
+				sceneModels[modelName].Jcubee.material = currentMesh.material.clone(currentMesh.material.name.substr(0,5)+(num_of_mats++));
 				sceneModels[modelName].Jcubee.material.alpha = 1;
 				currentMesh.material.alpha = 0.5;			
 				sceneModels[modelName].Jcubee.parent = sceneParents[parentName].model;
@@ -1468,7 +1552,7 @@ console.log(fetchTitle.id);
 	jccsStudio.camera.upperBetaLimit = (Math.PI / 2) * 0.9;
 	jccsStudio.camera.attachControl(jcCanvas, true);
 	
-	jccsStudio.followCamera = new BABYLON.TargetCamera("followCamera", new BABYLON.Vector3(0, 60, 0), jccsStudio.scene);	
+	jccsStudio.followCamera = new BABYLON.TargetCamera("followCamera", new BABYLON.Vector3(0, 0, 0), jccsStudio.scene);	
 	jccsStudio.followCamera.attachControl(jcCanvas, true);
 	
 	jccsStudio.scene.activeCameras.push(jccsStudio.camera);
@@ -1501,7 +1585,7 @@ console.log(fetchTitle.id);
 	var brownGridMat = new BABYLON.StandardMaterial("red", jccsStudio.scene);
 	brownGridMat.emissiveColor = new BABYLON.Color3(0.4,0.2,0);
 	
-	var blueMat = new BABYLON.StandardMaterial("blue", jccsStudio.scene);
+	var blueMat = new BABYLON.StandardMaterial("mat02", jccsStudio.scene);
 	blueMat.emissiveColor = new BABYLON.Color3(0,0,1);
 	
 	var redMat = new BABYLON.StandardMaterial("red", jccsStudio.scene);
@@ -1514,7 +1598,58 @@ console.log(fetchTitle.id);
 	
 	//Follow Camera holder and Target
 	
-	var holder = new CreateCuboid('holder', 6, 60, 6, jccsStudio.scene);
+	var holder = BABYLON.Mesh.CreateBox('holder', 1, jccsStudio.scene);
+	//holder.material = blackMat;
+	holder.isVisible = false;
+	
+	var viewer = {};
+	viewer.front = BABYLON.Mesh.CreatePlane('viewerfront', 1, jccsStudio.scene);
+	viewer.front.position.z = 0.5;
+	viewer.front.parent = holder;
+	viewer.front.isVisible = false;
+	
+	viewer.back = BABYLON.Mesh.CreatePlane('viewerback', 1, jccsStudio.scene);
+	viewer.back.position.z = -0.5;
+	viewer.back.parent = holder;
+	viewer.back.isVisible = false;
+	
+	viewer.left = BABYLON.Mesh.CreatePlane('viewerleft', 1, jccsStudio.scene);
+	viewer.left.rotation.y = Math.PI/2;
+	viewer.left.position.x = -1;
+	viewer.left.parent = holder;
+	
+	viewer.right = BABYLON.Mesh.CreatePlane('viewerright', 1, jccsStudio.scene);
+	viewer.right.rotation.y = Math.PI/2;
+	viewer.right.position.x = 1;
+	viewer.right.parent = holder;
+	viewer.right.isVisible = false;
+	
+	viewer.top = BABYLON.Mesh.CreatePlane('viewertop', 1, jccsStudio.scene);
+	viewer.top.rotation.x = Math.PI/2;
+	viewer.top.position.y = 1;
+	viewer.top.parent = holder;
+	viewer.top.isVisible = false;
+	
+	viewer.bottom = BABYLON.Mesh.CreatePlane('viewerbottom', 1, jccsStudio.scene);
+	viewer.bottom.rotation.x = Math.PI/2;
+	viewer.bottom.position.y = -1;
+	viewer.bottom.parent = holder;
+	viewer.bottom.isVisible = false;
+	
+	var target = BABYLON.Mesh.CreatePlane('target', 1, jccsStudio.scene);
+	//target.material = blackMat;
+	target.isVisible = false;
+	target.parent = holder;
+	target.position = new BABYLON.Vector3(0, 0, 13*60);
+	
+	holder.scaling = new BABYLON.Vector3(6,6,60);
+	holder.position = new BABYLON.Vector3(15,52, -585);
+	holder.rotation.x = 5*Math.PI/180;
+	
+	jccsStudio.followCamera.position = viewer.back.getAbsolutePosition();	
+	jccsStudio.followCamera.setTarget(target.getAbsolutePosition());
+	
+/*	var holder = new CreateCuboid('holder', 6, 60, 6, jccsStudio.scene);
 	//holder.material = blackMat;
 	//holder.material.alpha = 0.3;
 	holder.isVisible = false;
@@ -1566,7 +1701,7 @@ console.log(fetchTitle.id);
 	holder.rotation.x = 5*Math.PI/180;
 	jccsStudio.followCamera.position = viewer.back.getAbsolutePosition();	
 	jccsStudio.followCamera.setTarget(target.getAbsolutePosition());
-	
+*/	
 	//Create Ground
 	var ground=BABYLON.Mesh.CreateGround("ground",1200, 1200, 20, jccsStudio.scene,  false, BABYLON.Mesh.DOUBLESIDE);	
 	ground.material = greenGridMat;
@@ -1645,10 +1780,8 @@ console.log(fetchTitle.id);
 
 	
 	//Make Cubees  L prefix for Live Cubee
-	function makeBox() {
+	function makeBox() {		
 		var name = "L"+currentModelName+"¬box"+(num_of_boxes++);
-		//var boxMat = new BABYLON.StandardMaterial("blue", jccsStudio.scene);
-		//boxMat.emissiveColor = new BABYLON.Color3(colour.colarray[0]/255,colour.colarray[1]/255,colour.colarray[2]/255);
 		JCubees[name]= new JcubeeBox(name, 30, 30 + 12*60, 30, colour.material, num_of_mats++, jccsStudio.scene);		
 		JCubees[name].addMarkers(jccsStudio.scene);
 		hideSubMenus();
@@ -1661,13 +1794,12 @@ console.log(fetchTitle.id);
 		model.innerHTML = "Model -- "+currentModelName+storeMarker+saveMarker+exportMarker;
 		stored[currentModelName] = false;
 		saved[currentModelName] = false;
-		exported[currentModelName] = false;		
+		exported[currentModelName] = false;
+		return 	name;	
 	}
 	
 	function makeCylinder() {
 		var name = "L"+currentModelName+"¬cyl"+(num_of_boxes++);
-		//var boxMat = new BABYLON.StandardMaterial("blue", jccsStudio.scene);
-		//boxMat.emissiveColor = new BABYLON.Color3(colour.colarray[0]/255,colour.colarray[1]/255,colour.colarray[2]/255);
 		JCubees[name]= new JcubeeCylinder(name, 30, 30 + 12*60, 30, colour.material, num_of_mats++, jccsStudio.scene);
 		JCubees[name].addMarkers(jccsStudio.scene);
 		hideSubMenus();
@@ -1681,12 +1813,11 @@ console.log(fetchTitle.id);
 		stored[currentModelName] = false;
 		saved[currentModelName] = false;
 		exported[currentModelName] = false;
+		return 	name;
 	}
 	
 	function makeSphere() {
 		var name = "L"+currentModelName+"¬sph"+(num_of_boxes++);
-		//var boxMat = new BABYLON.StandardMaterial("blue", jccsStudio.scene);
-		//boxMat.emissiveColor = new BABYLON.Color3(colour.colarray[0]/255,colour.colarray[1]/255,colour.colarray[2]/255);
 		JCubees[name]= new JcubeeSphere(name, 30, 30 + 12*60, 30, colour.material, num_of_mats++, jccsStudio.scene);
 		JCubees[name].addMarkers(jccsStudio.scene);
 		hideSubMenus();
@@ -1700,12 +1831,11 @@ console.log(fetchTitle.id);
 		stored[currentModelName] = false;
 		saved[currentModelName] = false;
 		exported[currentModelName] = false;
+		return 	name;
 	}
 
 	function makeRoof() {
 		var name = "L"+currentModelName+"¬rof"+(num_of_boxes++);
-		//var boxMat = new BABYLON.StandardMaterial("blue", jccsStudio.scene);
-		//boxMat.emissiveColor = new BABYLON.Color3(colour.colarray[0]/255,colour.colarray[1]/255,colour.colarray[2]/255);
 		JCubees[name]= new JcubeeRoof(name, 30, 30 + 12*60, 30, colour.material, num_of_mats++, jccsStudio.scene);
 		JCubees[name].addMarkers(jccsStudio.scene);
 		hideSubMenus();
@@ -1719,6 +1849,7 @@ console.log(fetchTitle.id);
 		stored[currentModelName] = false;
 		saved[currentModelName] = false;
 		exported[currentModelName] = false;
+		return 	name;
 	}
 	
 	//select new cubee
@@ -1966,7 +2097,7 @@ console.log(fetchTitle.id);
 				jccsStudio.camera.detachControl(jcCanvas);
 				detached = true;
 			}
-			cameraMove(collideCamera.front, 1*cameraSpeed, BABYLON.Axis.Z, BABYLON.Space.LOCAL, true);
+			cameraMove(collideCamera.front, 1*cameraSpeed/60, BABYLON.Axis.Z, BABYLON.Space.LOCAL, true);
 			return;		
 		}
 		
@@ -1975,7 +2106,7 @@ console.log(fetchTitle.id);
 				jccsStudio.camera.detachControl(jcCanvas);
 				detached = true;
 			}			
-			cameraMove(collideCamera.back, -1*cameraSpeed, BABYLON.Axis.Z, BABYLON.Space.LOCAL, true);
+			cameraMove(collideCamera.back, -1*cameraSpeed/60, BABYLON.Axis.Z, BABYLON.Space.LOCAL, true);
 			return;	
 		}
 		
@@ -2286,12 +2417,12 @@ console.log(fetchTitle.id);
 			}
 			else {
 				holder.rotate(axis,diff,space);				
-			}
+			}		
 			jccsStudio.followCamera.position = viewer.back.getAbsolutePosition();	
 			jccsStudio.followCamera.setTarget(target.getAbsolutePosition());
 			collideCamera = collisionCamera(holder, sceneParents, viewer);
 			var edgeCollide = collideEdgesCamera(viewer);
-			for(var dir in collide)	{
+			for(var dir in collideCamera)	{
 				collideCamera[dir] = collideCamera[dir] || edgeCollide[dir];
 			}		
 		}

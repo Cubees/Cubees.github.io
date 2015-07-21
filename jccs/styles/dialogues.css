@@ -74,7 +74,7 @@ li:hover {
 
 .DBBut {
 	top: 1px;
-	left:5px;
+	right:90px;
 }
 
 .DBCancel {
@@ -148,8 +148,27 @@ li:hover {
 	padding-left:5px;
 }
 
-#fetchBut {
-	left:200px;
+
+
+#importDB {
+	width:340px;
+	height:100px;
+	resize:both;
+	min-width:340px;
+	min-height:120px;
+	max-height:300px;
+	overflow :hidden;
+}
+
+#importDesc {
+	top:2px;
+	left:5px;
+	color: #666666;
+	cursor: default;
+}
+
+#importBut {
+	left:5px;
 }
 
 #confirmDB {
@@ -158,5 +177,9 @@ li:hover {
 
 #confirmDesc {
 	margin:5px;
+}
+
+#confirmBut {
+	left:5px;
 }
 
