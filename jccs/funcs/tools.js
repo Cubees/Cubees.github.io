@@ -194,6 +194,21 @@ function getType(ref) {
 	return name.substr(0,3);
 }
 
+function getSceneRef(ref) {
+	var i = ref.indexOf('^');
+	return ref.substring(0,i);
+}
+
+function getSceneNum(ref) {
+	var i = ref.indexOf('^') +1;
+	var j = ref.indexOf('*');
+	return ref.substring(i,j);
+}
+
+function getJcubeeRef(ref) {
+	var i = ref.indexOf('*')+1;
+	return ref.substr(i);
+}
 
 function getPosition(e) {
     e = e || window.event;

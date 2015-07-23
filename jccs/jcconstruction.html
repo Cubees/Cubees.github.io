@@ -77,12 +77,13 @@
 			<div class='row'>
 				
 				<div id='newmodel' class='filecontent'>New...</div>
-				<div id='store' class='filecontent'>Store</div>
+				<!-- <div id='store' class='filecontent'>Store</div> -->
 				<div id='store_as' class='filecontent'>Store As...</div>
 				<div id='fetch' class='filecontent'>Fetch...</div>
-				<div id='save' class='filecontent'>Save</div>
+				<!-- <div id='save' class='filecontent'>Save</div> -->
 				<div id='save_as' class='filecontent'>Save As...</div>
 				<div id='open' class='filecontent'>Open...</div>
+				<div id='manage' class='filecontent'>Manage...</div>
 				<div id='export' class='filecontent'>Export...</div>
 				<div id='import' class='filecontent'>Import...</div>
 				<div class="subcontent"></div>
@@ -201,11 +202,30 @@
 					<div class="closediv">X</div>
 				</div>
 				<div class='dragContent'>
-					<div id = 'importDesc'>Import from External</div>
+					<div id = 'importDesc'>Import from External</div><br>
+					<input id = "browseBut" class='DBBut' type = 'file' accept = '.babylon' />
 				</div>
 				<div class='footer'>
-					<input id = "importBut" class='DBBut' type = 'file' access = 'babylon' />
+					
+					<input id = "importBut" class='DBBut' type = 'button' value = 'Import' />
 					<input id = "importCancel" class = 'DBCancel' type = 'button' value = "Cancel" />
+				</div>
+			</div>
+		</div>
+		
+		<div id='manageDB' class="dragDialogueBox" draggable="true">
+			<div class="row">
+				<div class="heading"> 
+					<div id="manageTitle" class="titlediv">Manager for Local Storage</div>
+					<div class="closediv">X</div>
+				</div>
+				<div class='dragContent'>
+					<div id='manageList' class = 'getList' ></div>
+				</div>
+				<div class='footer'>
+					<div id='managename'></div>
+					<input id = "manageBut" class='DBBut' type = 'button' value = "Delete" />
+					<input id = "manageCancel" class = 'DBCancel' type = 'button' value = "Cancel" />
 				</div>
 			</div>
 		</div>
@@ -254,9 +274,9 @@
 			<div class='row'>
 				<div id='scene_new' class='filecontent'>New...</div>
 				<div id='scene_fetch' class='filecontent'>Fetch...</div>
-				<div id='scene_save' class='filecontent'>Save</div>
+<!--			<div id='scene_save' class='filecontent'>Save</div>
 				<div id='scene_save_as' class='filecontent'>Save As...</div>
-				<div id='scene_open' class='filecontent'>Open...</div>
+				<div id='scene_open' class='filecontent'>Open...</div>    -->
 				<div id='scene_export' class='filecontent'>Export...</div>
 				<div id='scene_import' class='filecontent'>Import...</div>
 				<div class="subcontent"></div>

@@ -9,6 +9,7 @@ function main() {
 	var storeMarker = storeIcon;
 	var saveMarker = saveIcon;
 	var exportMarker = exportIcon;
+	var scene_exportMarker = exportIcon;
 	
 	// Event variables
     var groundPoint;
@@ -48,10 +49,12 @@ function main() {
 	var saved={};
 	var exported={};
 	var sceneParents={}, sceneModels={};
+	var scene_exported = false;
 	var doAddToScene = false;
 	var inScene=false;
 	var viewcamera = false;
 	var viewangle=5*Math.PI/180;
+	var new_scene = true;
 	
 	var collide = {left:false, right:false, up:false, down:false, front:false, back:false};	
 	var collideCamera = {left:false, right:false, up:false, down:false, front:false, back:false, lookup:false, lookdown:false};
@@ -83,12 +86,13 @@ function main() {
 	var file_ = document.getElementById("file");
 	var newmodel = document.getElementById("newmodel");
 	var subfilemenu = document.getElementById("subfilemenu");
-	var store = document.getElementById("store");
+	//var store = document.getElementById("store");
 	var store_as = document.getElementById("store_as");
 	var fetch = document.getElementById("fetch");
-	var save = document.getElementById("save");
+	//var save = document.getElementById("save");
 	var save_as = document.getElementById("save_as");
-	var openFile  = document.getElementById("open"); 
+	var openFile = document.getElementById("open"); 
+	var manage = document.getElementById("manage"); 
 	var export_ = document.getElementById("export"); 
 	var import_ = document.getElementById("import"); 
 	
@@ -143,13 +147,20 @@ function main() {
 	var fetchList = document.getElementById("fetchList");
 	var fetchBut = document.getElementById("fetchBut");
 	
+	var importTitle= document.getElementById("importTitle");
 	var importDesc= document.getElementById("importDesc"); 
 	var importList = document.getElementById("importList");
 	var importBut = document.getElementById("importBut");
+	var browseBut = document.getElementById("browseBut");
 	
 	var saveDB = document.getElementById("saveDB"); 
 	var saveIn = document.getElementById("saveIn");
 	var saveBut = document.getElementById("saveBut");
+	
+	var manageDB = document.getElementById("manageDB"); 
+	var manageIn = document.getElementById("manageIn");
+	var manageBut = document.getElementById("manageBut");
+	var manageList = document.getElementById("manageList");
 	
 	var confirmDB = document.getElementById("confirmDB"); 
 	var confirmBut = document.getElementById("confirmBut");	
@@ -167,14 +178,15 @@ function main() {
 	//file events
 	file_.addEventListener('click', showFileMenu, false);
 	newmodel.addEventListener('click', doNew, false);
-	store.addEventListener('click', doStore, false);
+	//store.addEventListener('click', doStore, false);
 	store_as.addEventListener('click', openStoreAs, false);
 	fetch.addEventListener('click', openFetch, false);
 	
 	if(typeof(Storage) !== "undefined") {
-		save.addEventListener('click', doSave, false);
+		//save.addEventListener('click', doSave, false);
 		save_as.addEventListener('click', openSaveAs, false);
 		openFile.addEventListener('click', openOpen, false);
+		manage.addEventListener('click', openManage, false);
 	}
 	
 	export_.addEventListener('click', doExport, false);
@@ -247,7 +259,10 @@ function main() {
 	//Fetch fromApp
 	fetchBut.addEventListener('click', doFetch, false);
 	importBut.addEventListener('click', doImport, false);
-	saveBut.addEventListener('click', doSaveAs, false);
+	if(typeof(Storage) !== "undefined") {
+		saveBut.addEventListener('click', doSaveAs, false);
+		manageBut.addEventListener('click', doDeleteSaved, false);
+	}
 		
 	/*-------------CONSTRUCTION MENU FUNCTIONS ---------------*/
 	//set colours in selection menu
@@ -417,7 +432,8 @@ function main() {
 		var flen=fetch_array.length;
 		var cols = Math.ceil(flen/10);
 		var rows = 10;
-		var len;
+		var len = flen - (cols-1)*10;
+		fetchList.innerHTML ="";
 		var fetch_row, fetch_col;
 		var i=0;
 		for(var c=0; c<cols; c++){
@@ -426,8 +442,7 @@ function main() {
 			fetchList.appendChild(fetch_col);
 			fetch_ul = document.createElement("ul");
 			fetch_col.appendChild(fetch_ul);
-			len = flen - c*10;
-			if(len<10) {
+			if(len<10  && c==cols-1) {
 				rows=len;
 			}
 			for(var r=0; r<rows; r++) {
@@ -512,9 +527,78 @@ function main() {
 		model.innerHTML = "Model -- "+currentModelName+storeMarker+saveMarker+exportMarker;
 		
 		saveIn.value = currentModelName;
+		storeIn.value = currentModelName;
 		saved[currentModelName] = true;
 		
 		saveDB.style.visibility = "hidden";
+	}
+	
+	function openManage() {		
+		manageDB.style.visibility = 'visible';
+		doManageFill()
+	}
+	
+	function doManageFill() {
+		var name;
+		var manage_array =[];
+		var i=0;	
+		while(i<localStorage.length) {		
+			name = localStorage.key(i);			
+			if(name.substr(0,5)=="CUBEE") {
+				manage_array.push(name.substr(5));
+			}
+			i++;
+		}		
+		manage_array.sort();	
+		var flen=manage_array.length;
+		var cols = Math.ceil(flen/10);	
+		var rows = 10;
+		var len = flen - (cols-1)*10;	
+		var manage_row, manage_col;
+		var i=0;
+		manageList.innerHTML ="";
+		for(var c=0; c<cols; c++){
+			manage_col = document.createElement("div");
+			manage_col.style.left=c*140+"px";
+			manageList.appendChild(manage_col);
+			manage_ul = document.createElement("ul");
+			manage_col.appendChild(manage_ul);
+			if(len<10  && c==cols-1) {
+				rows=len;
+			}
+			for(var r=0; r<rows; r++) {
+				manage_li = document.createElement("li");
+				manage_li.style.width ='150px';
+				manage_li.innerHTML='<input type="checkbox" id="chkbx'+i+'" style ="top:'+r*25+'px"><span style = "top:'+(r*25-2)+'px">'+manage_array[i]+'</span >';
+				manage_li.name = manage_array[i++];
+				manage_ul.appendChild(manage_li);
+			}
+		}
+		manageDB.list = manage_array;		
+		manageDB.style.visibility = 'visible';
+	}
+	
+	function doDeleteSaved() {
+		var del=false;
+		for(var i=0; i<manageDB.list.length; i++) {
+			del = del || document.getElementById("chkbx"+i).checked;
+		}
+		if (!del) {
+			return;
+		}
+		confirmName = name;
+		confirmFunc = doDeleteChecked;
+		confirmDesc.innerHTML = 'Do you want to continue to and delete these?';
+		openConfirmDBox();
+	}
+	
+	function doDeleteChecked() {
+		for(var i=0; i<manageDB.list.length; i++) {
+			if(document.getElementById("chkbx"+i).checked) {
+				localStorage.removeItem("CUBEE"+manageDB.list[i]);
+			}
+		}
+		doManageFill();
 	}
 	
 	function doExport() {
@@ -678,6 +762,7 @@ function main() {
 		 menu.style.visibility = 'hidden';
 		 scene_menu.style.visibility = 'visible';
 		 Header.innerHTML ='Scene';
+		 new_scene = false;
 	}
 	
 	function sceneSwitch(name) {
@@ -690,14 +775,16 @@ function main() {
 		
 		collide = {left:false, right:false, up:false, down:false, front:false, back:false};
 		
-		var parentName = "Iparent"+name+num_in_scene;
-		var modelName = "I"+name+num_in_scene;
+		var parentName = "Iparent"+name+"^"+num_in_scene+"*";
+		var modelName = "I"+name+"^"+num_in_scene+"*";
 		sceneParents[parentName] ={};
 		sceneParents[parentName].name = parentName;
 		sceneParents[parentName].model = BABYLON.Mesh.CreateBox(parentName, 60.0, jccsStudio.scene);
 		sceneParents[parentName].model.visibility = 0;
 		selectNewModel(sceneParents[parentName]);
-		sceneParents[parentName].modelChildren = [];	
+		sceneParents[parentName].modelChildren = [];
+		
+		var newRef;	
 	
 		for(var ref in JCubees) {			
 			sceneModels[modelName+ref] = new JcubeeBlank(modelName+ref);
@@ -726,6 +813,10 @@ function main() {
 		num_in_scene++;			
 			
 		inScene=true;
+		
+		scene_exported = false;
+		scene_exportMarker = exportIcon;
+		scene_scene.innerHTML = "Scene -- "+scene_exportMarker;
 	}
 	
 	//General Menu functions
@@ -868,6 +959,7 @@ function main() {
 		storeMarker = Blank;
 		model.innerHTML = "Model -- "+currentModelName+storeMarker+saveMarker+exportMarker;
 		storeIn.value = currentModelName;
+		saveIn.value = currentModelName;
 		stored[currentModelName] = true;				
 	}
 	
@@ -914,11 +1006,11 @@ function main() {
 	
 	function doFetchToScene() {
 		var name = fetchname.innerHTML;
-		
+		new_scene = false;
 		collide = {left:false, right:false, up:false, down:false, front:false, back:false};
 		
-		var parentName = "Iparent"+name+num_in_scene;
-		var modelName = "I"+name+num_in_scene;
+		var parentName = "Iparent"+name+"^"+num_in_scene+"*";
+		var modelName = "I"+name+"^"+num_in_scene+"*";
 		sceneParents[parentName] ={};
 		sceneParents[parentName].name = parentName;
 		sceneParents[parentName].model = BABYLON.Mesh.CreateBox(parentName, 60.0, jccsStudio.scene);
@@ -926,7 +1018,7 @@ function main() {
 		selectNewModel(sceneParents[parentName]);
 		sceneParents[parentName].modelChildren = [];	
 	
-		for(var ref in jcModels[name]) {						
+		for(var ref in jcModels[name]) {									
 			sceneModels[modelName+ref] = new JcubeeBlank(modelName+ref);
 			sceneModels[modelName+ref].Jcubee = jcModels[name][ref].Jcubee.clone(modelName+ref);
 			sceneModels[modelName+ref].Jcubee.material = jcModels[name][ref].Jcubee.material.clone(jcModels[name][ref].Jcubee.material.name.substr(0,5)+(num_of_mats++));
@@ -949,7 +1041,11 @@ function main() {
 		sceneParents[parentName].modelBoundary = childrenBoundary(sceneParents[parentName], jccsStudio.scene );
 		sceneParents[parentName].modelBoundary.parent = sceneParents[parentName].model;
 		
-		num_in_scene++;			
+		num_in_scene++;	
+		
+		scene_exported = false;
+		scene_exportMarker = exportIcon;
+		scene_scene.innerHTML = "Scene -- "+scene_exportMarker;		
 			
 		fetchDB.style.visibility = 'hidden';
 	}
@@ -1081,6 +1177,8 @@ function main() {
 	}
 	
 	function openImport() {	
+		importTitle.style.backgroundColor = "#AAAAAA";
+		importTitle.innerHTML ="Import";
 		if(!stored[currentModelName] && !inScene) {
 			confirmName = currentModelName;
 			confirmFunc = function() {importDB.style.visibility = 'visible';};
@@ -1092,9 +1190,9 @@ function main() {
 		}
 	}
 	
-	function doImport(evt) {
-		var files = evt.target.files;
-		var f = files[0];
+	function doImport() {
+		
+		var f = browseBut.files[0];
 		if (f) 
 		{
 			var r = new FileReader();
@@ -1109,14 +1207,30 @@ function main() {
 	
 	function parseImport(data) {
 		if(inScene) {
+			var re = /Iparent/i;
+			if(!re.test(data)) {
+				importTitle.style.backgroundColor = "#FF0000";
+				importTitle.innerHTML ="Import - Not a Scene File";
+				return
+			}
+			importTitle.style.backgroundColor = "#AAAAAA";
+			importTitle.innerHTML ="Import";
 			doImportToScene(data);
 		}
 		else {
+			var re = /Iparent/i;
+			if(re.test(data)) {
+				importTitle.style.backgroundColor = "#FF0000";
+				importTitle.innerHTML ="Import - Not a Model File";
+				return
+			}
+			importTitle.style.backgroundColor = "#AAAAAA";
+			importTitle.innerHTML ="Import";			
 			doImportToConstruct(data)
 		}
 	};
 	
-	function doImportToConstruct(data) {
+	function doImportToConstruct(data) {	
 		for( var ref in JCubees) {
 			if(ref in currentMeshes) {
 				delete currentMeshes[ref];
@@ -1130,6 +1244,7 @@ function main() {
 		
 		var re = /\s*/gi;
 		data = data.replace(re, '');
+		if(data.match)
 		
 		BABYLON.SceneLoader.ImportMesh("", "", 'data:'+data, jccsStudio.scene, function (meshes, particleSystems, skeletons) {
 				var newRef;
@@ -1156,12 +1271,54 @@ function main() {
 		
 	}
 	
-	function doImportToScene() {
-		var name = fetchname.innerHTML;
-		
+	function doImportToScene(data) {
+		newScene();
 		collide = {left:false, right:false, up:false, down:false, front:false, back:false};
 		
-		var parentName = "Iparent"+name+num_in_scene;
+		var re = /\s*/gi;
+		data = data.replace(re, '');
+		
+		BABYLON.SceneLoader.ImportMesh("", "", 'data:'+data, jccsStudio.scene, function (meshes, particleSystems, skeletons) {
+				var ref;
+				var modelName= getModelRef(meshes[0].name);	
+console.log("meshes", meshes.length);							
+				for(var i=0; i<meshes.length; i++) {	
+console.log(meshes[i].name,getSceneRef(meshes[i].name), getSceneNum(meshes[i].name), getJcubeeRef(meshes[i].name));	
+console.log(getSceneRef(meshes[i].name).substr(0,7));
+						if(getSceneRef(meshes[i].name).substr(0,7) == "Iparent") {									
+							parentName = "Iparent^"+num_in_scene+"*";
+							sceneParents[parentName] ={};
+							sceneParents[parentName].name = parentName;
+							sceneParents[parentName].model = meshes[i].clone(parentName, "", true);
+							sceneParents[parentName].modelChildren = [];
+console.log("here");						
+console.log(meshes[i].getChildren());
+						}				  	
+		/*		 	}
+				 	else {
+				 		modelName = getSceneNum(meshes[i].name)+"^"+num_in_scene+"*"+getJcubeeRef(meshes[i].name);
+				 	}
+				  
+				 	ref = getSceneRef(meshes[i].name)+"^"+num_in_scene+"*"+getJcubeeRef(meshes[i].name);					
+					JCubees[newRef] = new JcubeeBlank(newRef);		
+					JCubees[newRef].Jcubee = meshes[i];
+					JCubees[newRef].addMarkers(jccsStudio.scene);
+					JCubees[newRef].enable();*/
+				} 
+				
+	/*			selectAll();		
+				currentModelName = modelName;
+				storeMarker = storeIcon; 
+				saveMarker = saveIcon; 
+				exportMarker = exportIcon;
+				model.innerHTML = "Model -- "+currentModelName+storeMarker+saveMarker+exportMarker;
+				stored[currentModelName] = false;
+				saved[currentModelName] = false;
+				exported[currentModelName] = false;
+				importDB.style.visibility = 'hidden';  */
+		});
+		
+/*		var parentName = "Iparent"+name+num_in_scene;
 		var modelName = "I"+name+num_in_scene;
 		sceneParents[parentName] ={};
 		sceneParents[parentName].name = parentName;
@@ -1193,9 +1350,9 @@ function main() {
 		sceneParents[parentName].modelBoundary = childrenBoundary(sceneParents[parentName], jccsStudio.scene );
 		sceneParents[parentName].modelBoundary.parent = sceneParents[parentName].model;
 		
-		num_in_scene++;			
+		num_in_scene++;			*/
 			
-		fetchDB.style.visibility = 'hidden';
+		importDB.style.visibility = 'hidden'; 
 	}
 	
 	/*********************************************SCENE DIALOGUE CODE****************************************/
@@ -1219,12 +1376,15 @@ function main() {
 	var scene_backarrow = document.getElementById("scene_backarrow");
 	
 	// File Menu and Sub-Menus
+	var scene_new = document.getElementById("scene_new");
 	var scene_file_ = document.getElementById("scene_file");
 	var scene_subfilemenu = document.getElementById("scene_subfilemenu");
 	var scene_fetch = document.getElementById("scene_fetch");
-	var scene_save = document.getElementById("scene_save");
-	var scene_save_as = document.getElementById("scene_save_as");
-	var scene_openFile = document.getElementById("scene_open");
+	//var scene_save = document.getElementById("scene_save");
+	//var scene_save_as = document.getElementById("scene_save_as");
+	//var scene_openFile = document.getElementById("scene_open");
+	var scene_export = document.getElementById("scene_export");
+	var scene_import = document.getElementById("scene_import");
 	
 		// Selection Menu and Sub-Menus
 	var scene_selection = document.getElementById("scene_selection");
@@ -1246,9 +1406,9 @@ function main() {
 		save.parentNode.removeChild(save);
 		save_as.parentNode.removeChild(save_as);
 		openFile.parentNode.removeChild(openFile);
-		scene_save.parentNode.removeChild(scene_save);
-		scene_save_as.parentNode.removeChild(scene_save_as);
-		scene_openFile.parentNode.removeChild(scene_openFile);
+		//scene_save.parentNode.removeChild(scene_save);
+		//scene_save_as.parentNode.removeChild(scene_save_as);
+		//scene_openFile.parentNode.removeChild(scene_openFile);
 		saveMarker="";
 		Blank="";
 	}
@@ -1266,9 +1426,13 @@ function main() {
 	//file events
 	scene_file_.addEventListener('click', scene_showFileMenu, false);
 	scene_fetch.addEventListener('click', fillFetch, false);
-	//to do scene_save.addEventListener('click', scene_doSave, false);
-	//to do scene_save_as.addEventListener('click', scene_openSaveAs, false);
+	scene_new.addEventListener('click', scene_doNew, false);
+	//scene_save.addEventListener('click', scene_doSave, false);
+	//scene_save_as.addEventListener('click', scene_openSaveAs, false);
 	
+	scene_export.addEventListener('click', scene_doExport, false);
+	scene_import.addEventListener('click', openImport, false);
+
 	//return to construction site event
 	scene_constructSite.addEventListener('click', scene_to_construct, false);
 	
@@ -1434,6 +1598,10 @@ function main() {
 		};
 		scene_hideSubMenus();
 		
+		scene_exported = false;
+		scene_exportMarker = exportIcon;
+		scene_scene.innerHTML = "Scene -- "+scene_exportMarker;
+		
 		collide = {left:false, right:false, up:false, down:false, front:false, back:false};
 	}
 	
@@ -1456,6 +1624,10 @@ function main() {
 			delete currentParents[model];
 		}
 		scene_clearSelection();
+		
+		scene_exported = false;
+		scene_exportMarker = exportIcon;
+		scene_scene.innerHTML = "Scene -- "+scene_exportMarker;
 	}
 	
 	//rotation functions
@@ -1466,6 +1638,10 @@ function main() {
 				currentParents[model].modelChildren[i].moveT(currentParents[model].modelChildren[i].Jcubee.getAbsolutePosition());
 			}			
 		}
+		
+		scene_exported = false;
+		scene_exportMarker = exportIcon;
+		scene_scene.innerHTML = "Scene -- "+scene_exportMarker;
 	}
 	
 	function scene_Yrotate() {
@@ -1475,6 +1651,10 @@ function main() {
 				currentParents[model].modelChildren[i].moveT(currentParents[model].modelChildren[i].Jcubee.getAbsolutePosition());
 			}		
 		}
+		
+		scene_exported = false;
+		scene_exportMarker = exportIcon;
+		scene_scene.innerHTML = "Scene -- "+scene_exportMarker;
 	}
 	
 	function scene_Zrotate() {
@@ -1484,6 +1664,10 @@ function main() {
 				currentParents[model].modelChildren[i].moveT(currentParents[model].modelChildren[i].Jcubee.getAbsolutePosition());
 			}		
 		}
+		
+		scene_exported = false;
+		scene_exportMarker = exportIcon;
+		scene_scene.innerHTML = "Scene -- "+scene_exportMarker;
 	}
 	
 	//Return to construction site
@@ -1495,7 +1679,7 @@ function main() {
 			}
 		}
 		for(var ref in JCubees) {
-			JCubees[ref].enable()
+			JCubees[ref].enable();
 		}
 		scene_hideSubMenus();
 		menu.style.visibility = 'visible';
@@ -1521,12 +1705,84 @@ function main() {
 		scene_resetBorders();
 	}
 	
+	function scene_doExport() {
+		var alpha = {};
+		var meshes_to_save = [];
+
+		for(var parent in sceneParents) {
+			//meshes_to_save.push(sceneParents[parent].model);
+			for(var i=0; i<sceneParents[parent].modelChildren.length; i++) {
+				sceneParents[parent].modelChildren[i].Jcubee.material.alpha = 1;
+				alpha[sceneParents[parent].modelChildren[i].name] = sceneParents[parent].modelChildren[i].Jcubee.material.alpha;
+				meshes_to_save.push(sceneParents[parent].modelChildren[i].Jcubee);					
+			}
+			
+		}		
+		var serializedMesh = BABYLON.SceneSerializer.SerializeMesh(meshes_to_save, true);
+		
+		var strMesh = JSON.stringify(serializedMesh);
+		newwindow=window.open("",currentModelName);
+		newwindow.document.write(strMesh);
+		newwindow.document.close();
+		
+		for(var parent in sceneParents) {
+			for(var i=0; i<sceneParents[parent].modelChildren.length; i++) {
+				sceneParents[parent].modelChildren[i].Jcubee.material.alpha = alpha[sceneParents[parent].modelChildren[i].name];					
+			}
+			meshes_to_save.push(sceneParents[parent].model);
+		}
+		
+		scene_exported = true;
+		scene_scene.innerHTML = "Scene";
+	}
+	
+	function scene_doNew() {
+		if (new_scene) {
+			return;
+		}
+		if(!scene_exported) 
+		{
+			confirmName = name;
+			confirmFunc = newScene;
+			confirmDesc.innerHTML = 'The current scene has not been exported.<BR>Do you want to continue and delete the current scene?'
+			openConfirmDBox();
+		}
+		else {
+			newScene();
+		}
+	}
+	
+	function newScene() {
+		new_scene = true;
+		scene_hideSubMenus();
+		
+		var child;
+		for(var parent in sceneParents) {
+			while(0<sceneParents[parent].modelChildren.length) {
+				child = sceneParents[parent].modelChildren.pop();			
+				child.destroy();
+				delete child;		
+			}
+			sceneParents[parent].model.dispose();
+			delete sceneParents[parent];
+		}
+		sceneParents = {};
+		currentParents = {};
+	 
+		scene_exported = false;
+		scene_exportMarker = exportIcon;
+		scene_scene.innerHTML = "Scene -- "+scene_exportMarker;
+		
+		scene_selection.innerHTML="Selection";
+		scene_selection.style.color=="rgb(136, 136, 136)";
+	}
 	
 	/***********************************************MODEL CODES************************************/
 	
 	/*-------------START LIST OF MODELS---------------*/
 	var currentModelName = 'model'+(num_of_models++);
 	model.innerHTML = "Model -- "+currentModelName+storeMarker+saveMarker+exportMarker;
+	scene_scene.innerHTML = "Scene -- "+scene_exportMarker;
 	jcModels[currentModelName] = {};
 	stored[currentModelName] = false;
 	saved[currentModelName] = false;
@@ -1576,13 +1832,13 @@ function main() {
 	var blueGridMat = new BABYLON.StandardMaterial("blueGrid", jccsStudio.scene);
 	blueGridMat.emissiveColor = new BABYLON.Color3(0.2,0.2,1);
 	
-	var redGridMat = new BABYLON.StandardMaterial("red", jccsStudio.scene);
+	var redGridMat = new BABYLON.StandardMaterial("redGrid", jccsStudio.scene);
 	redGridMat.emissiveColor = new BABYLON.Color3(1,0.2,0.2);
 	
 	var yellowGridMat = new BABYLON.StandardMaterial("blueGrid", jccsStudio.scene);
 	yellowGridMat.emissiveColor = new BABYLON.Color3(1,1,0);
 	
-	var brownGridMat = new BABYLON.StandardMaterial("red", jccsStudio.scene);
+	var brownGridMat = new BABYLON.StandardMaterial("brown", jccsStudio.scene);
 	brownGridMat.emissiveColor = new BABYLON.Color3(0.4,0.2,0);
 	
 	var blueMat = new BABYLON.StandardMaterial("mat02", jccsStudio.scene);
@@ -2382,6 +2638,9 @@ function main() {
 				}
 			}
 		}
+		scene_exported = false;
+		scene_exportMarker = exportIcon;
+		scene_scene.innerHTML = "Scene -- "+scene_exportMarker;
 	}
 	
 	

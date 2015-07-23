@@ -35,6 +35,12 @@ li:hover {
 	margin: 2px 2px 2px 2px;
 }
 
+li span {
+	position:absolute;
+	left: 20px;
+}
+
+
 .heading {
 	border-bottom: 1px solid #666666;
 	width:100%;
@@ -148,8 +154,6 @@ li:hover {
 	padding-left:5px;
 }
 
-
-
 #importDB {
 	width:340px;
 	height:100px;
@@ -168,6 +172,24 @@ li:hover {
 }
 
 #importBut {
+	left:5px;
+}
+
+#browseBut {
+	position:static;
+}
+
+#manageDB {
+	width:340px;
+	height:210px;
+	resize:both;
+	min-width:340px;
+	min-height:120px;
+	max-height:300px;
+	overflow :hidden;
+}
+
+#manageBut {
 	left:5px;
 }
 
