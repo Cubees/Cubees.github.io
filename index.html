@@ -15,10 +15,11 @@
 				background-color:#FFFFFF;
 			}
 			
-
+			div {
+				position:absolute;
+			}
 			
 			#title_ribbon {
-				position:absolute;
 				width:100%;
 				height:12%;
 				margin-top:0.5%;
@@ -27,7 +28,6 @@
 			}
 			
 			#title {
-				position:absolute;
 				margin-top:0.6%;
 				margin-left:15px;
 				width:778px;
@@ -37,6 +37,61 @@
 			}
 			
 			
+			.column {
+				margin-left:1%;
+				margin-right:1%;
+				width:48%;
+				height:80%;
+				border: solid 1px #666666;
+				top:15%;
+			}
+			
+			.holder {
+				margin: 1%;
+				width:48%;
+				top:10%;
+				border: solid 1px #666666;
+			}
+			
+			.content {
+				margin:1%;
+				width:98%;
+				top:12%;
+			}
+			
+			#sns {
+				left:50%;
+			}
+			
+			.subTitle {
+				width:100%;
+				height:10%;
+				background-color:#AAAAAA;
+				color:#FFFFFF;
+				padding-top:4px;
+				text-align: center;
+				font-size: 1.2em;
+			}
+			
+			.subsubTitle {
+				width:100%;
+				height:8%;
+				background-color:#CCCCCC;
+				color:#000000;
+				padding-top:4px;
+				text-align: center;
+				font-size: 1.1em;
+			}
+			
+			#jcdesc {
+				height:85%;
+			}
+			
+			#jcwkshop {
+				height:85%;
+				left:49.5%;	
+			}
+			
 			.noTextCursor {
 				cursor:default;
 			}
@@ -45,57 +100,6 @@
 				background: linear-gradient(to right, #999999 , #FFFFFF); 
 			}
 			
-			.dialogueBox {
-				position:absolute;
-				display:table;
-				border: 1px solid #333333;
-				background-color: #FFFFFF;
-				box-shadow: 5px 5px 2px #111111;
-				<!-- visibility:hidden; -->
-				z-index:5;
-			}
-			
-			.row {
-				display:table-row;
-				height:100%;
-				width:100%;
-			}
-			
-			.space {
-				display:table-cell;
-				border: 1px solid #666666;
-				width:25%;
-			}
-			
-			.content {
-				display:table-cell;
-				border: 1px solid #666666;
-				width:75%;
-			}
-			
-			#segment {
-				top:50px;
-				right:50px;
-				width:120px;
-				height:60px;
-				visibility:hidden;
-			}
-			
-			#p_curved, #p_straight {
-				color: #888888;
-			}
-			
-			#node {
-				top:50px;
-				right:50px;
-				width:120px;
-				height:60px;
-				visibility:hidden;
-			}
-			
-			#p_corner {
-				color: #888888;
-			}
 			
 		</style>
 		
@@ -113,27 +117,25 @@
 		<div id="title_ribbon"></div>
 		<div id="title"></div>
 		
-		<!--dialogue boxes-->
-		<div id='segment' class="dialogueBox">
-			<div class="row">
-				<div class="space"> </div>
-				<div id='segmentContent' class='content'>
-					<div id="p_add" class="noTextCursor">&nbsp;&nbsp;Add Point</div>
-					<div id="p_straight" class="noTextCursor">&nbsp;&nbsp;Straight</div>
-					<div id="p_curved" class="noTextCursor">&nbsp;&nbsp;Curved</div>
+		<div id="just" class="column"> 
+			<div class="subTitle">Just Cubees Plain and Simple</div>
+			<div id="jcdesc" class="holder">
+				<div class="subsubTitle">What is a Cubee?</div>
+				<div class="content">
+					 Imagine you have lots of invisible cubes all the same size. 
+					 <p>A Cubee is a shape that just fits inside one of these cube. By fitting Cubees together you can make models and by placing models you can make a scene.</p> 
+					 <p>In the workshop there is a Construction Room for making models with the Cubees and a room for building a scene, the Build A Scene Room. </p>
+					 <p>The Workshop is a basic introduction to building with just Cubees. You cannot change the size of a Cubee nor make your own Cubees</p>
 				</div>
+			</div>
+			<div id="jcwkshop" class="holder">
+				<div class="subsubTitle">Workshop</div>
 			</div>
 		</div>
 		
-		<div id='node' class="dialogueBox">
-			<div class="row">
-				<div class="space"> </div>
-				<div id='nodeContent' class='content'>
-					<div id="p_corner" class="noTextCursor">&nbsp;&nbsp;Corner</div>
-					<div id="p_smooth" class="noTextCursor">&nbsp;&nbsp;Smooth</div>
-					<div id="p_joined" class="noTextCursor">&nbsp;&nbsp;Joined</div>
-				</div>
-			</div>
+		
+		<div id="sns" class = "column"> 
+			<div class="subTitle">Stretchable and Squashable Cubees - TO BE CONSTRUCTED</div>
 		</div>
 		
 	</body>

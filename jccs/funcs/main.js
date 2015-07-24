@@ -118,7 +118,6 @@ function main() {
 	var colours = document.getElementById("colours");
 	
 	var texturepics = document.getElementById("texturepics");
-	setTextures();
 	
 	var rotateX = document.getElementById("rotateX");
 	var rotateY = document.getElementById("rotateY");
@@ -299,6 +298,7 @@ function main() {
 				"Rust",
 				"Wheel"
 		];
+		
 		for(var t=0;t<textures.length;t++) {
 			var txtr = document.createElement('div');
 			txtr.imgName = "images/xt"+textures[t]+".png";
@@ -306,7 +306,9 @@ function main() {
 			txtr.alt = textures[t];
 			txtr.title = textures[t];
 			txtr.className = "textureimage";
-			txtr.addEventListener("click", function() {setMeshTexture(this)}, false );
+			txtr.material = new BABYLON.StandardMaterial("Tmat"+t, jccsStudio.scene);
+			txtr.material.emissiveTexture = new BABYLON.Texture(txtr.imgName, jccsStudio.scene);
+			txtr.addEventListener("click", function() {setMeshTexture(this.material)}, false );
 			texturepics.appendChild(txtr);
 		}
 	}
@@ -588,7 +590,7 @@ function main() {
 		}
 		confirmName = name;
 		confirmFunc = doDeleteChecked;
-		confirmDesc.innerHTML = 'Do you want to continue to and delete these?';
+		confirmDesc.innerHTML = 'Do you want to continue and delete?';
 		openConfirmDBox();
 	}
 	
@@ -761,7 +763,7 @@ function main() {
 		 hideSubMenus();
 		 menu.style.visibility = 'hidden';
 		 scene_menu.style.visibility = 'visible';
-		 Header.innerHTML ='Scene';
+		 Header.innerHTML ='Build A Scene Room';
 		 new_scene = false;
 	}
 	
@@ -845,18 +847,16 @@ function main() {
 
 	function setMeshColour(elm) {
 		for(var mesh in currentMeshes) {						
-			currentMeshes[mesh].material = elm.material;
+			currentMeshes[mesh].material = elm.material.clone(elm.material.name.substr(0,5)+(num_of_mats));;
 		}
 		colour.material=elm.material;
 		colour.colarray=elm.colarray;
 		colour.style.backgroundColor="rgb("+elm.colarray[0] +","+elm.colarray[1]+","+elm.colarray[2]+")";
 	}
 	
-	function setMeshTexture(elm) {
-		var elmTxtrMat = new BABYLON.StandardMaterial("elmTxtrMat", jccsStudio.scene);
-		elmTxtrMat.emissiveTexture = new BABYLON.Texture(elm.imgName, jccsStudio.scene);
+	function setMeshTexture(material) {
 		for(var mesh in currentMeshes) {						
-			currentMeshes[mesh].material = elmTxtrMat;
+			currentMeshes[mesh].material = material.clone(material.name.substr(0,5)+(num_of_mats));
 		}
 	}
 	
@@ -874,7 +874,7 @@ function main() {
 		hideSubMenus();
 		menu.style.visibility = 'hidden';
 		scene_menu.style.visibility = 'visible';
-		Header.innerHTML = 'scene';
+		Header.innerHTML = 'Build A Scene Room';
 		inScene = true;
 	}
 	
@@ -1607,7 +1607,7 @@ console.log(meshes[i].getChildren());
 	
 	function scene_doDelete() {
 		confirmFunc = scene_doDeletion;
-		confirmDesc.innerHTML = 'Do you want to continue to and delete the current selection?';
+		confirmDesc.innerHTML = 'Do you want to continue and delete the current selection?';
 		openConfirmDBox();
 	}
 	
@@ -1684,7 +1684,7 @@ console.log(meshes[i].getChildren());
 		scene_hideSubMenus();
 		menu.style.visibility = 'visible';
 		scene_menu.style.visibility = 'hidden';
-		Header.innerHTML = 'Construction Site';
+		Header.innerHTML = 'Construction Room';
 		inScene = false;
 	}
 	
@@ -1821,6 +1821,7 @@ console.log(meshes[i].getChildren());
 	jccsStudio.bottomLight.intensity = 0.2;
 	
 	setColours(colours);
+	setTextures();
 	
 	//Materials
 	var greenGridMat = new BABYLON.StandardMaterial("greenGrid", jccsStudio.scene);
