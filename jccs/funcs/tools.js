@@ -210,6 +210,7 @@ function getJcubeeRef(ref) {
 	return ref.substr(i);
 }
 
+
 function getPosition(e) {
     e = e || window.event;
     var cursor = {x:0, y:0};

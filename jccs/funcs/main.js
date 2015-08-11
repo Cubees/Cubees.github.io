@@ -15,11 +15,8 @@ function main() {
     var groundPoint;
 	var currentMeshes={};
 	var currentParents={};
-    //var currentMesh = null;
     
     var newModel=true;
-	//var currentMaterial;
-	//var currentMaterials={};
 	var detached = false;
 	var shiftDown=false;
 	var moveRight = new BABYLON.Vector3(60, 0, 0);  // +ve x axis direction
@@ -52,6 +49,7 @@ function main() {
 	var scene_exported = false;
 	var doAddToScene = false;
 	var inScene=false;
+	var scene_import;
 	var viewcamera = false;
 	var viewangle=5*Math.PI/180;
 	var new_scene = true;
@@ -291,6 +289,7 @@ function main() {
 	}
 	
 	//set textures in selection menu
+	var T;
 	function setTextures() {
 		var textures = [
 				"Metal",
@@ -306,7 +305,11 @@ function main() {
 			txtr.alt = textures[t];
 			txtr.title = textures[t];
 			txtr.className = "textureimage";
-			txtr.material = new BABYLON.StandardMaterial("Tmat"+t, jccsStudio.scene);
+			T=t;
+			if(t<10) {
+				T="0"+t;
+			}
+			txtr.material = new BABYLON.StandardMaterial("Tmt"+T, jccsStudio.scene);
 			txtr.material.emissiveTexture = new BABYLON.Texture(txtr.imgName, jccsStudio.scene);
 			txtr.addEventListener("click", function() {setMeshTexture(this.material)}, false );
 			texturepics.appendChild(txtr);
@@ -499,15 +502,15 @@ function main() {
 	};
 	
 	function doSaveModel(name) {
-		var alpha = {};
+		var selValue = {};
 		var names_to_save = [];
 		var types_to_save = [];
 		var materials_to_save = [];
 		var positions_to_save = [];
 		
 		for(var ref in JCubees) {
-			alpha[ref] = JCubees[ref].Jcubee.material.alpha;
-			JCubees[ref].Jcubee.material.alpha = 1;
+			selValue[ref] = JCubees[ref].getSelected();
+			JCubees[ref].hideSelected();
 			names_to_save.push(getNameRef(JCubees[ref].name));
 			types_to_save.push(getType(JCubees[ref].name));
 			materials_to_save.push(JCubees[ref].Jcubee.material.name.substr(0,5));
@@ -521,7 +524,9 @@ function main() {
 		localStorage.setItem(key, strMesh);
 		
 		for(var ref in JCubees) {
-			JCubees[ref].Jcubee.material.alpha = alpha[ref];
+			if(setValue[ref]) {
+				JCubees[ref].showSelected();
+			}
 		}
 		
 		currentModelName = name;
@@ -604,12 +609,12 @@ function main() {
 	}
 	
 	function doExport() {
-		var alpha = {};
+		var selValue = {};
 		var meshes_to_save = [];
 		
 		for(var ref in JCubees) {
-			alpha[ref] = JCubees[ref].Jcubee.material.alpha;
-			JCubees[ref].Jcubee.material.alpha = 1;
+			selValue[ref] = JCubees[ref].getSelected();
+			JCubees[ref].hideSelected();
 			meshes_to_save.push(JCubees[ref].Jcubee);
 		}
 		
@@ -621,7 +626,9 @@ function main() {
 		newwindow.document.close();
 		
 		for(var ref in JCubees) {
-			JCubees[ref].Jcubee.material.alpha = alpha[ref];
+			if(setValue[ref]) {
+				JCubees[ref].showSelected();
+			}
 		}
 		
 		exportMarker = Blank;
@@ -654,20 +661,18 @@ function main() {
 	
 	function clearSelection() {
 		for(var mesh in JCubees) {						
-			JCubees[mesh].Jcubee.material.alpha = 1;
+			JCubees[mesh]. hideSelected();
 			JCubees[mesh].hideMarkers();
 		}			
 		currentMeshes = {};
-		//currentMaterials = {};
 		hideSubMenus();
-		//selection.style.color="rgb(136, 136, 136)"
 		selection.innerHTML = "Select All";
 	}
 	
 	function selectAll() {
 		for(var mesh in JCubees) {						
-			if(!(mesh in currentMeshes)) {						
-				JCubees[mesh].Jcubee.material.alpha = 1;
+			if(!(mesh in currentMeshes)) {	
+				JCubees[mesh]. showSelected();					
 				JCubees[mesh].showMarkers();
 				currentMeshes[mesh] = JCubees[mesh].Jcubee;
 			}
@@ -677,18 +682,24 @@ function main() {
 	}
 	
 	function doCopy() {
+		var x, y, z;
+		var material;
 		var newRef;
 		var tempMeshes=[];
 		var name;
 		for(var ref in currentMeshes) {
-			newRef = "L"+currentModelName+"¬"+getType(ref)+(num_of_boxes++);			
-			JCubees[newRef] = new JcubeeBlank(newRef);
-			JCubees[newRef].Jcubee = JCubees[ref].Jcubee.clone(newRef);
-			JCubees[newRef].Jcubee.position.y += 6*60;			
-			JCubees[newRef].Jcubee.material = JCubees[ref].Jcubee.material.clone(JCubees[ref].Jcubee.material.name.substr(0,5)+(num_of_mats++));			
-			JCubees[newRef].Jcubee.material.alpha = 1;			
-			JCubees[newRef].addMarkers(jccsStudio.scene);		
-			JCubees[ref].Jcubee.material.alpha= 0.5;
+			newRef = "L"+currentModelName+"¬"+getType(ref)+(num_of_boxes++);
+			x = JCubees[ref].Jcubee.position.x;
+			y = JCubees[ref].Jcubee.position.y;
+			z = JCubees[ref].Jcubee.position.z;
+			material = JCubees[ref].Jcubee.material;
+			JCubees[newRef] = new JcubeeClone(baseMeshes[getType(ref)], newRef, x, y, z, material);				
+			//JCubees[newRef] = new JcubeeBlank(newRef);
+			//JCubees[newRef].Jcubee = JCubees[ref].Jcubee.clone(newRef);
+			JCubees[newRef].Jcubee.position.y += 6*60;
+			JCubees[newRef].showSelected();						
+			JCubees[newRef].addMarkers(jccsStudio.scene);
+			JCubees[ref].hideSelected();		
 			JCubees[ref].hideMarkers();
 			delete currentMeshes[ref];
 			tempMeshes.push(JCubees[newRef].Jcubee);			
@@ -759,7 +770,7 @@ function main() {
 	
 	//Add to Scene functions	
 	function addtoscene() {
-		 sceneSwitch(currentModelName);
+		 sceneSwitch(currentModelName);		 
 		 hideSubMenus();
 		 menu.style.visibility = 'hidden';
 		 scene_menu.style.visibility = 'visible';
@@ -768,10 +779,13 @@ function main() {
 	}
 	
 	function sceneSwitch(name) {
+		var x, y, z;
+		var material;		
 		for(var model in sceneParents) {
 			sceneParents[model].model.setEnabled(true);
 			for(var i=0; i<sceneParents[model].modelChildren.length;i++) {
 				sceneParents[model].modelChildren[i].enable();
+				sceneParents[model].modelChildren[i].hideSelected();
 			}
 		}
 		
@@ -781,18 +795,24 @@ function main() {
 		var modelName = "I"+name+"^"+num_in_scene+"*";
 		sceneParents[parentName] ={};
 		sceneParents[parentName].name = parentName;
-		sceneParents[parentName].model = BABYLON.Mesh.CreateBox(parentName, 60.0, jccsStudio.scene);
+		sceneParents[parentName].model = baseMeshes["box"].clone(parentName);
+		sceneParents[parentName].model.id = parentName;
+		sceneParents[parentName].clone = baseMeshes["box"].clone(parentName+"clone");
 		sceneParents[parentName].model.visibility = 0;
-		selectNewModel(sceneParents[parentName]);
+		sceneParents[parentName].clone.visibility = 0;
+				
+		selectNewModel(sceneParents[parentName]);		
 		sceneParents[parentName].modelChildren = [];
 		
 		var newRef;	
 	
-		for(var ref in JCubees) {			
-			sceneModels[modelName+ref] = new JcubeeBlank(modelName+ref);
-			sceneModels[modelName+ref].Jcubee = JCubees[ref].Jcubee.clone(modelName+ref);
-			sceneModels[modelName+ref].Jcubee.material = JCubees[ref].Jcubee.material.clone(JCubees[ref].Jcubee.material.name.substr(0,5)+(num_of_mats++));
-			sceneModels[modelName+ref].Jcubee.material.alpha = 1;			
+		for(var ref in JCubees) {	
+			material = JCubees[ref].Jcubee.material;
+			x = JCubees[ref].Jcubee.position.x;
+			y = JCubees[ref].Jcubee.position.y;
+			z = JCubees[ref].Jcubee.position.z;
+			sceneModels[modelName+ref] = new JcubeeClone(baseMeshes[getType(ref)], modelName+ref, x, y, z, material);			
+			sceneModels[modelName+ref].showSelected();		
 			sceneModels[modelName+ref].Jcubee.parent = sceneParents[parentName].model;
 			sceneModels[modelName+ref].parent = sceneParents[parentName];
 			sceneModels[modelName+ref].addMarkers(jccsStudio.scene,0.5);
@@ -801,8 +821,11 @@ function main() {
 		}
 		
 		sceneParents[parentName].model.position.y = 9.5*60;
+		sceneParents[parentName].clone.position.y = 9.5*60;
 		sceneParents[parentName].model.scaling = new BABYLON.Vector3(0.5, 0.5, 0.5);
+		sceneParents[parentName].clone.scaling = new BABYLON.Vector3(0.5, 0.5, 0.5);
 		sceneParents[parentName].model.computeWorldMatrix(true);
+		sceneParents[parentName].clone.computeWorldMatrix(true);
 		
 		for(var i=0; i<sceneParents[parentName].modelChildren.length;i++) {
 			sceneParents[parentName].modelChildren[i].Jcubee.computeWorldMatrix(true);
@@ -810,7 +833,8 @@ function main() {
 		}
 		
 		sceneParents[parentName].modelBoundary = childrenBoundary(sceneParents[parentName], jccsStudio.scene );
-		sceneParents[parentName].modelBoundary.parent = sceneParents[parentName].model;
+		sceneParents[parentName].modelBoundary.parent = sceneParents[parentName].clone;
+		
 		
 		num_in_scene++;			
 			
@@ -847,7 +871,7 @@ function main() {
 
 	function setMeshColour(elm) {
 		for(var mesh in currentMeshes) {						
-			currentMeshes[mesh].material = elm.material.clone(elm.material.name.substr(0,5)+(num_of_mats));;
+			currentMeshes[mesh].material = elm.material;
 		}
 		colour.material=elm.material;
 		colour.colarray=elm.colarray;
@@ -954,7 +978,6 @@ function main() {
 			jcModels[name][newRef].disable();
 		}
 
-		
 		currentModelName = name;
 		storeMarker = Blank;
 		model.innerHTML = "Model -- "+currentModelName+storeMarker+saveMarker+exportMarker;
@@ -973,6 +996,8 @@ function main() {
 	}
 	
 	function doFetchToConstruct() {
+		var x, y, z;
+		var material;
 		var name = fetchname.innerHTML;		
 		for( var ref in JCubees) {
 			if(ref in currentMeshes) {
@@ -984,11 +1009,14 @@ function main() {
 		}
 		JCubees ={};
 		currentMeshes ={};
-		for (var ref in jcModels[name]) {
-			newRef = "L"+getModelRef(ref)+"¬"+getNameRef(ref);					
-			JCubees[newRef] = new JcubeeBlank(newRef);					
-			JCubees[newRef].Jcubee = jcModels[name][ref].Jcubee.clone(newRef);			
-			JCubees[newRef].Jcubee.material = jcModels[name][ref].Jcubee.material.clone(jcModels[name][ref].Jcubee.material.name.substr(0,5)+(num_of_mats++));		
+		for (var ref in jcModels[name]) {			
+			newRef = "L"+getModelRef(ref)+"¬"+getNameRef(ref);
+			x= jcModels[name][ref].Jcubee.position.x;
+			y= jcModels[name][ref].Jcubee.position.y;
+			z= jcModels[name][ref].Jcubee.position.z;
+			material = jcModels[name][ref].Jcubee.material;					
+			JCubees[newRef] = new JcubeeClone(baseMeshes[getType(ref)], newRef, x, y, z, material);					
+			JCubees[newRef].showSelected();			
 			JCubees[newRef].addMarkers(jccsStudio.scene);
 			JCubees[newRef].enable();			
 		}
@@ -1005,6 +1033,8 @@ function main() {
 	}
 	
 	function doFetchToScene() {
+		var x, y, z;
+		var material;
 		var name = fetchname.innerHTML;
 		new_scene = false;
 		collide = {left:false, right:false, up:false, down:false, front:false, back:false};
@@ -1013,16 +1043,21 @@ function main() {
 		var modelName = "I"+name+"^"+num_in_scene+"*";
 		sceneParents[parentName] ={};
 		sceneParents[parentName].name = parentName;
-		sceneParents[parentName].model = BABYLON.Mesh.CreateBox(parentName, 60.0, jccsStudio.scene);
+		sceneParents[parentName].model = baseMeshes["box"].clone(parentName);
+		sceneParents[parentName].model.id = parentName;
+		sceneParents[parentName].clone = baseMeshes["box"].clone(parentName+"clone");
 		sceneParents[parentName].model.visibility = 0;
+		sceneParents[parentName].clone.visibility = 0;
 		selectNewModel(sceneParents[parentName]);
 		sceneParents[parentName].modelChildren = [];	
 	
-		for(var ref in jcModels[name]) {									
-			sceneModels[modelName+ref] = new JcubeeBlank(modelName+ref);
-			sceneModels[modelName+ref].Jcubee = jcModels[name][ref].Jcubee.clone(modelName+ref);
-			sceneModels[modelName+ref].Jcubee.material = jcModels[name][ref].Jcubee.material.clone(jcModels[name][ref].Jcubee.material.name.substr(0,5)+(num_of_mats++));
-			sceneModels[modelName+ref].Jcubee.material.alpha = 1;			
+		for(var ref in jcModels[name]) {
+			x= jcModels[name][ref].Jcubee.position.x;
+			y= jcModels[name][ref].Jcubee.position.y;
+			z= jcModels[name][ref].Jcubee.position.z;
+			material = jcModels[name][ref].Jcubee.material;					
+			sceneModels[modelName+ref] = new JcubeeClone(baseMeshes[getType(ref)], name, x, y, z, material);	
+			sceneModels[modelName+ref].showSelected();		
 			sceneModels[modelName+ref].Jcubee.parent = sceneParents[parentName].model;
 			sceneModels[modelName+ref].parent = sceneParents[parentName];
 			sceneModels[modelName+ref].addMarkers(jccsStudio.scene,0.5);
@@ -1032,6 +1067,9 @@ function main() {
 		sceneParents[parentName].model.position.y = 9.5*60;
 		sceneParents[parentName].model.scaling = new BABYLON.Vector3(0.5, 0.5, 0.5);
 		sceneParents[parentName].model.computeWorldMatrix(true);
+		sceneParents[parentName].clone.position.y = 9.5*60;
+		sceneParents[parentName].clone.scaling = new BABYLON.Vector3(0.5, 0.5, 0.5);
+		sceneParents[parentName].clone.computeWorldMatrix(true);
 		
 		for(var i=0; i<sceneParents[parentName].modelChildren.length;i++) {
 			sceneParents[parentName].modelChildren[i].Jcubee.computeWorldMatrix(true);
@@ -1039,7 +1077,7 @@ function main() {
 		}
 		
 		sceneParents[parentName].modelBoundary = childrenBoundary(sceneParents[parentName], jccsStudio.scene );
-		sceneParents[parentName].modelBoundary.parent = sceneParents[parentName].model;
+		sceneParents[parentName].modelBoundary.parent = sceneParents[parentName].clone;
 		
 		num_in_scene++;	
 		
@@ -1064,7 +1102,7 @@ function main() {
 		currentModelName = name;
 		
 		var type;
-		var saveName,JCname;
+		var saveName;
 		var matName;
 			
 		for( var ref in JCubees) {
@@ -1082,32 +1120,16 @@ function main() {
 		for(var i=0; i<models.n.length; i++) {
 			saveName = models.n[i];
 			type = models.t[i];
-			matName = models.m[i];			
-			switch (type) {
-				case "box":
-					JCname = makeBox();
-				break
-				case "cyl":
-					JCname = makeCylinder();
-				break
-				case "sph":
-					JCname = makeSphere();
-				break
-				case "rof":
-					JCname = makeRoof();
-				break
-			}			
-			JCubees[JCname].Jcubee.material = jccsStudio.scene.getMaterialByName(matName).clone(matName+(num_of_mats++));
-			JCubees[JCname].Jcubee.position.x = models.p[i][0];
-			JCubees[JCname].Jcubee.position.y = models.p[i][1];
-			JCubees[JCname].Jcubee.position.z = models.p[i][2];
-			JCubees[JCname].moveT(JCubees[JCname].Jcubee.position);
+			matName = models.m[i];
+			name="L"+currentModelName+"¬"+type+(num_of_boxes++);
+			material = 	jccsStudio.scene.getMaterialByName(matName);
+			JCubees[name] = new JcubeeClone(baseMeshes[type], name, models.p[i][0], models.p[i][1], models.p[i][2], material);		
+			JCubees[name].addMarkers(jccsStudio.scene);
+			JCubees[name].moveT(JCubees[name].Jcubee.position);
 		}
-		
 		
 		selectAll();
 		
-		currentModelName = name;
 		storeMarker = storeMarker; 
 		saveMarker = Blank; 
 		exportMarker = exportIcon;
@@ -1122,29 +1144,50 @@ function main() {
 		
 		collide = {left:false, right:false, up:false, down:false, front:false, back:false};
 		
-		var parentName = "Iparent"+name+num_in_scene;
-		var modelName = "I"+name+num_in_scene;
+		var type;
+		var saveName,modelName;
+		var name, matName;
+		var material;
+		var x, y, z;
+					
+		var strModels=localStorage.getItem('CUBEE'+name);
+		var models = JSON.parse(strModels);
+		
+		var parentName = "Iparent"+name+"^"+num_in_scene+"*";
+		var modelName = "I"+name+"^"+num_in_scene+"*";
 		sceneParents[parentName] ={};
 		sceneParents[parentName].name = parentName;
-		sceneParents[parentName].model = BABYLON.Mesh.CreateBox(parentName, 60.0, jccsStudio.scene);
+		sceneParents[parentName].model = baseMeshes["box"].clone(parentName);
+		sceneParents[parentName].model.id = parentName;
+		sceneParents[parentName].clone = baseMeshes["box"].clone(parentName+"clone");
 		sceneParents[parentName].model.visibility = 0;
+		sceneParents[parentName].clone.visibility = 0;
 		selectNewModel(sceneParents[parentName]);
-		sceneParents[parentName].modelChildren = [];	
-	
-		for(var ref in jcModels[name]) {						
-			sceneModels[modelName+ref] = new JcubeeBlank(modelName+ref);
-			sceneModels[modelName+ref].Jcubee = jcModels[name][ref].Jcubee.clone(modelName+ref);
-			sceneModels[modelName+ref].Jcubee.material = jcModels[name][ref].Jcubee.material.clone(jcModels[name][ref].Jcubee.material.name.substr(0,5)+(num_of_mats++));
-			sceneModels[modelName+ref].Jcubee.material.alpha = 1;			
-			sceneModels[modelName+ref].Jcubee.parent = sceneParents[parentName].model;
-			sceneModels[modelName+ref].parent = sceneParents[parentName];
-			sceneModels[modelName+ref].addMarkers(jccsStudio.scene,0.5);
-			sceneParents[parentName].modelChildren.push(sceneModels[modelName+ref]);				
+		sceneParents[parentName].modelChildren = [];
+
+		for(var i=0; i<models.n.length; i++) {
+			saveName = models.n[i];
+			type = models.t[i];
+			matName = models.m[i];
+			name = "L"+saveName+"¬"+type+(num_of_boxes++);
+			material = jccsStudio.scene.getMaterialByName(matName);
+			x = models.p[i][0];
+			y = models.p[i][1];
+			z = models.p[i][2];
+			sceneModels[modelName+saveName] = new JcubeeClone(baseMeshes[type], modelName+saveName, x, y, z, material);						
+			sceneModels[modelName+saveName].showSelected();			
+			sceneModels[modelName+saveName].Jcubee.parent = sceneParents[parentName].model;
+			sceneModels[modelName+saveName].parent = sceneParents[parentName];
+			sceneModels[modelName+saveName].addMarkers(jccsStudio.scene,0.5);
+			sceneParents[parentName].modelChildren.push(sceneModels[modelName+saveName]);				
 		}
 		
 		sceneParents[parentName].model.position.y = 9.5*60;
 		sceneParents[parentName].model.scaling = new BABYLON.Vector3(0.5, 0.5, 0.5);
 		sceneParents[parentName].model.computeWorldMatrix(true);
+		sceneParents[parentName].clone.position.y = 9.5*60;
+		sceneParents[parentName].clone.scaling = new BABYLON.Vector3(0.5, 0.5, 0.5);
+		sceneParents[parentName].clone.computeWorldMatrix(true);
 		
 		for(var i=0; i<sceneParents[parentName].modelChildren.length;i++) {
 			sceneParents[parentName].modelChildren[i].Jcubee.computeWorldMatrix(true);
@@ -1152,7 +1195,7 @@ function main() {
 		}
 		
 		sceneParents[parentName].modelBoundary = childrenBoundary(sceneParents[parentName], jccsStudio.scene );
-		sceneParents[parentName].modelBoundary.parent = sceneParents[parentName].model;
+		sceneParents[parentName].modelBoundary.parent = sceneParents[parentName].clone;
 		
 		num_in_scene++;			
 			
@@ -1176,7 +1219,17 @@ function main() {
 		}
 	}
 	
-	function openImport() {	
+	function openImport() {
+		scene_import = false;
+		openImporter();
+	}
+	
+	function openImportScene() {
+		scene_import = true;
+		openImporter();
+	}
+	
+	function openImporter() {	
 		importTitle.style.backgroundColor = "#AAAAAA";
 		importTitle.innerHTML ="Import";
 		if(!stored[currentModelName] && !inScene) {
@@ -1206,7 +1259,7 @@ function main() {
 	};
 	
 	function parseImport(data) {
-		if(inScene) {
+		if(inScene && scene_import) {
 			var re = /Iparent/i;
 			if(!re.test(data)) {
 				importTitle.style.backgroundColor = "#FF0000";
@@ -1215,7 +1268,18 @@ function main() {
 			}
 			importTitle.style.backgroundColor = "#AAAAAA";
 			importTitle.innerHTML ="Import";
-			doImportToScene(data);
+			doImportSceneToScene(data);
+		}
+		else if(inScene && !scene_import){ 
+			var re = /Iparent/i;
+			if(re.test(data)) {
+				importTitle.style.backgroundColor = "#FF0000";
+				importTitle.innerHTML ="Import - Not a Model File";
+				return
+			}
+			importTitle.style.backgroundColor = "#AAAAAA";
+			importTitle.innerHTML ="Import";			
+			doImportToScene(data)
 		}
 		else {
 			var re = /Iparent/i;
@@ -1244,13 +1308,13 @@ function main() {
 		
 		var re = /\s*/gi;
 		data = data.replace(re, '');
-		if(data.match)
 		
 		BABYLON.SceneLoader.ImportMesh("", "", 'data:'+data, jccsStudio.scene, function (meshes, particleSystems, skeletons) {
 				var newRef;
 				var modelName= getModelRef(meshes[0].name);
-				for (var i=0; i<meshes.length; i++) {			
-					newRef = "L"+modelName+"¬"+getNameRef(meshes[i].name);					
+				for (var i=0; i<meshes.length; i++) {							
+					newRef = "L"+modelName+"¬"+getType(meshes[i].name)+(num_of_boxes++);	
+					meshes[i].name = newRef;								
 					JCubees[newRef] = new JcubeeBlank(newRef);		
 					JCubees[newRef].Jcubee = meshes[i];
 					JCubees[newRef].addMarkers(jccsStudio.scene);
@@ -1269,9 +1333,86 @@ function main() {
 				importDB.style.visibility = 'hidden'; 
 		});
 		
+		selectAll();
+		
+		currentModelName = name;
+		storeMarker = Blank;
+		saveMarker = saveIcon; 
+		exportMarker = exportIcon;
+		model.innerHTML = "Model -- "+currentModelName+storeMarker+saveMarker+exportMarker;
+		stored[currentModelName] = true;
+		fetchDB.style.visibility = 'hidden';
+				
 	}
 	
-	function doImportToScene(data) {
+	function doImportToScene(data) { //imports model to scene		
+		for(var parent in sceneParents) {
+			for(var i = 0; i<sceneParents[parent].modelChildren.length; i++) {
+				sceneParents[parent].modelChildren[i].hideSelected();					
+			}
+		}
+		collide = {left:false, right:false, up:false, down:false, front:false, back:false};
+		
+		var re = /\s*/gi;
+		data = data.replace(re, '');
+		
+		BABYLON.SceneLoader.ImportMesh("", "", 'data:'+data, jccsStudio.scene, function (meshes, particleSystems, skeletons) {
+				var newRef;
+				var mName= getModelRef(meshes[0].name);
+				var parentName = "Iparent"+mName+"^"+num_in_scene+"*";
+				var modelName = "I"+mName+"^"+num_in_scene+"*";
+				var meshName, name;
+				sceneParents[parentName] ={};
+				sceneParents[parentName].name = parentName;
+				sceneParents[parentName].model = baseMeshes["box"].clone(parentName);
+				sceneParents[parentName].model.id = parentName;
+				sceneParents[parentName].clone = baseMeshes["box"].clone(parentName+"clone");
+				sceneParents[parentName].model.visibility = 0;
+				sceneParents[parentName].clone.visibility = 0;
+				selectNewModel(sceneParents[parentName]);
+				sceneParents[parentName].modelChildren = [];
+				for (var i=0; i<meshes.length; i++) {	
+					meshName=getNameRef(meshes[i].name);
+					type = getType(meshes[i].name);
+					meshName = "L"+meshName+"¬"+type+(num_of_boxes++);
+					meshes[i].name = meshName;
+					sceneModels[modelName+meshName] = new JcubeeBlank(modelName+meshName);	
+					sceneModels[modelName+meshName].Jcubee = meshes[i];	
+					sceneModels[modelName+meshName].Jcubee.name = modelName+meshName;				
+					sceneModels[modelName+meshName].showSelected();			
+					sceneModels[modelName+meshName].Jcubee.parent = sceneParents[parentName].model;
+					sceneModels[modelName+meshName].parent = sceneParents[parentName];
+					sceneModels[modelName+meshName].addMarkers(jccsStudio.scene,0.5);
+					sceneParents[parentName].modelChildren.push(sceneModels[modelName+meshName]);
+				}
+				
+				sceneParents[parentName].model.position.y = 9.5*60;
+				sceneParents[parentName].model.scaling = new BABYLON.Vector3(0.5, 0.5, 0.5);
+				sceneParents[parentName].model.computeWorldMatrix(true);
+				sceneParents[parentName].clone.position.y = 9.5*60;
+				sceneParents[parentName].clone.scaling = new BABYLON.Vector3(0.5, 0.5, 0.5);
+				sceneParents[parentName].clone.computeWorldMatrix(true);
+		
+				for(var i=0; i<sceneParents[parentName].modelChildren.length;i++) {
+					sceneParents[parentName].modelChildren[i].Jcubee.computeWorldMatrix(true);
+					sceneParents[parentName].modelChildren[i].moveT(sceneParents[parentName].modelChildren[i].Jcubee.getAbsolutePosition());		
+				}
+		
+				sceneParents[parentName].modelBoundary = childrenBoundary(sceneParents[parentName], jccsStudio.scene );
+				sceneParents[parentName].modelBoundary.parent = sceneParents[parentName].clone;
+		});
+		
+		num_in_scene++;	
+
+		scene_exported = false;
+		scene_exportMarker = exportIcon;
+		scene_scene.innerHTML = "Scene -- "+scene_exportMarker;	
+		
+			
+		importDB.style.visibility = 'hidden'; 
+	}
+	
+	function doImportSceneToScene(data) {
 		newScene();
 		collide = {left:false, right:false, up:false, down:false, front:false, back:false};
 		
@@ -1279,78 +1420,66 @@ function main() {
 		data = data.replace(re, '');
 		
 		BABYLON.SceneLoader.ImportMesh("", "", 'data:'+data, jccsStudio.scene, function (meshes, particleSystems, skeletons) {
-				var ref;
-				var modelName= getModelRef(meshes[0].name);	
-console.log("meshes", meshes.length);							
-				for(var i=0; i<meshes.length; i++) {	
-console.log(meshes[i].name,getSceneRef(meshes[i].name), getSceneNum(meshes[i].name), getJcubeeRef(meshes[i].name));	
-console.log(getSceneRef(meshes[i].name).substr(0,7));
-						if(getSceneRef(meshes[i].name).substr(0,7) == "Iparent") {									
-							parentName = "Iparent^"+num_in_scene+"*";
-							sceneParents[parentName] ={};
-							sceneParents[parentName].name = parentName;
-							sceneParents[parentName].model = meshes[i].clone(parentName, "", true);
-							sceneParents[parentName].modelChildren = [];
-console.log("here");						
-console.log(meshes[i].getChildren());
-						}				  	
-		/*		 	}
-				 	else {
-				 		modelName = getSceneNum(meshes[i].name)+"^"+num_in_scene+"*"+getJcubeeRef(meshes[i].name);
-				 	}
-				  
-				 	ref = getSceneRef(meshes[i].name)+"^"+num_in_scene+"*"+getJcubeeRef(meshes[i].name);					
-					JCubees[newRef] = new JcubeeBlank(newRef);		
-					JCubees[newRef].Jcubee = meshes[i];
-					JCubees[newRef].addMarkers(jccsStudio.scene);
-					JCubees[newRef].enable();*/
-				} 
+
+				var mName, parentName, modelName;
+				var meshName, name;
 				
-	/*			selectAll();		
-				currentModelName = modelName;
-				storeMarker = storeIcon; 
-				saveMarker = saveIcon; 
-				exportMarker = exportIcon;
-				model.innerHTML = "Model -- "+currentModelName+storeMarker+saveMarker+exportMarker;
-				stored[currentModelName] = false;
-				saved[currentModelName] = false;
-				exported[currentModelName] = false;
-				importDB.style.visibility = 'hidden';  */
+				for (var i=0; i<meshes.length; i++) {
+					if(meshes[i].name.substr(0,7) == "Iparent")	{											
+						mName= getSceneRef(meshes[i].name);					
+						parentName = mName+"^"+num_in_scene+"*";						
+						sceneParents[parentName] ={};
+						sceneParents[parentName].name = parentName;
+						sceneParents[parentName].model = meshes[i];
+						sceneParents[parentName].clone = baseMeshes["box"].clone(parentName+"clone");
+						sceneParents[parentName].clone.position.x = sceneParents[parentName].model.position.x;
+						sceneParents[parentName].clone.position.y = sceneParents[parentName].model.position.y;
+						sceneParents[parentName].clone.position.z = sceneParents[parentName].model.position.z;
+						sceneParents[parentName].model.visibility = 0;
+						sceneParents[parentName].clone.visibility = 0;
+						sceneParents[parentName].modelChildren = [];
+						children = meshes[i].getChildren();	
+						meshes[i].name = parentName;
+						sceneParents[parentName].model.name = parentName;
+						sceneParents[parentName].model.id = parentName;					
+						for(var j=0; j<children.length; j++) {					
+							meshName=getModelRef(children[j].name);
+							type = getType(children[j].name);
+							meshName = "I"+meshName+"¬"+type+(num_of_boxes++);						
+							children[j].name = meshName;
+							sceneModels[meshName] = new JcubeeBlank(meshName);	
+							sceneModels[meshName].Jcubee = children[j];	
+							sceneModels[meshName].Jcubee.name = meshName;							
+							sceneModels[meshName].Jcubee.parent = sceneParents[parentName].model;
+							sceneModels[meshName].parent = sceneParents[parentName];
+							sceneModels[meshName].addMarkers(jccsStudio.scene,0.5);
+							sceneParents[parentName].modelChildren.push(sceneModels[meshName]);
+						}
+						
+						num_in_scene++;
+					}	
+					
+					//sceneParents[parentName].model.scaling = new BABYLON.Vector3(0.5, 0.5, 0.5);
+					sceneParents[parentName].model.computeWorldMatrix(true);
+					sceneParents[parentName].clone.scaling = new BABYLON.Vector3(0.5, 0.5, 0.5);
+					sceneParents[parentName].clone.computeWorldMatrix(true);
+					
+					for(var j=0; j<sceneParents[parentName].modelChildren.length;j++) {
+						sceneParents[parentName].modelChildren[j].Jcubee.computeWorldMatrix(true);
+						sceneParents[parentName].modelChildren[j].moveT(sceneParents[parentName].modelChildren[j].Jcubee.getAbsolutePosition());		
+					}
+		
+					sceneParents[parentName].modelBoundary = childrenBoundary(sceneParents[parentName], jccsStudio.scene );
+					sceneParents[parentName].modelBoundary.parent = sceneParents[parentName].clone;
+					
+					
+				}
+				
+				
 		});
 		
-/*		var parentName = "Iparent"+name+num_in_scene;
-		var modelName = "I"+name+num_in_scene;
-		sceneParents[parentName] ={};
-		sceneParents[parentName].name = parentName;
-		sceneParents[parentName].model = BABYLON.Mesh.CreateBox(parentName, 60.0, jccsStudio.scene);
-		sceneParents[parentName].model.visibility = 0;
-		selectNewModel(sceneParents[parentName]);
-		sceneParents[parentName].modelChildren = [];	
-	
-		for(var ref in jcModels[name]) {						
-			sceneModels[modelName+ref] = new JcubeeBlank(modelName+ref);
-			sceneModels[modelName+ref].Jcubee = jcModels[name][ref].Jcubee.clone(modelName+ref);
-			sceneModels[modelName+ref].Jcubee.material = jcModels[name][ref].Jcubee.material.clone(jcModels[name][ref].Jcubee.material.name.substr(0,5)+(num_of_mats++));
-			sceneModels[modelName+ref].Jcubee.material.alpha = 1;			
-			sceneModels[modelName+ref].Jcubee.parent = sceneParents[parentName].model;
-			sceneModels[modelName+ref].parent = sceneParents[parentName];
-			sceneModels[modelName+ref].addMarkers(jccsStudio.scene,0.5);
-			sceneParents[parentName].modelChildren.push(sceneModels[modelName+ref]);				
-		}
 		
-		sceneParents[parentName].model.position.y = 9.5*60;
-		sceneParents[parentName].model.scaling = new BABYLON.Vector3(0.5, 0.5, 0.5);
-		sceneParents[parentName].model.computeWorldMatrix(true);
 		
-		for(var i=0; i<sceneParents[parentName].modelChildren.length;i++) {
-			sceneParents[parentName].modelChildren[i].Jcubee.computeWorldMatrix(true);
-			sceneParents[parentName].modelChildren[i].moveT(sceneParents[parentName].modelChildren[i].Jcubee.getAbsolutePosition());		
-		}
-		
-		sceneParents[parentName].modelBoundary = childrenBoundary(sceneParents[parentName], jccsStudio.scene );
-		sceneParents[parentName].modelBoundary.parent = sceneParents[parentName].model;
-		
-		num_in_scene++;			*/
 			
 		importDB.style.visibility = 'hidden'; 
 	}
@@ -1382,9 +1511,10 @@ console.log(meshes[i].getChildren());
 	var scene_fetch = document.getElementById("scene_fetch");
 	//var scene_save = document.getElementById("scene_save");
 	//var scene_save_as = document.getElementById("scene_save_as");
-	//var scene_openFile = document.getElementById("scene_open");
+	var scene_openFile = document.getElementById("scene_open");
 	var scene_export = document.getElementById("scene_export");
 	var scene_import = document.getElementById("scene_import");
+	var scene_importScene = document.getElementById("scene_importScene");
 	
 		// Selection Menu and Sub-Menus
 	var scene_selection = document.getElementById("scene_selection");
@@ -1408,7 +1538,7 @@ console.log(meshes[i].getChildren());
 		openFile.parentNode.removeChild(openFile);
 		//scene_save.parentNode.removeChild(scene_save);
 		//scene_save_as.parentNode.removeChild(scene_save_as);
-		//scene_openFile.parentNode.removeChild(scene_openFile);
+		scene_openFile.parentNode.removeChild(scene_openFile);
 		saveMarker="";
 		Blank="";
 	}
@@ -1427,11 +1557,13 @@ console.log(meshes[i].getChildren());
 	scene_file_.addEventListener('click', scene_showFileMenu, false);
 	scene_fetch.addEventListener('click', fillFetch, false);
 	scene_new.addEventListener('click', scene_doNew, false);
+	scene_openFile.addEventListener('click', openOpen, false);
 	//scene_save.addEventListener('click', scene_doSave, false);
 	//scene_save_as.addEventListener('click', scene_openSaveAs, false);
 	
 	scene_export.addEventListener('click', scene_doExport, false);
 	scene_import.addEventListener('click', openImport, false);
+	scene_importScene.addEventListener('click', openImportScene, false);
 
 	//return to construction site event
 	scene_constructSite.addEventListener('click', scene_to_construct, false);
@@ -1478,7 +1610,7 @@ console.log(meshes[i].getChildren());
 	function scene_clearSelection() {
 		for(var model in sceneParents) {						
 			for(var i=0; i<sceneParents[model].modelChildren.length;i++) {
-				sceneParents[model].modelChildren[i].Jcubee.material.alpha = 1;
+				sceneParents[model].modelChildren[i].hideSelected();
 				sceneParents[model].modelChildren[i].hideMarkers();
 			}
 		}			
@@ -1491,7 +1623,7 @@ console.log(meshes[i].getChildren());
 		for(var model in sceneParents) {						
 			if(!(model in currentParents)) {
 				for(var i=0; i<sceneParents[model].modelChildren.length;i++) {
-					sceneParents[model].modelChildren[i].Jcubee.material.alpha = 1;
+					sceneParents[model].modelChildren[i].showSelected();
 					sceneParents[model].modelChildren[i].showMarkers();
 				}						
 				currentParents[model] = sceneParents[model];
@@ -1507,7 +1639,7 @@ console.log(meshes[i].getChildren());
 		for(var model in sceneParents) {
 			for(var i=0; i<sceneParents[model].modelChildren.length;i++) {
 				sceneParents[model].modelChildren[i].disableMarkers();
-				sceneParents[model].modelChildren[i].Jcubee.material.alpha = 1;
+				sceneParents[model].modelChildren[i].hideSelected();
 			}		
 		}
 		frontPlane.setEnabled(false);
@@ -1530,7 +1662,7 @@ console.log(meshes[i].getChildren());
 			for(var i=0; i<sceneParents[model].modelChildren.length;i++) {
 				sceneParents[model].modelChildren[i].enable();
 				if (!(model in currentParents)) {
-					sceneParents[model].modelChildren[i].Jcubee.material.alpha = 0.4;
+					sceneParents[model].modelChildren[i].hideSelected();
 				}
 			}
 					
@@ -1569,8 +1701,8 @@ console.log(meshes[i].getChildren());
 				sceneModels[modelName].Jcubee = currentMesh.clone(modelName);				
 				//sceneModels[modelName].Jcubee.position.y +=6*60;
 				sceneModels[modelName].Jcubee.material = currentMesh.material.clone(currentMesh.material.name.substr(0,5)+(num_of_mats++));
-				sceneModels[modelName].Jcubee.material.alpha = 1;
-				currentMesh.material.alpha = 0.5;			
+				sceneModels[modelName].showSelected();
+				currentParents[model].modelChildren[i].hideSelected();			
 				sceneModels[modelName].Jcubee.parent = sceneParents[parentName].model;
 				sceneModels[modelName].parent = sceneParents[parentName];
 				sceneModels[modelName].addMarkers(jccsStudio.scene,0.5);
@@ -1706,19 +1838,19 @@ console.log(meshes[i].getChildren());
 	}
 	
 	function scene_doExport() {
-		var alpha = {};
+		var selValue = {};
 		var meshes_to_save = [];
 
 		for(var parent in sceneParents) {
-			//meshes_to_save.push(sceneParents[parent].model);
+			meshes_to_save.push(sceneParents[parent].model);
 			for(var i=0; i<sceneParents[parent].modelChildren.length; i++) {
-				sceneParents[parent].modelChildren[i].Jcubee.material.alpha = 1;
-				alpha[sceneParents[parent].modelChildren[i].name] = sceneParents[parent].modelChildren[i].Jcubee.material.alpha;
-				meshes_to_save.push(sceneParents[parent].modelChildren[i].Jcubee);					
+				sceneParents[parent].modelChildren[i].hideSelected;
+				selValue[sceneParents[parent].modelChildren[i].name] = sceneParents[parent].modelChildren[i].getSelected();
+				//meshes_to_save.push(sceneParents[parent].modelChildren[i].Jcubee);					
 			}
 			
 		}		
-		var serializedMesh = BABYLON.SceneSerializer.SerializeMesh(meshes_to_save, true);
+		var serializedMesh = BABYLON.SceneSerializer.SerializeMesh(meshes_to_save, false, true);
 		
 		var strMesh = JSON.stringify(serializedMesh);
 		newwindow=window.open("",currentModelName);
@@ -1727,7 +1859,9 @@ console.log(meshes[i].getChildren());
 		
 		for(var parent in sceneParents) {
 			for(var i=0; i<sceneParents[parent].modelChildren.length; i++) {
-				sceneParents[parent].modelChildren[i].Jcubee.material.alpha = alpha[sceneParents[parent].modelChildren[i].name];					
+				if(selValue[parent]) {
+					sceneParents[parent].modelChildren[i].showSelected();
+				}					
 			}
 			meshes_to_save.push(sceneParents[parent].model);
 		}
@@ -1753,6 +1887,7 @@ console.log(meshes[i].getChildren());
 	}
 	
 	function newScene() {
+		num_in_scene = 0;
 		new_scene = true;
 		scene_hideSubMenus();
 		
@@ -1822,7 +1957,9 @@ console.log(meshes[i].getChildren());
 	
 	setColours(colours);
 	setTextures();
-	
+
+	colour.material = jccsStudio.scene.getMaterialByName("mat02");
+		
 	//Materials
 	var greenGridMat = new BABYLON.StandardMaterial("greenGrid", jccsStudio.scene);
 	greenGridMat.emissiveColor = new BABYLON.Color3(0,1,0);
@@ -1842,27 +1979,28 @@ console.log(meshes[i].getChildren());
 	var brownGridMat = new BABYLON.StandardMaterial("brown", jccsStudio.scene);
 	brownGridMat.emissiveColor = new BABYLON.Color3(0.4,0.2,0);
 	
-	var blueMat = new BABYLON.StandardMaterial("mat02", jccsStudio.scene);
-	blueMat.emissiveColor = new BABYLON.Color3(0,0,1);
+	//var blueMat = new BABYLON.StandardMaterial("mat02", jccsStudio.scene);
+	//blueMat.emissiveColor = new BABYLON.Color3(0,0,1);
 	
-	var redMat = new BABYLON.StandardMaterial("red", jccsStudio.scene);
-	redMat.emissiveColor = new BABYLON.Color3(1,0,0);
+	//var redMat = new BABYLON.StandardMaterial("red", jccsStudio.scene);
+	//redMat.emissiveColor = new BABYLON.Color3(1,0,0);
 	
 	var blackMat = new BABYLON.StandardMaterial("black", jccsStudio.scene);
 	blackMat.emissiveColor = new BABYLON.Color3(0,0,0);
 	
-	colour.material = blueMat;
-	
 	//Follow Camera holder and Target
 	
 	var holder = BABYLON.Mesh.CreateBox('holder', 1, jccsStudio.scene);
-	//holder.material = blackMat;
+	holder.material = blackMat;
+	holder.material.alpha = 0.2;
 	holder.isVisible = false;
 	
 	var viewer = {};
 	viewer.front = BABYLON.Mesh.CreatePlane('viewerfront', 1, jccsStudio.scene);
 	viewer.front.position.z = 0.5;
 	viewer.front.parent = holder;
+	viewer.material = blackMat;
+	viewer.material.alpha = 0.5;
 	viewer.front.isVisible = false;
 	
 	viewer.back = BABYLON.Mesh.CreatePlane('viewerback', 1, jccsStudio.scene);
@@ -1874,6 +2012,7 @@ console.log(meshes[i].getChildren());
 	viewer.left.rotation.y = Math.PI/2;
 	viewer.left.position.x = -1;
 	viewer.left.parent = holder;
+	viewer.left.isVisible = false;
 	
 	viewer.right = BABYLON.Mesh.CreatePlane('viewerright', 1, jccsStudio.scene);
 	viewer.right.rotation.y = Math.PI/2;
@@ -1895,9 +2034,18 @@ console.log(meshes[i].getChildren());
 	
 	var target = BABYLON.Mesh.CreatePlane('target', 1, jccsStudio.scene);
 	//target.material = blackMat;
+	//target.material.alpha = 0.5;
 	target.isVisible = false;
 	target.parent = holder;
 	target.position = new BABYLON.Vector3(0, 0, 13*60);
+	
+	var crosshairdown = BABYLON.Mesh.CreateLines('crosshairdown', [new BABYLON.Vector3(0,0.5,0), new BABYLON.Vector3(0,-0.5,0)], jccsStudio.scene);
+	crosshairdown.position.z = 0.45;
+	crosshairdown.parent = holder;
+	
+	var crosshairacross = BABYLON.Mesh.CreateLines('crosshairacross', [new BABYLON.Vector3(0.5,0,0), new BABYLON.Vector3(-0.5,0,0)], jccsStudio.scene);
+	crosshairacross.position.z = 0.45;
+	crosshairacross.parent = holder;
 	
 	holder.scaling = new BABYLON.Vector3(6,6,60);
 	holder.position = new BABYLON.Vector3(15,52, -585);
@@ -1906,59 +2054,6 @@ console.log(meshes[i].getChildren());
 	jccsStudio.followCamera.position = viewer.back.getAbsolutePosition();	
 	jccsStudio.followCamera.setTarget(target.getAbsolutePosition());
 	
-/*	var holder = new CreateCuboid('holder', 6, 60, 6, jccsStudio.scene);
-	//holder.material = blackMat;
-	//holder.material.alpha = 0.3;
-	holder.isVisible = false;
-	
-	var viewer = {};
-	viewer.front = new CreateCuboid('viewerfront', 6, 1, 6, jccsStudio.scene);
-	viewer.front.position.z = 30;
-	viewer.front.parent = holder;
-	//viewer.front.material = redMat;
-	viewer.front.isVisible = false;
-	viewer.back = new CreateCuboid('viewerback', 6, 1, 6, jccsStudio.scene);
-	viewer.back.parent = holder;
-	viewer.back.position.z = -30;
-	viewer.back.isVisible = false;;
-	viewer.left = new CreateCuboid('viewerleft', 1, 60, 6, jccsStudio.scene);
-	viewer.left.position.x = -3;
-	viewer.left.parent = holder;
-	viewer.left.isVisible = false;
-	viewer.right = new CreateCuboid('viewerright', 1, 60, 6, jccsStudio.scene);
-	viewer.right.position.x = 3;
-	viewer.right.parent = holder;
-	viewer.right.isVisible = false;;
-	viewer.top = new CreateCuboid('viewertop', 6, 60, 1, jccsStudio.scene);
-	viewer.top.position.y = 3;
-	viewer.top.parent = holder;
-	viewer.top.isVisible = false;;
-	viewer.bottom = new CreateCuboid('viewerbottom', 6, 60, 1, jccsStudio.scene);
-	viewer.bottom.position.y = -3;
-	viewer.bottom.parent = holder;
-	viewer.bottom.isVisible = false;
-	
-	var crosshairdown = BABYLON.Mesh.CreateLines('crosshairdown', [new BABYLON.Vector3(0,1,0), new BABYLON.Vector3(0,-1,0)], jccsStudio.scene);
-	crosshairdown.material = blackMat;
-	crosshairdown.position.z = 30;
-	crosshairdown.parent = holder;
-	
-	var crosshairacross = BABYLON.Mesh.CreateLines('crosshairacross', [new BABYLON.Vector3(1,0,0), new BABYLON.Vector3(-1,0,0)], jccsStudio.scene);
-	crosshairacross.material = blackMat;
-	crosshairacross.position.z = 30;
-	crosshairacross.parent = holder;
-	
-	var target = BABYLON.Mesh.CreateBox('target', 1, jccsStudio.scene);
-	target.position = new BABYLON.Vector3(0, 0, 13*60);
-	//target.material = blackMat;
-	target.isVisible = false;
-	target.parent = holder;
-	
-	holder.position = new BABYLON.Vector3(15,52, -585);
-	holder.rotation.x = 5*Math.PI/180;
-	jccsStudio.followCamera.position = viewer.back.getAbsolutePosition();	
-	jccsStudio.followCamera.setTarget(target.getAbsolutePosition());
-*/	
 	//Create Ground
 	var ground=BABYLON.Mesh.CreateGround("ground",1200, 1200, 20, jccsStudio.scene,  false, BABYLON.Mesh.DOUBLESIDE);	
 	ground.material = greenGridMat;
@@ -2035,11 +2130,35 @@ console.log(meshes[i].getChildren());
 	skyboxMaterial.specularColor = new BABYLON.Color3(0, 0, 0);
 	skybox.material = skyboxMaterial;
 
+
+	//Base Meshes
+	var baseMeshes={};
+	
+	baseMeshes["box"] = BABYLON.Mesh.CreateBox("box", 60.0, jccsStudio.scene);
+	baseMeshes["box"].setEnabled(false);
+	baseMeshes["cyl"] = BABYLON.Mesh.CreateCylinder("cyl", 60, 60, 60, 60, 1, jccsStudio.scene);
+	baseMeshes["cyl"].setEnabled(false);
+	baseMeshes["sph"] = BABYLON.Mesh.CreateSphere("sph", 60.0, 60.0, jccsStudio.scene);
+	baseMeshes["sph"].setEnabled(false);
+	var roofshape = [
+		new BABYLON.Vector3(30, 30, -30),
+		new BABYLON.Vector3(30, -30, -30),
+		new BABYLON.Vector3(-30, -30, -30)
+	];
+	roofshape.push(roofshape[0]);
+	
+	var roofpath = [
+	  new BABYLON.Vector3(0,0,0),
+	  new BABYLON.Vector3(0, 0, 60)
+	];
+
+	baseMeshes["rti"] = BABYLON.Mesh.ExtrudeShape("rti", roofshape, roofpath, 1, 0, BABYLON.Mesh.CAP_ALL, jccsStudio.scene, true, BABYLON.Mesh.DOUBLESIDE);
+	baseMeshes["rti"].setEnabled(false);
 	
 	//Make Cubees  L prefix for Live Cubee
 	function makeBox() {		
 		var name = "L"+currentModelName+"¬box"+(num_of_boxes++);
-		JCubees[name]= new JcubeeBox(name, 30, 30 + 12*60, 30, colour.material, num_of_mats++, jccsStudio.scene);		
+		JCubees[name] = new JcubeeClone(baseMeshes["box"], name, 30, 30 + 12*60, 30, colour.material);		
 		JCubees[name].addMarkers(jccsStudio.scene);
 		hideSubMenus();
 		resetBorders();		
@@ -2051,13 +2170,12 @@ console.log(meshes[i].getChildren());
 		model.innerHTML = "Model -- "+currentModelName+storeMarker+saveMarker+exportMarker;
 		stored[currentModelName] = false;
 		saved[currentModelName] = false;
-		exported[currentModelName] = false;
-		return 	name;	
+		exported[currentModelName] = false;	
 	}
 	
 	function makeCylinder() {
 		var name = "L"+currentModelName+"¬cyl"+(num_of_boxes++);
-		JCubees[name]= new JcubeeCylinder(name, 30, 30 + 12*60, 30, colour.material, num_of_mats++, jccsStudio.scene);
+		JCubees[name] = new JcubeeClone(baseMeshes["cyl"], name, 30, 30 + 12*60, 30, colour.material);
 		JCubees[name].addMarkers(jccsStudio.scene);
 		hideSubMenus();
 		resetBorders();		
@@ -2070,12 +2188,11 @@ console.log(meshes[i].getChildren());
 		stored[currentModelName] = false;
 		saved[currentModelName] = false;
 		exported[currentModelName] = false;
-		return 	name;
 	}
 	
 	function makeSphere() {
 		var name = "L"+currentModelName+"¬sph"+(num_of_boxes++);
-		JCubees[name]= new JcubeeSphere(name, 30, 30 + 12*60, 30, colour.material, num_of_mats++, jccsStudio.scene);
+		JCubees[name] = new JcubeeClone(baseMeshes["sph"], name, 30, 30 + 12*60, 30, colour.material);
 		JCubees[name].addMarkers(jccsStudio.scene);
 		hideSubMenus();
 		resetBorders();		
@@ -2088,12 +2205,11 @@ console.log(meshes[i].getChildren());
 		stored[currentModelName] = false;
 		saved[currentModelName] = false;
 		exported[currentModelName] = false;
-		return 	name;
 	}
 
 	function makeRoof() {
-		var name = "L"+currentModelName+"¬rof"+(num_of_boxes++);
-		JCubees[name]= new JcubeeRoof(name, 30, 30 + 12*60, 30, colour.material, num_of_mats++, jccsStudio.scene);
+		var name = "L"+currentModelName+"¬rti"+(num_of_boxes++);
+		JCubees[name] = new JcubeeClone(baseMeshes["rti"], name, 30, 30 + 12*60, 30, colour.material);
 		JCubees[name].addMarkers(jccsStudio.scene);
 		hideSubMenus();
 		resetBorders();		
@@ -2106,7 +2222,6 @@ console.log(meshes[i].getChildren());
 		stored[currentModelName] = false;
 		saved[currentModelName] = false;
 		exported[currentModelName] = false;
-		return 	name;
 	}
 	
 	//select new cubee
@@ -2114,9 +2229,11 @@ console.log(meshes[i].getChildren());
 		currentMeshes = {};
 		//currentMaterials = {};
 		currentMeshes[cubee.name] = cubee;
+		JCubees[cubee.name].showSelected();
+		//currentMeshes[cubee.name].showBoundingBox=true;	
 		for(var mesh in JCubees) {						
-			if(!(mesh in currentMeshes)) {						
-				JCubees[mesh].Jcubee.material.alpha = 0.5;
+			if(!(mesh in currentMeshes)) {
+				JCubees[mesh].hideSelected();						
 				JCubees[mesh].hideMarkers();
 			}
 		}
@@ -2128,7 +2245,7 @@ console.log(meshes[i].getChildren());
 		for(var model in sceneParents) {		
 			if(!(model in currentParents))	{					
 				for(var i=0; i<sceneParents[model].modelChildren.length;i++) {
-					sceneParents[model].modelChildren[i].Jcubee.material.alpha = 0.5;
+					sceneParents[model].modelChildren[i]. hideSelected();
 					sceneParents[model].modelChildren[i].hideMarkers();					
 				}
 			}
@@ -2166,10 +2283,13 @@ console.log(meshes[i].getChildren());
         var pickInfo = jccsStudio.scene.pick(jccsStudio.scene.pointerX, jccsStudio.scene.pointerY);	
 		if (pickInfo.hit && pickInfo.pickedMesh !==ground) {	
             var currentMesh = pickInfo.pickedMesh;
-			var name = currentMesh.name;					
+			var name = currentMesh.name;
+console.log("pick", name);														
 			if(name.charAt(0)=="I") {
 				var currentParent = sceneModels[name].parent;
+console.log("mesh",name);				
 				name = currentParent.name;
+console.log("parent",name);				
 				updateCurrentModels()
 			}
 			else {
@@ -2186,30 +2306,34 @@ console.log(meshes[i].getChildren());
         }
         
          function updateCurrentMeshes() {
+         	if(viewcamera) {
+         		return
+         	};
 			if(shiftDown) {
 				if(name in currentMeshes) {
-					currentMeshes[name].material.alpha = 0.5;
+					JCubees[name].hideSelected();
+					//currentMeshes[name].showBoundingBox=false;
 					JCubees[name].hideMarkers();
 					delete currentMeshes[name];
 				}
 				else {
 					currentMeshes[name] = currentMesh;
-					currentMesh.material.alpha = 1;	
+					JCubees[name].showSelected();
+					//currentMeshes[name].showBoundingBox=true;	
 					JCubees[name].showMarkers();					
 				}
 			}
 			else {			
 				for(var mesh in JCubees) {						
-					JCubees[mesh].Jcubee.material.alpha = 1;
+					JCubees[mesh].showSelected();
 					JCubees[mesh].hideMarkers();
 				}			
 				currentMeshes = {};
-				//currentMaterials = {}; 
 				currentMeshes[name] = currentMesh;
 				JCubees[name].showMarkers();
 				for(var mesh in JCubees) {						
-					if(!(mesh in currentMeshes)) {						
-						JCubees[mesh].Jcubee.material.alpha = 0.5;
+					if(!(mesh in currentMeshes)) {
+						JCubees[mesh].hideSelected();						
 					}
 				}
 			}
@@ -2220,6 +2344,9 @@ console.log(meshes[i].getChildren());
 		}
 
 		function updateCurrentModels() {
+			if(viewcamera) {
+         		return
+         	};
 			if(shiftDown) {				
 				if(name in currentParents) {
 					delete currentParents[name];
@@ -2227,7 +2354,7 @@ console.log(meshes[i].getChildren());
 				else {
 					currentParents[name] = currentParent;
 					for(var i=0; i<currentParent.modelChildren.length;i++) {
-						currentParent.modelChildren[i].Jcubee.material.alpha = 1;
+						currentParent.modelChildren[i].showSelected();
 						currentParent.modelChildren[i].showMarkers();
 					}						
 				}
@@ -2235,7 +2362,7 @@ console.log(meshes[i].getChildren());
 			else {			
 				for(var model in sceneParents) {						
 					for(var i=0; i<sceneParents[model].modelChildren.length;i++) {
-						sceneParents[model].modelChildren[i].Jcubee.material.alpha = 1;
+						sceneParents[model].modelChildren[i].showSelected();
 						sceneParents[model].modelChildren[i].showMarkers();
 					}
 				}			
@@ -2244,7 +2371,7 @@ console.log(meshes[i].getChildren());
 				for(var model in sceneParents) {						
 					if(!(model in currentParents)) {						
 						for(var i=0; i<sceneParents[model].modelChildren.length;i++) {
-							sceneParents[model].modelChildren[i].Jcubee.material.alpha = 0.5;
+							sceneParents[model].modelChildren[i].hideSelected();
 							sceneParents[model].modelChildren[i].hideMarkers();
 						}
 					}
@@ -2349,7 +2476,7 @@ console.log(meshes[i].getChildren());
 			return;
 		};
 		
-		if(evt.keyCode == 101 && viewcamera) {
+		if((evt.keyCode == 101 || evt.keyCode == 12) && viewcamera) {
 			if(!detached) {
 				jccsStudio.camera.detachControl(jcCanvas);
 				detached = true;
@@ -2358,7 +2485,7 @@ console.log(meshes[i].getChildren());
 			return;		
 		}
 		
-		if(evt.keyCode == 96 && viewcamera) {
+		if((evt.keyCode == 96 || evt.keyCode == 45) && viewcamera) {
 			if(!detached) {
 				jccsStudio.camera.detachControl(jcCanvas);
 				detached = true;
@@ -2367,7 +2494,7 @@ console.log(meshes[i].getChildren());
 			return;	
 		}
 		
-		if(evt.keyCode == 100 && viewcamera) {
+		if((evt.keyCode == 100 || evt.keyCode == 37) && viewcamera) {
 			if(!detached) {
 				jccsStudio.camera.detachControl(jcCanvas);
 				detached = true;
@@ -2376,7 +2503,7 @@ console.log(meshes[i].getChildren());
 			return;		
 		}
 		
-		if(evt.keyCode == 102 && viewcamera) {
+		if((evt.keyCode == 102 || evt.keyCode == 39) && viewcamera) {
 			if(!detached) {
 				jccsStudio.camera.detachControl(jcCanvas);
 				detached = true;
@@ -2386,7 +2513,7 @@ console.log(meshes[i].getChildren());
 		}
 		
 		
-		if(evt.keyCode == 98 && viewcamera) {
+		if((evt.keyCode == 98 || evt.keyCode == 40) && viewcamera) {
 			if(!detached) {
 				jccsStudio.camera.detachControl(jcCanvas);
 				detached = true;
@@ -2395,7 +2522,7 @@ console.log(meshes[i].getChildren());
 			return;			
 		}
 		
-		if(evt.keyCode == 104 && viewcamera) {
+		if((evt.keyCode == 104 || evt.keyCode == 38) && viewcamera) {
 			if(!detached) {
 				jccsStudio.camera.detachControl(jcCanvas);
 				detached = true;
@@ -2404,7 +2531,7 @@ console.log(meshes[i].getChildren());
 			return;	
 		}
 		
-		if((evt.keyCode == 97 || evt.keyCode == 99) && viewcamera) {
+		if((evt.keyCode == 97 || evt.keyCode == 99 || evt.keyCode == 35 || evt.keyCode == 34 ) && viewcamera) {
 			if(!detached) {
 				jccsStudio.camera.detachControl(jcCanvas);
 				detached = true;
@@ -2416,7 +2543,7 @@ console.log(meshes[i].getChildren());
 			return;						
 		}
 		
-		if((evt.keyCode == 103 || evt.keyCode == 105) && viewcamera) {
+		if((evt.keyCode == 103 || evt.keyCode == 105 || evt.keyCode == 36 || evt.keyCode == 33) && viewcamera) {
 			if(!detached) {
 				jccsStudio.camera.detachControl(jcCanvas);
 				detached = true;
@@ -2627,8 +2754,15 @@ console.log(meshes[i].getChildren());
 	function modelMove(blocked, diff) {
 		if(!blocked  || !scene_solid.checked) {
 			diff = diff.scale(0.5);
-			for(var name in currentParents) {			
+			for(var name in currentParents) {
+console.log("B parent",currentParents[name].model.position, diff);
+console.log("B clone",currentParents[name].clone.position, diff);								
 				currentParents[name].model.position.addInPlace(diff);
+console.log("A parent",currentParents[name].model.position, diff);
+console.log("AB clone",currentParents[name].clone.position, diff);
+				currentParents[name].clone.position.addInPlace(diff);
+console.log("A clone",currentParents[name].clone.position, diff);				
+				//currentParents[name].modelBoundary.position.addInPlace(diff);
 				collide = collision(currentParents[name], sceneParents);
 				var edgeCollide = collideEdges(currentParents[name]);
 				for(var dir in collide)	{

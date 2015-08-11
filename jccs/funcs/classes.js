@@ -3,6 +3,11 @@ Studio = function (engine) {
 	this.scene = new BABYLON.Scene(engine);
 };
 
+function baseCubee(mesh) {
+	this.name = mesh.name;
+	this.mesh = mesh;
+}
+
 function JcubeeBlank(name) {
 	this.name = name;
 		
@@ -15,12 +20,16 @@ function JcubeeBlank(name) {
 	this.disable = disable;
 	this.enable = enable;
 	this.destroy = destroy;	
+	this.showSelected = showSelected;
+	this.hideSelected = hideSelected;
+	this.getSelected = getSelected;
 }
 
-function JcubeeBox(name, x, y, z, material, n, scene) {
+function JcubeeClone(base, name, x, y, z, material) {	
 	this.name = name;
-	this.Jcubee = BABYLON.Mesh.CreateBox(name, 60.0, scene, true);	
-	this.Jcubee.material = material.clone(material.name.substr(0,5)+n);
+	this.Jcubee = base.clone(name);
+	this.Jcubee.material = material;
+	this.Jcubee.setEnabled(true);
 	this.Jcubee.position.x = x;
 	this.Jcubee.position.y = y;
 	this.Jcubee.position.z = z;	
@@ -33,76 +42,30 @@ function JcubeeBox(name, x, y, z, material, n, scene) {
 	this.hideMarkers = hideMarkers;
 	this.disable = disable;
 	this.enable = enable;
-	this.destroy = destroy;		
+	this.destroy = destroy;	
+	this.showSelected = showSelected;
+	this.hideSelected = hideSelected;
+	this.getSelected = getSelected;
 }
 
-function JcubeeCylinder(name, x, y, z, material, n, scene) {
-	this.name = name;
-	this.Jcubee = BABYLON.Mesh.CreateCylinder(name, 60, 60, 60, 60, 1, scene, true);
-	this.Jcubee.material = material.clone(material.name.substr(0,5)+n);
-	this.Jcubee.position.x = x;
-	this.Jcubee.position.y = y;
-	this.Jcubee.position.z = z;
-		
-	//methods
-	this.addMarkers = addMarkers;
-	this.disableMarkers = disableMarkers;
-	this.moveT = moveT;
-	this.showMarkers = showMarkers;
-	this.hideMarkers = hideMarkers;
-	this.disable = disable;
-	this.enable = enable;
-	this.destroy = destroy;		
+function showSelected() {	
+	this.Jcubee.outlineWidth = 5;
+	this.Jcubee.renderOutline = true;
+	this.Jcubee.outlineColor = BABYLON.Color3.Red();
+	if(this.Jcubee.material.name == "mat00")	{
+		this.Jcubee.outlineColor = BABYLON.Color3.Blue();
+	}
+	//this.Jcubee.showBoundingBox=true;
 }
 
-function JcubeeSphere(name, x, y, z, material, n, scene) {
-	this.name = name;
-	this.Jcubee = BABYLON.Mesh.CreateSphere(name, 60.0, 60.0, scene, true);
-	this.Jcubee.material = material.clone(material.name.substr(0,5)+n);
-	this.Jcubee.position.x = x;
-	this.Jcubee.position.y = y;
-	this.Jcubee.position.z = z;
-		
-	//methods
-	this.addMarkers = addMarkers;
-	this.disableMarkers = disableMarkers;
-	this.moveT = moveT;
-	this.showMarkers = showMarkers;
-	this.hideMarkers = hideMarkers;
-	this.disable = disable;
-	this.enable = enable;
-	this.destroy = destroy;		
+function hideSelected() {
+	this.Jcubee.renderOutline = false;	
+	//this.Jcubee.showBoundingBox=false;
 }
 
-function JcubeeRoof(name, x, y, z, material, n, scene) {
-	this.name = name;
-	var shape = [
-		new BABYLON.Vector3(30, 30, -30),
-		new BABYLON.Vector3(30, -30, -30),
-		new BABYLON.Vector3(-30, -30, -30)
-	];
-	shape.push(shape[0]);
-	
-	var path = [
-	  new BABYLON.Vector3(0,0,0),
-	  new BABYLON.Vector3(0, 0, 60)
-	];
-	
-	this.Jcubee = BABYLON.Mesh.ExtrudeShape(name, shape, path, 1, 0, BABYLON.Mesh.CAP_ALL, scene, true, BABYLON.Mesh.DOUBLESIDE);
-	this.Jcubee.material = material.clone(material.name.substr(0,5)+n);
-	this.Jcubee.position.x = x;
-	this.Jcubee.position.y = y;
-	this.Jcubee.position.z = z;
-		
-	//methods
-	this.addMarkers = addMarkers;
-	this.disableMarkers = disableMarkers;
-	this.moveT = moveT;
-	this.showMarkers = showMarkers;
-	this.hideMarkers = hideMarkers; 
-	this.disable = disable;
-	this.enable = enable;
-	this.destroy = destroy;		
+function getSelected() {
+	return this.Jcubee.renderOutline 
+	//return this.Jcubee.showBoundingBox;
 }
 
 function addMarkers(scene,scale) {
@@ -203,6 +166,3 @@ function destroy() {
 	this.groundMarker.dispose();
 }
 	
-
-
-
