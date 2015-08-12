@@ -328,7 +328,7 @@ function main() {
 	function doNew() {
 		if(!stored[currentModelName]) 
 		{
-			confirmName = name;
+			confirmName = currentModelName;
 			confirmFunc = newJCubees;
 			confirmDesc.innerHTML = 'The current model <span style="font-style:italic"> '+confirmName+'</span> has not been stored.<BR>Do you want to continue and delete the current model?'
 			openConfirmDBox();
@@ -1259,7 +1259,7 @@ function main() {
 	};
 	
 	function parseImport(data) {
-		if(inScene && scene_import) {
+		if(inScene && scene_import) {		
 			var re = /Iparent/i;
 			if(!re.test(data)) {
 				importTitle.style.backgroundColor = "#FF0000";
@@ -1459,7 +1459,6 @@ function main() {
 						num_in_scene++;
 					}	
 					
-					//sceneParents[parentName].model.scaling = new BABYLON.Vector3(0.5, 0.5, 0.5);
 					sceneParents[parentName].model.computeWorldMatrix(true);
 					sceneParents[parentName].clone.scaling = new BABYLON.Vector3(0.5, 0.5, 0.5);
 					sceneParents[parentName].clone.computeWorldMatrix(true);
@@ -1876,7 +1875,6 @@ function main() {
 		}
 		if(!scene_exported) 
 		{
-			confirmName = name;
 			confirmFunc = newScene;
 			confirmDesc.innerHTML = 'The current scene has not been exported.<BR>Do you want to continue and delete the current scene?'
 			openConfirmDBox();
