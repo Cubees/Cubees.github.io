@@ -72,6 +72,7 @@ function main() {
 	var add_to_scene = document.getElementById("addToScene");
 	var solid = document.getElementById("solid");
 	var model = document.getElementById("model");
+	var help = document.getElementById("help");
 	
 	var leftarrow = document.getElementById("leftarrow");
 	var rightarrow = document.getElementById("rightarrow");
@@ -163,6 +164,8 @@ function main() {
 	var confirmBut = document.getElementById("confirmBut");	
 	
 	/*----------CONSTRUCTION MENU EVENTS--------------------------------*/
+	
+	help.addEventListener("click", function() {window.open("../jchelp/jchelphome.html")}, false);
 
 	//move events
 	leftarrow.addEventListener("mousedown", leftMove, false);
@@ -507,6 +510,7 @@ function main() {
 		var types_to_save = [];
 		var materials_to_save = [];
 		var positions_to_save = [];
+		var rotations_to_save = [];
 		
 		for(var ref in JCubees) {
 			selValue[ref] = JCubees[ref].getSelected();
@@ -514,17 +518,22 @@ function main() {
 			names_to_save.push(getNameRef(JCubees[ref].name));
 			types_to_save.push(getType(JCubees[ref].name));
 			materials_to_save.push(JCubees[ref].Jcubee.material.name.substr(0,5));
-			positions_to_save.push([JCubees[ref].Jcubee.position.x, JCubees[ref].Jcubee.position.y, JCubees[ref].Jcubee.position.z]);
+			positions_to_save.push([JCubees[ref].Jcubee.position.x, JCubees[ref].Jcubee.position.y, JCubees[ref].Jcubee.position.z]);			
+			if(!JCubees[ref].Jcubee.rotationQuaternion) {
+				JCubees[ref].Jcubee.rotationQuaternion=new BABYLON.Vector4(0,0,0,0);
+			}
+			rotations_to_save.push([JCubees[ref].Jcubee.rotationQuaternion.x, JCubees[ref].Jcubee.rotationQuaternion.y, JCubees[ref].Jcubee.rotationQuaternion.z, JCubees[ref].Jcubee.rotationQuaternion.w]);			
 		}
 		
-		var saveMesh = {n:names_to_save,t:types_to_save, m:materials_to_save, p:positions_to_save};
+		var saveMesh = {n:names_to_save,t:types_to_save, m:materials_to_save, p:positions_to_save, r:rotations_to_save};
 		var strMesh = JSON.stringify(saveMesh);
+console.log(strMesh);		
 		var key = "CUBEE"+name;;
 		
 		localStorage.setItem(key, strMesh);
 		
 		for(var ref in JCubees) {
-			if(setValue[ref]) {
+			if(selValue[ref]) {
 				JCubees[ref].showSelected();
 			}
 		}
@@ -626,7 +635,7 @@ function main() {
 		newwindow.document.close();
 		
 		for(var ref in JCubees) {
-			if(setValue[ref]) {
+			if(selValue[ref]) {
 				JCubees[ref].showSelected();
 			}
 		}
@@ -689,13 +698,13 @@ function main() {
 		var name;
 		for(var ref in currentMeshes) {
 			newRef = "L"+currentModelName+"¬"+getType(ref)+(num_of_boxes++);
-			x = JCubees[ref].Jcubee.position.x;
-			y = JCubees[ref].Jcubee.position.y;
-			z = JCubees[ref].Jcubee.position.z;
-			material = JCubees[ref].Jcubee.material;
-			JCubees[newRef] = new JcubeeClone(baseMeshes[getType(ref)], newRef, x, y, z, material);				
-			//JCubees[newRef] = new JcubeeBlank(newRef);
-			//JCubees[newRef].Jcubee = JCubees[ref].Jcubee.clone(newRef);
+			//x = JCubees[ref].Jcubee.position.x;
+			//y = JCubees[ref].Jcubee.position.y;
+			//z = JCubees[ref].Jcubee.position.z;
+			//material = JCubees[ref].Jcubee.material;
+			//JCubees[newRef] = new JcubeeClone(baseMeshes[getType(ref)], newRef, x, y, z, material);				
+			JCubees[newRef] = new JcubeeBlank(newRef);
+			JCubees[newRef].Jcubee = JCubees[ref].Jcubee.clone(newRef);
 			JCubees[newRef].Jcubee.position.y += 6*60;
 			JCubees[newRef].showSelected();						
 			JCubees[newRef].addMarkers(jccsStudio.scene);
@@ -807,11 +816,13 @@ function main() {
 		var newRef;	
 	
 		for(var ref in JCubees) {	
-			material = JCubees[ref].Jcubee.material;
-			x = JCubees[ref].Jcubee.position.x;
-			y = JCubees[ref].Jcubee.position.y;
-			z = JCubees[ref].Jcubee.position.z;
-			sceneModels[modelName+ref] = new JcubeeClone(baseMeshes[getType(ref)], modelName+ref, x, y, z, material);			
+			//material = JCubees[ref].Jcubee.material;
+			//x = JCubees[ref].Jcubee.position.x;
+			//y = JCubees[ref].Jcubee.position.y;
+			//z = JCubees[ref].Jcubee.position.z;
+			//sceneModels[modelName+ref] = new JcubeeClone(baseMeshes[getType(ref)], modelName+ref, x, y, z, material);
+			sceneModels[modelName+ref] = new JcubeeBlank(modelName+ref);
+			sceneModels[modelName+ref].Jcubee = JCubees[ref].Jcubee.clone(modelName+ref);			
 			sceneModels[modelName+ref].showSelected();		
 			sceneModels[modelName+ref].Jcubee.parent = sceneParents[parentName].model;
 			sceneModels[modelName+ref].parent = sceneParents[parentName];
@@ -1052,10 +1063,13 @@ function main() {
 		sceneParents[parentName].modelChildren = [];	
 	
 		for(var ref in jcModels[name]) {
-			x= jcModels[name][ref].Jcubee.position.x;
-			y= jcModels[name][ref].Jcubee.position.y;
-			z= jcModels[name][ref].Jcubee.position.z;
-			material = jcModels[name][ref].Jcubee.material;					
+			//material = JCubees[ref].Jcubee.material;
+			//x = JCubees[ref].Jcubee.position.x;
+			//y = JCubees[ref].Jcubee.position.y;
+			//z = JCubees[ref].Jcubee.position.z;
+			//sceneModels[modelName+ref] = new JcubeeClone(baseMeshes[getType(ref)], modelName+ref, x, y, z, material);
+			sceneModels[modelName+ref] = new JcubeeBlank(modelName+ref);
+			sceneModels[modelName+ref].Jcubee = JCubees[ref].Jcubee.clone(modelName+ref);					
 			sceneModels[modelName+ref] = new JcubeeClone(baseMeshes[getType(ref)], name, x, y, z, material);	
 			sceneModels[modelName+ref].showSelected();		
 			sceneModels[modelName+ref].Jcubee.parent = sceneParents[parentName].model;
@@ -1120,12 +1134,14 @@ function main() {
 		for(var i=0; i<models.n.length; i++) {
 			saveName = models.n[i];
 			type = models.t[i];
-			matName = models.m[i];
+			matName = models.m[i];			
 			name="L"+currentModelName+"¬"+type+(num_of_boxes++);
 			material = 	jccsStudio.scene.getMaterialByName(matName);
-			JCubees[name] = new JcubeeClone(baseMeshes[type], name, models.p[i][0], models.p[i][1], models.p[i][2], material);		
+			JCubees[name] = new JcubeeClone(baseMeshes[type], name, models.p[i][0], models.p[i][1], models.p[i][2], material);
+			JCubees[name].Jcubee.rotationQuaternion = new BABYLON.Quaternion(models.r[i][0], models.r[i][1], models.r[i][2], models.r[i][3]);					
 			JCubees[name].addMarkers(jccsStudio.scene);
 			JCubees[name].moveT(JCubees[name].Jcubee.position);
+			
 		}
 		
 		selectAll();
@@ -1136,7 +1152,7 @@ function main() {
 		model.innerHTML = "Model -- "+currentModelName+storeMarker+saveMarker+exportMarker;
 		stored[currentModelName] = false;
 		saved[currentModelName] = true;
-		fetchDB.style.visibility = 'hidden';
+		fetchDB.style.visibility = 'hidden';		
 	}
 	
 	function doOpenToScene() {
@@ -1173,13 +1189,14 @@ function main() {
 			material = jccsStudio.scene.getMaterialByName(matName);
 			x = models.p[i][0];
 			y = models.p[i][1];
-			z = models.p[i][2];
-			sceneModels[modelName+saveName] = new JcubeeClone(baseMeshes[type], modelName+saveName, x, y, z, material);						
-			sceneModels[modelName+saveName].showSelected();			
-			sceneModels[modelName+saveName].Jcubee.parent = sceneParents[parentName].model;
-			sceneModels[modelName+saveName].parent = sceneParents[parentName];
-			sceneModels[modelName+saveName].addMarkers(jccsStudio.scene,0.5);
-			sceneParents[parentName].modelChildren.push(sceneModels[modelName+saveName]);				
+			z = models.p[i][2];			
+			sceneModels[modelName+name] = new JcubeeClone(baseMeshes[type], modelName+name, x, y, z, material);
+			sceneModels[modelName+name].Jcubee.rotationQuaternion = new BABYLON.Quaternion(models.r[i][0], models.r[i][1], models.r[i][2], models.r[i][3]);						
+			sceneModels[modelName+name].showSelected();						
+			sceneModels[modelName+name].Jcubee.parent = sceneParents[parentName].model;
+			sceneModels[modelName+name].parent = sceneParents[parentName];
+			sceneModels[modelName+name].addMarkers(jccsStudio.scene,0.5);
+			sceneParents[parentName].modelChildren.push(sceneModels[modelName+name]);				
 		}
 		
 		sceneParents[parentName].model.position.y = 9.5*60;
@@ -1496,6 +1513,8 @@ function main() {
 	
 	var scene_scene = document.getElementById("scene_scene");
 	
+	var scene_help = document.getElementById("scene_help");
+	
 	var scene_leftarrow = document.getElementById("scene_leftarrow");
 	var scene_rightarrow = document.getElementById("scene_rightarrow");
 	var scene_uparrow = document.getElementById("scene_uparrow");
@@ -1543,6 +1562,8 @@ function main() {
 	}
 	
 	/*----------SCENE MENU EVENTS--------------------------------*/
+	
+	scene_help.addEventListener("click", function() {window.open("../jchelp/jchelphome.html")}, false);
 
 	//move events
 	scene_leftarrow.addEventListener("mousedown", function() {modelMove(collide.left, moveLeft)}, false);
@@ -1647,6 +1668,8 @@ function main() {
 		rightSidePlane.setEnabled(false);
 		ground.material.wireframe = false;
 		skybox.isVisible=true;
+		crosshairacross.isVisible = true;
+		crosshairdown.isVisible = true;
 		jccsStudio.followCamera.target = target;
 		jccsStudio.scene.activeCameras[0] = jccsStudio.followCamera;
 		jccsStudio.followCamera.position = viewer.back.getAbsolutePosition();	
@@ -1672,6 +1695,8 @@ function main() {
 		rightSidePlane.setEnabled(true);
 		ground.material.wireframe = true;
 		skybox.isVisible=false;
+		crosshairacross.isVisible = false;
+		crosshairdown.isVisible = false;
 		jccsStudio.scene.activeCameras[0] = jccsStudio.camera;
 		viewcamera = false;
 	}
@@ -2040,10 +2065,12 @@ function main() {
 	var crosshairdown = BABYLON.Mesh.CreateLines('crosshairdown', [new BABYLON.Vector3(0,0.5,0), new BABYLON.Vector3(0,-0.5,0)], jccsStudio.scene);
 	crosshairdown.position.z = 0.45;
 	crosshairdown.parent = holder;
+	crosshairdown.isVisible = false;
 	
 	var crosshairacross = BABYLON.Mesh.CreateLines('crosshairacross', [new BABYLON.Vector3(0.5,0,0), new BABYLON.Vector3(-0.5,0,0)], jccsStudio.scene);
 	crosshairacross.position.z = 0.45;
 	crosshairacross.parent = holder;
+	crosshairacross.isVisible = false;
 	
 	holder.scaling = new BABYLON.Vector3(6,6,60);
 	holder.position = new BABYLON.Vector3(15,52, -585);
@@ -2752,14 +2779,9 @@ console.log("parent",name);
 	function modelMove(blocked, diff) {
 		if(!blocked  || !scene_solid.checked) {
 			diff = diff.scale(0.5);
-			for(var name in currentParents) {
-console.log("B parent",currentParents[name].model.position, diff);
-console.log("B clone",currentParents[name].clone.position, diff);								
+			for(var name in currentParents) {								
 				currentParents[name].model.position.addInPlace(diff);
-console.log("A parent",currentParents[name].model.position, diff);
-console.log("AB clone",currentParents[name].clone.position, diff);
-				currentParents[name].clone.position.addInPlace(diff);
-console.log("A clone",currentParents[name].clone.position, diff);				
+				currentParents[name].clone.position.addInPlace(diff);				
 				//currentParents[name].modelBoundary.position.addInPlace(diff);
 				collide = collision(currentParents[name], sceneParents);
 				var edgeCollide = collideEdges(currentParents[name]);

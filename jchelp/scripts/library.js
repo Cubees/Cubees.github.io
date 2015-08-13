@@ -82,32 +82,83 @@ ConstructionLibrary=[
 ];
 
 SceneLibrary=[
-	AddColumns={
-		page:"AddColumns.html",
+	Sintro={
+		page:"Sintro.html",
 		loaded:false,
 		html:"",
 		next:null,
 		prev:null,
-		text:"Adding in Columns",
+		text:"Introduction",
 		main:true,
 		links:null
-	}
-];
-
-ViewingLibrary=[
-	TakeAwayMethod3={
-		page:"TakeAwayMethod3.html",
+	},
+	
+	model={
+		page:"model.html",
 		loaded:false,
 		html:"",
 		next:null,
 		prev:null,
-		text:"Method 3",
+		text:"Models",
+		main:true,
+		links:null
+	},
+	
+	scenefile={
+		page:"scenefile.html",
+		loaded:false,
+		html:"",
+		next:null,
+		prev:null,
+		text:"File",
+		main:true,
+		links:null
+	},
+	
+	sceneselection={
+		page:"sceneselection.html",
+		loaded:false,
+		html:"",
+		next:null,
+		prev:null,
+		text:"Selection",
+		main:true,
+		links:null
+	},
+	
+	scenetoconstruct={
+		page:"scenetoconstruct.html",
+		loaded:false,
+		html:"",
+		next:null,
+		prev:null,
+		text:"Switch to Construction",
+		main:true,
+		links:null
+	},
+	
+	scenesolidity={
+		page:"scenesolidity.html",
+		loaded:false,
+		html:"",
+		next:null,
+		prev:null,
+		text:"Solidity",
+		main:true,
+		links:null
+	},
+	
+	sceneview={
+		page:"sceneview.html",
+		loaded:false,
+		html:"",
+		next:null,
+		prev:null,
+		text:"View Camera",
 		main:true,
 		links:null
 	}
 ];
-
-
 
 library= [
 	Intro={
@@ -137,11 +188,28 @@ library= [
 		open:false
 	},
 		
-	View={
-		sub:ViewingLibrary,
-		text:'Viewing Area',
+	viewing={
+		page:"viewing.html",
+		loaded:false,
+		html:"",
+		next:null,
+		prev:null,
+		text:"Viewing Area",
+		links:null,
 		main:true,
-		open:false
+		sub:null,
+	},
+	
+	todo={
+		page:"todo.html",
+		loaded:false,
+		html:"",
+		next:null,
+		prev:null,
+		text:"To Do",
+		links:null,
+		main:true,
+		sub:null,
 	}	
 ];
 
@@ -154,6 +222,14 @@ newCubee.next=file;
 file.next=selection;
 selection.next=scene;
 scene.next=solidity;
+solidity.next=Sintro;
+Sintro.next=model;
+model.next=scenefile;
+scenefile.next=sceneselection;
+sceneselection.next=scenetoconstruct;
+scenetoconstruct.next=scenesolidity;
+scenesolidity.next=sceneview;
+sceneview.next=viewing;
 
 //PREV
 Cintro.prev=Intro;
@@ -161,9 +237,18 @@ newCubee.prev=Cintro;
 file.prev=newCubee;
 selection.prev=file;
 scene.prev=selection;
-solidity.prev=selection;
+solidity.prev=scene;
+Sintro.prev=solidity;
+model.prev=Sintro;
+scenefile.prev=model;
+sceneselection.prev=scenefile;
+scenetoconstruct.prev=sceneselection;
+scenesolidity.prev=scenetoconstruct;
+sceneview.prev=scenesolidity;
+viewing.prev=sceneview;
 
 //LINKS
 newCubee.links=[selection, solidity];
+model.links=[sceneselection, scenesolidity];
 
 
