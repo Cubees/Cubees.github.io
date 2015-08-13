@@ -116,14 +116,21 @@
 				background: linear-gradient(to right, #999999 , #FFFFFF); 
 			}
 			
+			#workshop:hover {
+				cursor:pointer;
+				background-color:#000000;
+				color:#FFFFFF;
+			}
 			
 		</style>
 		
 <!--		<script src="main.js"></script>	 -->
 			
 		<script>
-			"use strict";
-			//window.onload=main;
+			window.onload =function() {
+				var workshop = document.getElementById("workshop");
+				workshop.addEventListener("click", function() {window.open("jccs/jcworkshop.html")}, false);
+			}
 			
 		</script>
 			
@@ -145,7 +152,7 @@
 				</div>
 			</div>
 			<div id="jcwkshop" class="holder">
-				<div class="subsubTitle">Workshop</div>
+				<div id="workshop" class="subsubTitle">Workshop</div>
 				<div class="content">
 					The Construction Room for model making.<br> 
 					<img src="images/tree.jpg" width="50%"/><br>
