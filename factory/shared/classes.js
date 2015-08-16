@@ -27,15 +27,18 @@ function node(name,x,y,z,scene) { //x,y coordinates of centre
 	this.segmentType="curved";
 }
 
+var scale = new BABYLON.Vector3(0.2, 0.2, 0.2);
+
 function control(name,x,y,z,scene) { //x,y coordinates of centre
 	this.name=name;
 	this.x=x;
 	this.y=y;
 	this.z=z;
 	
-	this.marker=BABYLON.Mesh.CreateSphere("sphere"+this.name,4, 5,scene)
+	this.marker=BABYLON.Mesh.CreateDisc("sphere"+this.name, 12, 12,scene)
 	var darkGreyMat = new BABYLON.StandardMaterial("darkGrey", scene);
 	darkGreyMat.emissiveColor = new BABYLON.Color3(0.25,0.25,0.25);
+	this.marker.scaling = scale;
 	this.marker.material = darkGreyMat;
 	this.marker.position.x = this.x;
 	this.marker.position.y = this.y;

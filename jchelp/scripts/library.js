@@ -10,7 +10,7 @@ introhtml += "<p>This Workshop is a basic introduction to building with Just Cub
 introhtml += "<p>With Just Cubees you cannot change the size of a Cubee nor make your own Cubees.</p>"; 
 introhtml +="</div>";
 introhtml += "<div>";
-introhtml += "<br><input id='next' type='button' class='next' value='Next'><label id='nextLabel' for='next'>Construction Introduction?</label>";
+introhtml += "<br><input id='next' type='button' class='next' value='Next'><label id='nextLabel' for='next'>Construction Introduction</label>";
 introhtml += "</div>";
 
 ConstructionLibrary=[

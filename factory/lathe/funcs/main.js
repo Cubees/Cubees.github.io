@@ -5,10 +5,20 @@ function main() {
 	var num_of_steps = 25;
 	var num_of_turns = 25;
 	
+	var grid = 60;
+	var setzoom = -200;
+	
+	var bound;
+	
+	var cursorPos;
+	var downMouse = false;
+	var dlgbox;
+	
 	/*-------------MENU ELEMENTS---------------*/	
 	//Get Menu Elements 
 	var segment=document.getElementById("segment");
 	var pAdd=document.getElementById("p_add");
+	var pDelete=document.getElementById("p_delete");
 	var pStraight=document.getElementById("p_straight");
 	var pCurved=document.getElementById("p_curved");
 	
@@ -16,6 +26,35 @@ function main() {
 	var pCorner=document.getElementById("p_corner");
 	var pSmooth=document.getElementById("p_smooth");
 	var pJoined=document.getElementById("p_joined");
+	
+	var export_=document.getElementById("export");
+	var download=document.getElementById("download");
+	var menu=document.getElementById("menu");
+	
+	var the_menu=document.getElementById("the_menu");
+	var help=document.getElementById("help");
+	var cubeesize=document.getElementById("cubeesize");
+	var minisize=document.getElementById("minisize");
+	var microsize=document.getElementById("microsize");
+	var freesize=document.getElementById("freesize");
+	var boxHtitle=document.getElementById("boxHtitle");
+	var boxH=document.getElementById("boxH");
+	var boxWtitle=document.getElementById("boxWtitle");
+	var boxW=document.getElementById("boxW");
+	var zoomin=document.getElementById("zoomin");
+	var zoomout=document.getElementById("zoomout");
+	var nozoom=document.getElementById("nozoom");
+	var close=document.getElementById("close");
+	
+	var ddb = document.getElementsByClassName("dragDialogueBox");
+	var closediv = document.getElementsByClassName("closediv");
+	var headerDiv = document.getElementsByClassName("heading");
+	var cancelDiv = document.getElementsByClassName("DBCancel"); 
+	var inpt = document.getElementsByClassName("inpt");
+	
+	var storeDB = document.getElementById("storeDB"); 
+	var storeIn = document.getElementById("storeIn");
+	var storeBut = document.getElementById("storeBut");
 		
 	//Set readable styles for Elements
 	pStraight.style.color="#888888";
@@ -24,8 +63,15 @@ function main() {
 	pCorner.style.color="#888888";
 	pSmooth.style.color="#000000";
 	pJoined.style.color="#000000";
-
 	
+	cubeesize.style.color="#888888";
+	minisize.style.color="#000000";
+	microsize.style.color="#000000";
+	freesize.style.color="#000000";
+	
+	zoomin.style.color="#888888";
+	zoomout.style.color="#000000";
+	nozoom.style.color="#888888";
 
 	/*-------------LATHE STUDIO ---------------*/	
 	// Set the lathe studio
@@ -48,11 +94,11 @@ function main() {
 	backboard.position.y = 0;
 	backboard.position.z=1;	
 		
-	var startNode = new node("fxdstr",0,50,0,latheStudio.scene);
-	var endNode = new node("fxdend",0,-50,0,latheStudio.scene);
+	var startNode = new node("fxdstr",0,60,0,latheStudio.scene);
+	var endNode = new node("fxdend",0,-60,0,latheStudio.scene);
 		
-	var firstControl = new control("firstctrl",10,40,0,latheStudio.scene);
-	var lastControl = new control("lastctrl",10,-40,0,latheStudio.scene);
+	var firstControl = new control("firstctrl",20,50,0,latheStudio.scene);
+	var lastControl = new control("lastctrl",20,-50,0,latheStudio.scene);
 		
 	startNode.ctrl1=firstControl;
 	startNode.ctrl2=lastControl;
@@ -60,7 +106,7 @@ function main() {
 		
 	endNode.prev=startNode;
 		
-	var latheTool=createLathe(startNode,endNode,latheStudio.scene,num_of_steps);
+	var latheTool=createTool(startNode,endNode,latheStudio.scene,num_of_steps);
 
 	var latheBlade = BABYLON.Mesh.CreateLines("vcc", latheTool.blade, latheStudio.scene, true);
 	
@@ -106,12 +152,12 @@ function main() {
 		}
 
 		return null;
-	}
+	};
 
 	var onPointerDown = function (evt) {
 		if (evt.button !== 0) {
 			return;
-		} 
+		}; 
 			
 		// check if we are under a mesh
 		var pickInfo = latheStudio.scene.pick(latheStudio.scene.pointerX, latheStudio.scene.pointerY, function (mesh) { return mesh !== backboard; });
@@ -125,24 +171,26 @@ function main() {
 			}
 			startingPoint = getBackboardPosition(evt);	
 		}
-	}
+	};
 
 	var onPointerUp = function (evt) {			
 		if (startingPoint) {
 			startingPoint = null;
 			return;
-		}
+		};
 			
 		upPoint = getBackboardPosition(evt);
-		foundNode = proximity(upPoint,startNode, endNode, latheBlade)
-		if(foundNode !== endNode) {
+		foundNode = proximity(upPoint,startNode, endNode)
+		if(foundNode) {
 			square_M.position.x=upPoint.x;
 			square_M.position.y=upPoint.y;
 			square_M.position.z=-10;
 			
 			pStraight.style.color="#888888";
-			pCurved.style.color="#888888";	
+			pCurved.style.color="#888888";
+			pDelete.style.color="#888888";	
 			if(num_of_nodes>2) {
+				pDelete.style.color="#000000";
 				if(foundNode.segmentType == "curved") {
 					pStraight.style.color="#000000";
 				}
@@ -157,23 +205,27 @@ function main() {
 			
 			segment.style.visibility="hidden";
 		}
-	}
+	};
 
 	var onPointerMove = function (evt) {
 		if (!startingPoint) {
 			return;
-		}
+		};
 		var current = getBackboardPosition(evt);
 		if (!current) {
 			return;
 		}
+		if(currentMesh === endNode.marker) {
+			return;
+		};
+		
 		var diff = current.subtract(startingPoint);	
-		if(currentMesh === startNode.marker || currentMesh === endNode.marker) {
+		if(currentMesh === startNode.marker) {
 			diff.x=0;
 		}			
 		currentMesh.position.addInPlace(diff);
 			
-		latheTool=createLathe(startNode,endNode,latheStudio.scene,num_of_steps);
+		latheTool=createTool(startNode,endNode,latheStudio.scene,num_of_steps);
 	
 		latheBlade = BABYLON.Mesh.CreateLines(null, latheTool.blade, null, null, latheBlade);
 		
@@ -181,11 +233,14 @@ function main() {
 			controlLines[i]=BABYLON.Mesh.CreateLines(null,latheTool.controls[i],null,null, controlLines[i]);
 		}
 		
-		turned = updateTurned(turned, latheTool.blade, num_of_turns);
+		turned = updateTurned(turned, latheTool.blade, num_of_turns, productStudio.scene);
+		
+		bound.dispose();
+		bound = container(latheTool.blade, productStudio.scene, grid);
 
 		startingPoint = current;
 
-	}
+	};
 
 	latheCanvas.addEventListener("mousedown", onPointerDown, false);
 	latheCanvas.addEventListener("mouseup", onPointerUp, false);
@@ -195,7 +250,7 @@ function main() {
 		latheCanvas.removeEventListener("mousedown", onPointerDown);
 		latheCanvas.removeEventListener("mouseup", onPointerUp);
 		latheCanvas.removeEventListener("mousemove", onPointerMove);
-	}
+	};
 
 	 // Register a render loop to repeatedly render the scene
 	latheEngine.runRenderLoop(function () {
@@ -226,7 +281,9 @@ function main() {
 	productStudio.scene.clearColor = new BABYLON.Color3(0.75, 0.75, 0.75);
 	
 	// Create product
-	var turned=createTurned("turned", latheTool.blade, num_of_turns, productStudio.scene, true, BABYLON.Mesh.FRONTSIDE);
+	var turned=createTurned("BWXEturned", latheTool.blade, num_of_turns, productStudio.scene, true, BABYLON.Mesh.FRONTSIDE);
+	
+	bound = container(latheTool.blade, productStudio.scene, grid);
 	
 	// material
 	var darkMat = new BABYLON.StandardMaterial("dark", productStudio.scene);
@@ -275,7 +332,7 @@ function main() {
 			controlLines[i].dispose();
 		}
 	
-		latheTool=createLathe(startNode,endNode,latheStudio.scene,num_of_steps);	
+		latheTool=createTool(startNode,endNode,latheStudio.scene,num_of_steps);	
 				
 		latheBlade = BABYLON.Mesh.CreateLines("vcc", latheTool.blade, latheStudio.scene, true);
 				
@@ -284,8 +341,58 @@ function main() {
 		}
 		
 		turned.dispose();
-		turned=createTurned("turned", latheTool.blade, num_of_turns, productStudio.scene, true, BABYLON.Mesh.FRONTSIDE);
+		
+		turned=createTurned("BWXEturned", latheTool.blade, num_of_turns, productStudio.scene, true, BABYLON.Mesh.FRONTSIDE);
+		
+		bound.dispose();
+		bound = container(latheTool.blade, productStudio.scene, grid);
+	
 	}
+	
+	pDelete.addEventListener('click', onDelete, false);
+	
+	function onDelete () {
+		if(pDelete.style.color=="rgb(136, 136, 136)") {
+			return
+		}
+		for(var i=0; i<controlLines.length;i++) {
+			controlLines[i].dispose();
+		}	
+		segment.style.visibility="hidden";		
+		var xa, xb, ya, yb;
+		square_M.position.z=10;
+		num_of_nodes--;
+		if(foundNode.name =="fxdstr") {
+			foundNode=foundNode.next;
+		}
+		foundNode.marker.dispose();
+		foundNode.ctrl1.marker.dispose();
+		delete foundNode.ctrl1;
+		foundNode.prev.ctrl2.marker.dispose();
+		foundNode.prev.ctrl2 = foundNode.ctrl2;
+		foundNode.next.prev = foundNode.prev;
+		foundNode.prev.next = foundNode.next;
+		delete foundNode;		
+		latheBlade.dispose();
+		
+		
+	
+		latheTool=createTool(startNode,endNode,latheStudio.scene,num_of_steps);	
+				
+		latheBlade = BABYLON.Mesh.CreateLines("vcc", latheTool.blade, latheStudio.scene, true);
+				
+		for(var i=0; i<latheTool.controls.length;i++) {
+				controlLines[i]=BABYLON.Mesh.CreateLines("cl"+node_index+i,latheTool.controls[i],latheStudio.scene,true);
+		}
+		
+		turned.dispose();
+		
+		turned=createTurned("BWXEturned", latheTool.blade, num_of_turns, productStudio.scene, true, BABYLON.Mesh.FRONTSIDE);
+		
+		bound.dispose();
+		bound = container(latheTool.blade, productStudio.scene, grid); 
+	
+	}	
 
 	pStraight.addEventListener("click", onStraight, false);
 	
@@ -303,7 +410,7 @@ function main() {
 			controlLines[i].dispose();
 		}
 	
-		latheTool=createLathe(startNode,endNode,latheStudio.scene,num_of_steps);	
+		latheTool=createTool(startNode,endNode,latheStudio.scene,num_of_steps);	
 				
 		latheBlade = BABYLON.Mesh.CreateLines("vcc", latheTool.blade, latheStudio.scene, true);
 				
@@ -312,8 +419,10 @@ function main() {
 		}
 		
 		turned.dispose();
-		turned=createTurned("turned", latheTool.blade, num_of_turns, productStudio.scene, true, BABYLON.Mesh.FRONTSIDE);
-
+		turned=createTurned("BWXEturned", latheTool.blade, num_of_turns, productStudio.scene, true, BABYLON.Mesh.FRONTSIDE);
+		
+		bound.dispose();
+		bound = container(latheTool.blade, productStudio.scene, grid);
 	}
 	
 	pCurved.addEventListener("click", onCurved, false);
@@ -327,12 +436,12 @@ function main() {
 		pStraight.style.color="#000000";
 		pCurved.style.color="#888888";
 		foundNode.segmentType = "curved";
-		latheBlade.dispose()
+		latheBlade.dispose();
 		for(var i=0; i<controlLines.length;i++) {
 			controlLines[i].dispose();
 		}
 	
-		latheTool=createLathe(startNode,endNode,latheStudio.scene,num_of_steps);	
+		latheTool=createTool(startNode,endNode,latheStudio.scene,num_of_steps);	
 				
 		latheBlade = BABYLON.Mesh.CreateLines("vcc", latheTool.blade, latheStudio.scene, true);
 				
@@ -341,7 +450,227 @@ function main() {
 		}
 		
 		turned.dispose();
-		turned=createTurned("turned", latheTool.blade, num_of_turns, productStudio.scene, true, BABYLON.Mesh.FRONTSIDE);
-
+		turned=createTurned("BWXEturned", latheTool.blade, num_of_turns, productStudio.scene, true, BABYLON.Mesh.FRONTSIDE);
+		
+		bound.dispose();
+		bound = container(latheTool.blade, productStudio.scene, grid);
 	}
+	
+	export_.addEventListener("click", doExport, false);
+	
+	function doExport() {
+		writeExport(turned);
+	}
+	
+	download.addEventListener("click", function() {storeDB.style.visibility='visible';}, false);
+	
+	menu.addEventListener("click", function() {the_menu.style.visibility="visible"}, false);
+	
+	close.addEventListener("click", function() {the_menu.style.visibility="hidden"}, false);
+	
+	cubeesize.addEventListener("click", doCubeeSize, false);
+		
+	function doCubeeSize() {
+		if(cubeesize.style.color=="rgb(136, 136, 136)") {
+			return
+		}
+		cubeesize.style.color="#888888";
+		minisize.style.color="#000000";
+		microsize.style.color="#000000";
+		freesize.style.color="#000000";
+		grid = 60;
+		bound.dispose();
+		bound = container(latheTool.blade, productStudio.scene, grid);
+	}
+	
+	minisize.addEventListener("click", doMiniSize, false);
+		
+	function doMiniSize() {
+		if(minisize.style.color=="rgb(136, 136, 136)") {
+			return
+		}
+		cubeesize.style.color="#000000";
+		minisize.style.color="#888888";
+		microsize.style.color="#000000";
+		freesize.style.color="#000000";
+		grid = 15;
+		bound.dispose();
+		bound = container(latheTool.blade, productStudio.scene, grid);
+	}
+	
+	microsize.addEventListener("click", doMicroSize, false);
+		
+	function doMicroSize() {
+		if(microsize.style.color=="rgb(136, 136, 136)") {
+			return
+		}
+		cubeesize.style.color="#000000";
+		minisize.style.color="#000000";
+		microsize.style.color="#888888";
+		freesize.style.color="#000000";
+		grid = 1;
+		bound.dispose();
+		bound = container(latheTool.blade, productStudio.scene, grid);
+	}
+	
+	freesize.addEventListener("click", doFreeSize, false);
+		
+	function doFreeSize() {
+		if(freesize.style.color=="rgb(136, 136, 136)") {
+			return
+		}
+		cubeesize.style.color="#000000";
+		minisize.style.color="#000000";
+		microsize.style.color="#000000";
+		freesize.style.color="#888888";
+		grid = 0;
+		bound.dispose();
+		bound = container(latheTool.blade, productStudio.scene, grid);
+		bound.showBoundingBox = false;
+	}
+	
+	zoomin.addEventListener('click', doZoomin, false) 
+	
+	function doZoomin() {
+		if(zoomin.style.color=="rgb(136, 136, 136)") {
+			return
+		}
+		setzoom +=50;
+		zoomout.style.color ="#000000";
+		latheStudio.camera.setPosition(new BABYLON.Vector3(0, 0, setzoom));
+		productStudio.camera.setPosition(new BABYLON.Vector3(0, 0, setzoom));
+		if(setzoom ==-200) {
+			zoomin.style.color ="#888888";
+			nozoom.style.color ="#888888";
+		}
+	}
+	
+	zoomout.addEventListener('click', doZoomout, false);
+	
+	function doZoomout() {
+		if(zoomout.style.color=="rgb(136, 136, 136)") {
+			return;
+		}
+		setzoom -=50;
+		zoomin.style.color ="#000000";
+		nozoom.style.color ="#000000";
+		latheStudio.camera.setPosition(new BABYLON.Vector3(0, 0, setzoom));
+		productStudio.camera.setPosition(new BABYLON.Vector3(0, 0, setzoom));
+		if(setzoom ==-600) {
+			zoomout.style.color ="#888888";
+		}
+	}
+
+	nozoom.addEventListener('click', doNoZoom, false) 
+	
+	function doNoZoom() {
+		if(zoomout.style.color=="rgb(136, 136, 136)") {
+			return
+		}
+		setzoom =-200;
+		latheStudio.camera.setPosition(new BABYLON.Vector3(0, 0, setzoom));
+		productStudio.camera.setPosition(new BABYLON.Vector3(0, 0, setzoom));
+		zoomout.style.color ="#000000";
+		zoomin.style.color ="#888888";
+		nozoom.style.color ="#000000";
+	}
+	
+	/*-----------DRAG DIALOGUE BOX EVENTS--------------------*/
+	
+	//Drag events
+	window.addEventListener('mousemove', function(e) {doDrag(e)}, false);
+	
+	for(var i=0;i<ddb.length;i++){
+        ddb[i].style.top = "150px";
+        ddb[i].style.left = "500px";
+   };
+	
+	for(var i=0;i<headerDiv.length;i++){
+        headerDiv[i].addEventListener('mousedown', function(e) {startdbDrag(e, this)}, false);
+        headerDiv[i].addEventListener('mouseup', function(e) {enddbDrag(e)}, false);
+    }
+	;
+	//Close dialogue box
+	for(var i=0;i<closediv.length;i++){
+        closediv[i].addEventListener('click', function() {doClose(this)}, false);
+   };
+    
+    //Cancel dialogue box
+    for(var i=0;i<cancelDiv.length;i++){
+        cancelDiv[i].addEventListener('click', function() {doClose(this)}, false);
+    };
+    
+    //input dialogue box
+    for(var i=0;i<inpt.length;i++){   	
+        inpt[i].addEventListener('keydown', function(evt) {inpKeyDown(evt)}, false);
+    };    
+ 
+    
+    //Download
+   storeBut.addEventListener('click', startDownload, false);
+    
+    /*-----------DRAG DIALOGUE BOX EVENTS--------------------*/
+   window.addEventListener('mousemove', function(e) {doDrag(e)}, false);
+   
+	for(var i=0;i<ddb.length;i++){
+        ddb[i].style.top = "150px";
+        ddb[i].style.left = "500px";
+   };
+	
+	for(var i=0;i<headerDiv.length;i++){
+        headerDiv[i].addEventListener('mousedown', function(e) {startdbDrag(e, this)}, false);
+        headerDiv[i].addEventListener('mouseup', function(e) {enddbDrag(e)}, false);
+    }
+	;
+	//Close dialogue box
+	for(var i=0;i<closediv.length;i++){
+        closediv[i].addEventListener('click', function() {doClose(this)}, false);
+   };
+    
+    //Cancel dialogue box
+    for(var i=0;i<cancelDiv.length;i++){
+        cancelDiv[i].addEventListener('click', function() {doClose(this)}, false);
+    };
+    
+    //input dialogue box
+    for(var i=0;i<inpt.length;i++){   	
+        inpt[i].addEventListener('keydown', function(evt) {inpKeyDown(evt)}, false);
+    };    
+    
+    /*-------------DIALOGUE BOX FUNCTIONS--------*/
+
+	function doClose(box) {
+		box.parentNode.parentNode.parentNode.style.visibility = 'hidden';
+	}
+	
+	//Drag Dialogues
+	function startdbDrag(e, box) {
+		cursorPos = getPosition(e);
+		downMouse = true;
+		dlgbox = box.parentNode.parentNode;				
+	}
+	
+	function doDrag(e, box) {
+		if(!downMouse) {return};
+
+		var cursorNow = getPosition(e);	
+		var dx = cursorNow.x - cursorPos.x;
+		var dy = cursorNow.y - cursorPos.y;
+		cursorPos = cursorNow;
+		dlgbox.style.top = (parseInt(dlgbox.style.top) + dy)+"px";
+		dlgbox.style.left = (parseInt(dlgbox.style.left) + dx)+"px";
+	};
+	
+	function enddbDrag(e) {
+		downMouse = false;				
+	};
+	
+	function inpKeyDown(evt) {		
+		evt.stopPropagation();
+	};
+	
+	function startDownload() {
+		doDownload(storeIn.value,turned, storeDB);
+	}
+	
 }	

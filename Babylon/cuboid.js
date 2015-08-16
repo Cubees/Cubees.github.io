@@ -1,4 +1,4 @@
-function  CreateCuboid(name, length, width, height, scene, updatable) { //length x, width z, height y
+function  CreateCuboid(name, length, width, height, scene) { //length x, width z, height y
         var cuboid = new BABYLON.Mesh(name, scene);
 
         var normalsSource = [
@@ -57,9 +57,9 @@ function  CreateCuboid(name, length, width, height, scene, updatable) { //length
         }
 
 
-        cuboid.setVerticesData(BABYLON.VertexBuffer.PositionKind, positions, updatable);
-        cuboid.setVerticesData(BABYLON.VertexBuffer.NormalKind, normals, updatable);
-        cuboid.setVerticesData(BABYLON.VertexBuffer.UVKind, uvs, updatable);
+        cuboid.setVerticesData(BABYLON.VertexBuffer.PositionKind, positions);
+        cuboid.setVerticesData(BABYLON.VertexBuffer.NormalKind, normals);
+        cuboid.setVerticesData(BABYLON.VertexBuffer.UVKind, uvs);
         cuboid.setIndices(indices);
 
         return cuboid;

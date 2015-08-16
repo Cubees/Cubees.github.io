@@ -4,95 +4,16 @@
 	<head>
 		<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
 		<title>Lathe</title>
-	  
-		<style>
-			html, body {
-				overflow: hidden;
-				width: 100%;
-				height: 100%;
-				margin: 0;
-				padding: 0;
-			}
-			
-			.canvas {
-				width: 49.5%;
-				height: 100%;
-				touch-action: none;
-				float:left;
-			}
-
-			#productCanvas {
-				
-				margin-right:0.5%;
-			}
-			
-			.noTextCursor {
-				cursor:default;
-			}
-			
-			.noTextCursor:hover {
-				background: linear-gradient(to right, #999999 , #FFFFFF); 
-			}
-			
-			.dialogueBox {
-				position:absolute;
-				display:table;
-				border: 1px solid #333333;
-				background-color: #FFFFFF;
-				box-shadow: 5px 5px 2px #111111;
-				<!-- visibility:hidden; -->
-				z-index:5;
-			}
-			
-			.row {
-				display:table-row;
-				height:100%;
-				width:100%;
-			}
-			
-			.space {
-				display:table-cell;
-				border: 1px solid #666666;
-				width:25%;
-			}
-			
-			.content {
-				display:table-cell;
-				border: 1px solid #666666;
-				width:75%;
-			}
-			
-			#segment {
-				top:50px;
-				right:50px;
-				width:120px;
-				height:60px;
-				visibility:hidden;
-			}
-			
-			#p_curved, #p_straight {
-				color: #888888;
-			}
-			
-			#node {
-				top:50px;
-				right:50px;
-				width:120px;
-				height:60px;
-				visibility:hidden;
-			}
-			
-			#p_corner {
-				color: #888888;
-			}
-			
-		</style>
 		
-		<script src="../Babylon/babylon2.1a.js"></script>
-		<script src="../Babylon/hand.js"></script>
-		<script src="funcs/classes.js"></script>
+		<link rel="stylesheet" type="text/css" href="../shared/styles.css">
+		
+		<script src="../../Babylon/babylon2.2_min.js"></script>
+		<script src="../../Babylon/hand.js"></script>
+		<script src="../../Babylon/cuboid.js"></script>
+		<script src="../shared/classes.js"></script>
+		<script src="../shared/tools.js"></script>
+		<script src="../shared/exporter.js"></script>
 		<script src="funcs/tools.js"></script>
-		<script src="funcs/events.js"></script>
 		<script src="funcs/main.js"></script>	
 			
 		<script>
@@ -113,8 +34,62 @@
 				<div class="space"> </div>
 				<div id='segmentContent' class='content'>
 					<div id="p_add" class="noTextCursor">&nbsp;&nbsp;Add Point</div>
+					<div id="p_delete" class="noTextCursor">&nbsp;&nbsp;Delete</div>
 					<div id="p_straight" class="noTextCursor">&nbsp;&nbsp;Straight</div>
 					<div id="p_curved" class="noTextCursor">&nbsp;&nbsp;Curved</div>
+				</div>
+			</div>
+		</div>
+		
+		<div id='export'>
+			<input id="exportButton" type="button" value = "Export">
+		</div>
+		
+		<div id='download'>
+			<input id="downloadButton" type="button" value = "Download">
+		</div>
+		
+		<div id='menu'>
+			<input id="menuButton" type="button" value = "Menu">
+		</div>
+		
+		<div id='the_menu' class="dialogueBox">
+			<div class="row">
+				<div class="space"> </div>
+				<div id='nodeContent' class='content'>
+					<div id="help" class="noTextCursor">&nbsp;&nbsp;Help</div>
+				</div>
+			</div>
+			<div class="row">
+				<div class="space"> </div>
+				<div id='nodeContent' class='content'>
+					<div id="cubeesize" class="noTextCursor">&nbsp;&nbsp;Cubee Size</div>
+					<div id="minisize" class="noTextCursor">&nbsp;&nbsp;Mini Size</div>
+					<div id="microsize" class="noTextCursor">&nbsp;&nbsp;Micro Size</div>
+					<div id="freesize" class="noTextCursor">&nbsp;&nbsp;Free Size</div>
+				</div>
+			</div>
+			<div class="row">
+				<div class="space"> </div>
+				<div id='nodeContent' class='content'>
+					<div id="boxHtitle" class="noClickCursor">&nbsp;&nbsp;Container Height</div>
+					<div id="boxH" class="noClickCursor">&nbsp;&nbsp;&nbsp;&nbsp;200 Micro Cubees</div>
+					<div id="boxWtitle" class="noClickCursor">&nbsp;&nbsp;Container Width</div>
+					<div id="boxW" class="noClickCursor">&nbsp;&nbsp;&nbsp;&nbsp;200 Micro Cubees</div>
+				</div>
+			</div>
+			<div class="row">
+				<div class="space"> </div>	
+				<div id='nodeContent' class='content'>
+					<div id="zoomin" class="noTextCursor">&nbsp;&nbsp;Zoom In</div>
+					<div id="zoomout" class="noTextCursor">&nbsp;&nbsp;Zoom Out</div>
+					<div id="nozoom" class="noTextCursor">&nbsp;&nbsp;No Zoom</div>
+				</div>
+			</div>	
+			<div class="row">
+				<div class="space"> </div>
+				<div id='nodeContent' class='content'>
+					<div id="close" class="noTextCursor">&nbsp;&nbsp;Close Menu</div>
 				</div>
 			</div>
 		</div>
@@ -126,6 +101,25 @@
 					<div id="p_corner" class="noTextCursor">&nbsp;&nbsp;Corner</div>
 					<div id="p_smooth" class="noTextCursor">&nbsp;&nbsp;Smooth</div>
 					<div id="p_joined" class="noTextCursor">&nbsp;&nbsp;Joined</div>
+				</div>
+			</div>
+		</div>
+		
+		<div id='storeDB' class="dragDialogueBox" draggable="true">
+			<div class="row">
+				<div class="heading"> 
+					<div class="titlediv">Download</div>
+					<div class="closediv">X</div>
+				</div>
+				<div class='dragContent'>
+					<div id = 'storeDesc'>Download to Download Folder</div>
+					<div id = 'storeName' >
+						<label for="storeIn">File name: </label><input id="storeIn" class="inpt" type="text" size="15"/>
+					</div>
+				</div>
+				<div class="footer">	
+					<input id = "storeBut" class='DBBut' type = 'button' value = "Download" />
+					<input id = "storeCancel" class = 'DBCancel' type = 'button' value = "Cancel" />
 				</div>
 			</div>
 		</div>

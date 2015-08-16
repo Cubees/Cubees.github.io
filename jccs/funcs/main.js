@@ -165,7 +165,7 @@ function main() {
 	
 	/*----------CONSTRUCTION MENU EVENTS--------------------------------*/
 	
-	help.addEventListener("click", function() {window.open("../jchelp/jchelphome.html")}, false);
+	help.addEventListener("click", function() {window.open("../jchelp/home.html")}, false);
 
 	//move events
 	leftarrow.addEventListener("mousedown", leftMove, false);

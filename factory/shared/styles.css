@@ -1,0 +1,203 @@
+html, body {
+	overflow: hidden;
+	width: 100%;
+	height: 100%;
+	margin: 0;
+	padding: 0;
+}
+
+.canvas {
+	width: 49.5%;
+	height: 100%;
+	touch-action: none;
+	float:left;
+}
+
+#productCanvas {
+	margin-right:0.5%;
+}
+
+.noTextCursor, .noClickCursor {
+	cursor:default;
+}
+
+.noTextCursor:hover {
+	background: linear-gradient(to right, #999999 , #FFFFFF); 
+}
+
+.dialogueBox {
+	position:absolute;
+	display:table;
+	border: 1px solid #333333;
+	background-color: #FFFFFF;
+	box-shadow: 5px 5px 2px #111111;
+	z-index:5;
+}
+
+.row {
+	display:table-row;
+	height:100%;
+	width:100%;
+}
+
+.space {
+	display:table-cell;
+	border: 1px solid #666666;
+	width:25%;
+}
+
+.content {
+	display:table-cell;
+	border: 1px solid #666666;
+	width:75%;
+}
+
+#segment {
+	top:50px;
+	right:50px;
+	width:120px;
+	height:60px;
+	visibility:hidden;
+}
+
+#p_curved, #p_straight {
+	color: #888888;
+}
+
+#node {
+	top:50px;
+	right:50px;
+	width:120px;
+	height:60px;
+	visibility:hidden;
+}
+
+#p_corner {
+	color: #888888;
+}
+
+#export, #menu, #download {
+	position:absolute;
+	z-index:5;
+	top:5px;
+	left:5px;
+	width:60px;
+	height:28px;
+}
+
+#download {
+	left:68px;
+}
+
+#menu {
+	top:35px;
+}
+
+#the_menu {
+	top:65px;
+	left:5px;
+	width:200px;
+	height:60px;
+	visibility:hidden;
+}
+
+#cubeesize, #zoomin, #nozoom {
+	color:#888888;
+}
+
+#boxH, #boxW {
+	font-size: 0.75em;
+}
+
+.dragDialogueBox {
+	position:absolute;
+	width:240px;
+	height:120px;
+	top:250px;
+	left:500px;
+	border: 1px solid #333333;
+	background-color: #FFFFFF;
+	box-shadow: 5px 5px 2px #111111;
+	z-index:5;
+	visibility:hidden;
+}
+
+.dragDialogueBox div, input {
+	position:absolute;
+}
+
+.dragDialogueBox label, input {
+	margin: 2px 2px 2px 2px;
+}
+
+.heading {
+	border-bottom: 1px solid #666666;
+	width:100%;
+	height:20px;
+	background-color:#AAAAAA;
+}
+
+.titlediv {
+	left:5px;
+	cursor:default;
+}
+
+.footer {
+	border-top: 1px solid #666666;
+	width:100%;
+	height:30px;
+	bottom:0px;
+	background-color: #FFFFFF;
+}
+
+.closediv {
+	right:2px;
+	opacity:0.6;
+	font-family: sans-serif;
+	cursor:default;
+}
+
+.closedive:hover {
+	opacity:1;
+}
+
+.dragContent {
+	width: 100%;
+	height:80px;
+	top:20px;
+}
+
+.DBBut {
+	top: 1px;
+	right:90px;
+}
+
+.DBCancel {
+	right:5px;
+	top:1px;
+}
+
+#storeDesc {
+	top:2px;
+	left:5px;
+	color: #666666;
+	cursor: default;
+}
+
+#storeName {
+	top:25px;
+	left:5px;
+}
+
+#confirmDB {
+	height:135px;
+}
+
+#confirmDesc {
+	margin:5px;
+}
+
+#confirmBut {
+	left:5px;
+}
+
