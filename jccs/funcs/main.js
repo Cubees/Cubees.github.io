@@ -10,6 +10,7 @@ function main() {
 	var saveMarker = saveIcon;
 	var exportMarker = exportIcon;
 	var scene_exportMarker = exportIcon;
+	var objectUrl;
 	
 	// Event variables
     var groundPoint;
@@ -92,7 +93,8 @@ function main() {
 	var save_as = document.getElementById("save_as");
 	var openFile = document.getElementById("open"); 
 	var manage = document.getElementById("manage"); 
-	var export_ = document.getElementById("export"); 
+	var export_ = document.getElementById("export");
+	var download=document.getElementById("download"); 
 	var import_ = document.getElementById("import"); 
 	
 	// Cubee Menu and Sub-Menus
@@ -160,7 +162,11 @@ function main() {
 	var manageBut = document.getElementById("manageBut");
 	var manageList = document.getElementById("manageList");
 	
-	var confirmDB = document.getElementById("confirmDB"); 
+	var downloadDB = document.getElementById("downloadDB"); 
+	var downloadIn = document.getElementById("downloadIn");
+	var downloadBut = document.getElementById("downloadBut");
+	
+	var confirmDB = document.getElementById("confirmDB");
 	var confirmBut = document.getElementById("confirmBut");	
 	
 	/*----------CONSTRUCTION MENU EVENTS--------------------------------*/
@@ -190,6 +196,7 @@ function main() {
 	}
 	
 	export_.addEventListener('click', doExport, false);
+	download.addEventListener("click", openDownload, false);
 	import_.addEventListener('click', openImport, false);
 	
 	//cubee events
@@ -255,6 +262,9 @@ function main() {
     
     //Store As in App
     storeBut.addEventListener('click', doStoreAs, false);
+    
+    //Download
+   downloadBut.addEventListener('click', startDownload, false);
 
 	//Fetch fromApp
 	fetchBut.addEventListener('click', doFetch, false);
@@ -526,8 +536,7 @@ function main() {
 		}
 		
 		var saveMesh = {n:names_to_save,t:types_to_save, m:materials_to_save, p:positions_to_save, r:rotations_to_save};
-		var strMesh = JSON.stringify(saveMesh);
-console.log(strMesh);		
+		var strMesh = JSON.stringify(saveMesh);		
 		var key = "CUBEE"+name;;
 		
 		localStorage.setItem(key, strMesh);
@@ -643,6 +652,123 @@ console.log(strMesh);
 		exportMarker = Blank;
 		model.innerHTML = "Model -- "+currentModelName+storeMarker+saveMarker+exportMarker;
 		exported[currentModelName] = true;
+	}
+	
+	function startDownload() {
+		if (inScene) {
+			doSceneDownload(downloadIn.value);
+		}
+		else {
+			doDownload(downloadIn.value);
+		}
+	}
+	
+	function doSceneDownload(filename) {
+		var selValue = {};
+		var meshes_to_save = [];
+
+		for(var parent in sceneParents) {
+			meshes_to_save.push(sceneParents[parent].model);
+			for(var i=0; i<sceneParents[parent].modelChildren.length; i++) {
+				sceneParents[parent].modelChildren[i].hideSelected;
+				selValue[sceneParents[parent].modelChildren[i].name] = sceneParents[parent].modelChildren[i].getSelected();					
+			}
+			
+		}
+		
+		if(objectUrl) {
+			window.URL.revokeObjectURL(objectUrl);
+		}
+			
+		var serializedMesh = BABYLON.SceneSerializer.SerializeMesh(meshes_to_save, false, true);
+		
+		var strMesh = JSON.stringify(serializedMesh);
+		
+		downloadDB.style.visibility='hidden';        
+		if (filename.length === 0){
+			downloadDB.style.visibility='visible';
+			window.alert("No name specified");
+			return;
+		}
+		else if (filename.toLowerCase().lastIndexOf(".babylon") !== filename.length - 8 || filename.length < 9){
+			filename += ".babylon";
+		}
+            
+  	 	var blob = new Blob ( [ strMesh ], { type : "octet/stream" } );
+       
+		// turn blob into an object URL; saved as a member, so can be cleaned out later 
+		objectUrl = (window.webkitURL || window.URL).createObjectURL(blob);
+	      
+		var link = window.document.createElement('a');
+		link.href = objectUrl;
+		link.download = filename;
+		var click = document.createEvent("MouseEvents");
+		click.initEvent("click", true, false);
+		link.dispatchEvent(click); 
+		
+		for(var parent in sceneParents) {
+			for(var i=0; i<sceneParents[parent].modelChildren.length; i++) {
+				if(selValue[parent]) {
+					sceneParents[parent].modelChildren[i].showSelected();
+				}					
+			}
+			meshes_to_save.push(sceneParents[parent].model);
+		}
+		
+		scene_exported = true;
+		scene_scene.innerHTML = "Scene";
+	}
+	
+	function doDownload(filename) {
+		var selValue = {};
+		var meshes_to_save = [];
+		
+		for(var ref in JCubees) {
+			selValue[ref] = JCubees[ref].getSelected();
+			JCubees[ref].hideSelected();
+			meshes_to_save.push(JCubees[ref].Jcubee);
+		}
+		
+		if(objectUrl) {
+			window.URL.revokeObjectURL(objectUrl);
+		}
+	
+		var serializedMesh = BABYLON.SceneSerializer.SerializeMesh(meshes_to_save);
+		
+		var strMesh = JSON.stringify(serializedMesh);
+	
+    	downloadDB.style.visibility='hidden';        
+		if (filename.length === 0){
+			downloadDB.style.visibility='visible';
+			window.alert("No name specified");
+			return;
+		}
+		else if (filename.toLowerCase().lastIndexOf(".babylon") !== filename.length - 8 || filename.length < 9){
+			filename += ".babylon";
+		}
+            
+  	 	var blob = new Blob ( [ strMesh ], { type : "octet/stream" } );
+       
+		// turn blob into an object URL; saved as a member, so can be cleaned out later 
+		objectUrl = (window.webkitURL || window.URL).createObjectURL(blob);
+	      
+		var link = window.document.createElement('a');
+		link.href = objectUrl;
+		link.download = filename;
+		var click = document.createEvent("MouseEvents");
+		click.initEvent("click", true, false);
+		link.dispatchEvent(click); 
+		
+		for(var ref in JCubees) {
+			if(selValue[ref]) {
+				JCubees[ref].showSelected();
+			}
+		}
+		
+		exportMarker = Blank;
+		model.innerHTML = "Model -- "+currentModelName+storeMarker+saveMarker+exportMarker;
+		exported[currentModelName] = true;         
+	
 	}
 		
 	//Cubee functions
@@ -1236,6 +1362,10 @@ console.log(strMesh);
 		}
 	}
 	
+	function openDownload() {
+		downloadDB.style.visibility='visible';
+	}
+	
 	function openImport() {
 		scene_import = false;
 		openImporter();
@@ -1531,6 +1661,7 @@ console.log(strMesh);
 	//var scene_save_as = document.getElementById("scene_save_as");
 	var scene_openFile = document.getElementById("scene_open");
 	var scene_export = document.getElementById("scene_export");
+	var scene_download = document.getElementById("scene_download");
 	var scene_import = document.getElementById("scene_import");
 	var scene_importScene = document.getElementById("scene_importScene");
 	
@@ -1582,6 +1713,7 @@ console.log(strMesh);
 	//scene_save_as.addEventListener('click', scene_openSaveAs, false);
 	
 	scene_export.addEventListener('click', scene_doExport, false);
+	scene_download.addEventListener('click', openDownload, false);
 	scene_import.addEventListener('click', openImport, false);
 	scene_importScene.addEventListener('click', openImportScene, false);
 
@@ -2308,13 +2440,10 @@ console.log(strMesh);
         var pickInfo = jccsStudio.scene.pick(jccsStudio.scene.pointerX, jccsStudio.scene.pointerY);	
 		if (pickInfo.hit && pickInfo.pickedMesh !==ground) {	
             var currentMesh = pickInfo.pickedMesh;
-			var name = currentMesh.name;
-console.log("pick", name);														
+			var name = currentMesh.name;														
 			if(name.charAt(0)=="I") {
-				var currentParent = sceneModels[name].parent;
-console.log("mesh",name);				
-				name = currentParent.name;
-console.log("parent",name);				
+				var currentParent = sceneModels[name].parent;				
+				name = currentParent.name;				
 				updateCurrentModels()
 			}
 			else {

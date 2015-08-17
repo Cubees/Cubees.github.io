@@ -84,7 +84,8 @@
 				<div id='save_as' class='filecontent'>Save As...</div>
 				<div id='open' class='filecontent'>Open...</div>
 				<div id='manage' class='filecontent'>Manage...</div>
-				<div id='export' class='filecontent'>Export...</div>
+				<div id='export' class='filecontent'>Export</div>
+				<div id='download' class='filecontent'>Download...</div>
 				<div id='import' class='filecontent'>Import...</div>
 				<div class="subcontent"></div>
 			</div>
@@ -195,6 +196,25 @@
 			</div>
 		</div>
 		
+		<div id='downloadDB' class="dragDialogueBox" draggable="true">
+			<div class="row">
+				<div class="heading"> 
+					<div class="titlediv">Download</div>
+					<div class="closediv">X</div>
+				</div>
+				<div class='dragContent'>
+					<div id = 'downloadDesc'>Download to Download Folder</div>
+					<div id = 'downloadName' >
+						<label for="downloadIn">File name: </label><input id="downloadIn" class="inpt" type="text" size="15"/>
+					</div>
+				</div>
+				<div class="footer">	
+					<input id = "downloadBut" class='DBBut' type = 'button' value = "Download" />
+					<input id = "downloadCancel" class = 'DBCancel' type = 'button' value = "Cancel" />
+				</div>
+			</div>
+		</div>
+		
 		<div id='importDB' class="dragDialogueBox" draggable="true">
 			<div class="row">
 				<div class="heading"> 
@@ -278,7 +298,8 @@
 				<div id='scene_save_as' class='filecontent'>Save As...</div>  -->
 				<div id='scene_open' class='filecontent'>Open Model...</div> 
 				 <div id='scene_import' class='filecontent'>Import Model...</div>  
-				<div id='scene_export' class='filecontent'>Export Scene...</div>
+				<div id='scene_export' class='filecontent'>Export Scene</div>
+				<div id='scene_download' class='filecontent'>Download Scene...</div>
 				<div id='scene_importScene' class='filecontent'>Import Scene...</div>
 				<div class="subcontent"></div>
 			</div>

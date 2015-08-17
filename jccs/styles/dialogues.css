@@ -193,6 +193,18 @@ li span {
 	left:5px;
 }
 
+#downloadDesc {
+	top:2px;
+	left:5px;
+	color: #666666;
+	cursor: default;
+}
+
+#downloadName {
+	top:25px;
+	left:5px;
+}
+
 #confirmDB {
 	height:135px;
 }
