@@ -362,7 +362,10 @@ function main() {
 		var xa, xb, ya, yb;
 		square_M.position.z=10;
 		num_of_nodes--;
-		if(foundNode.name =="fxdstr") {
+		if(num_of_nodes == 2) {
+			pDelete.style.color = "#888888";
+		}
+		if(foundNode ==startNode) {
 			foundNode=foundNode.next;
 		}
 		foundNode.marker.dispose();

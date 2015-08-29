@@ -5,98 +5,172 @@
 		<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
 		<title>Extrude</title>
 	  
+		<link rel="stylesheet" type="text/css" href="../shared/styles.css">
 		<style>
-			html, body {
-				overflow: hidden;
-				width: 100%;
-				height: 100%;
-				margin: 0;
-				padding: 0;
-			}
-			
-			.canvas {
-				width: 49.5%;
-				height: 100%;
-				touch-action: none;
-				float:left;
-			}
-
-			#productCanvas {
-				
-				margin-right:0.5%;
-			}
-			
-			.noTextCursor {
+			#segment_title {
+				background-color:#000000;
+				color:#FFFFFF;
 				cursor:default;
 			}
-			
-			.noTextCursor:hover {
-				background: linear-gradient(to right, #999999 , #FFFFFF); 
-			}
-			
-			.dialogueBox {
-				position:absolute;
-				display:table;
-				border: 1px solid #333333;
-				background-color: #FFFFFF;
-				box-shadow: 5px 5px 2px #111111;
-				z-index:5;
-			}
-			
-			.row {
-				display:table-row;
-				height:100%;
-				width:100%;
-			}
-			
-			.space {
-				display:table-cell;
-				border: 1px solid #666666;
-				width:25%;
-			}
-			
-			.content {
-				display:table-cell;
-				border: 1px solid #666666;
-				width:75%;
-			}
-			
-			#segment {
-				top:50px;
-				right:50px;
-				width:120px;
-				height:60px;
-				visibility:hidden;
-			}
-			
-			#p_curved, #p_straight {
-				color: #888888;
-			}
-			
-			#node {
-				top:50px;
-				right:50px;
-				width:120px;
-				height:60px;
-				visibility:hidden;
-			}
-			
-			#p_corner {
-				color: #888888;
-			}
-			
+
 		</style>
 		
 		<script src="../../Babylon/babylon2.2_min.js"></script>
 		<script src="../../Babylon/hand.js"></script>
+		<script src="../../Babylon/cuboid.js"></script>
 		<script src="../shared/classes.js"></script>
 		<script src="../shared/tools.js"></script>
+		<script src="../shared/exporter.js"></script>
 		<script src="funcs/tools.js"></script>
-		<script src="funcs/main.js"></script>	
+		<script src="funcs/main.js"></script>
+		<script src="funcs/controls.js"></script>
+		<script src="funcs/bezier.js"></script>	
 			
 		<script>
 			"use strict";
 			window.onload=main;
+			
+			var dlgbox;
+			
+			var cursorPos;
+			var downMouse = false;
+			
+			var W=Math.floor(screen.availWidth/60)*60;
+			var H = 120;
+			var gap=44;
+			var size = 10;
+			
+			var controlNodes =[];
+			var num_controlNodes =[2,2,2,2,2];
+			var num_controlPoints = 25;
+			var currentControl = 0;
+			var Bnode_index=0;
+			
+			var scxH, scyH, rotH, tltH, twtH, mvxH, mvyH;
+			
+			var zoomMarker;
+			var zoomScaleX = 10;
+			var zoomScaleY = 10;
+			var VSMax, VSMin;
+			
+			var nowNode;
+			var extrudeLength;
+			
+			var mousePos;
+			
+			//Drag events
+			window.addEventListener('mousemove', function(e) {doDrag(e)}, false);
+			window.addEventListener('mouseup', enddbDrag, false);
+			
+			//Drag Dialogues
+			function startdbDrag(e, box) {
+				cursorPos = getPosition(e);
+				downMouse = true;
+				dlgbox = box.parentNode.parentNode;							
+			}
+			
+			function startMkrDrag(e, box) {		
+				cursorPos = getPosition(e);
+				downMouse = true;
+				nowNode.marker.mk.style.border = "none";
+				dlgbox = box;
+				nowNode = dlgbox.node;
+				dlgbox.style.border = "solid 1px black";
+				Bsq.style.visibility="hidden"; 
+				controlSeg.style.visibility="hidden"
+				zoomMarker.style.left = (120 - size/2) + "px";
+				zoomMarker.style.top = (100 - size/2) + "px";
+				doControlUpdates(controlNodes[currentControl]);				
+			}
+			
+			function startZoomDrag(e, box) {		
+				cursorPos = getPosition(e);
+				downMouse = true;
+				dlgbox = box;				
+			}
+	
+			function doDrag(e) {
+				if(!downMouse) {return};
+
+				var cursorNow = getPosition(e);	
+				var dx = cursorNow.x - cursorPos.x;
+				var dy = cursorNow.y - cursorPos.y;
+				cursorPos = cursorNow;				
+				if(dlgbox.type && dlgbox.type.substr(0,3) == "B2D") {
+					var lx = dlgbox.node.x + dx;
+					var ty = dlgbox.node.y + dy;
+					var topy = gap;
+					var boty = gap + H;
+					if(dlgbox.type == "B2DC") {
+						topy = size/2;
+						boty =2*gap + H;
+					}									
+					if(lx<W*0.1 || lx>W*0.9) {
+						return;
+					};
+					if(ty<topy || ty>boty) {
+						return;
+					};
+					dlgbox.node.y = ty;
+					dlgbox.style.top = (ty - dlgbox.node.size/2)+"px";
+					if(dlgbox.node !== controlNodes[currentControl]) {
+						dlgbox.node.x = lx;
+						dlgbox.style.left = (lx - dlgbox.node.size/2)+"px";
+					}
+					if(dlgbox.node.name.substr(0,2) == "ex") {
+						extrudeLength +=dx;
+						doSetAllLengths();
+					}			
+					initCanvas(controlCanvas, gap, W, H);
+					createPath(controlNodes[currentControl], controlCanvas);
+					doControlUpdates(controlNodes[currentControl]);
+				}
+				else if(dlgbox.type && dlgbox.type == "ZM") {
+					if (parseInt(dlgbox.style.top) + dy <size  || parseInt(dlgbox.style.top) + dy > (200 - size)) {
+						return;
+					}
+					if (parseInt(dlgbox.style.left) + dx <size  || parseInt(dlgbox.style.left) + dx > (220 - size)) {
+						return;
+					}
+					var lx = nowNode.x + dx/zoomScaleX;
+					var ty = nowNode.y + dy/zoomScaleY;
+					var topy = gap;
+					var boty = gap + H;
+					if(nowNode.marker.mk.type == "B2DC") {
+						topy = size/2;
+						boty =2*gap + H;
+					}
+					if(lx<W*0.1 || lx>W*0.9) {
+						return;
+					};
+					if(ty<topy || ty>boty) {
+						return;
+					};
+					nowNode.y += dy/zoomScaleY;
+					nowNode.marker.mk.style.top = (nowNode.y - size/2)	+ "px";	
+					dlgbox.style.top = (parseInt(dlgbox.style.top) + dy)+"px";
+					if(nowNode !== controlNodes[currentControl]) {
+						dlgbox.style.left = (parseInt(dlgbox.style.left) + dx)+"px";
+						nowNode.x += dx/zoomScaleX;
+						nowNode.marker.mk.style.left = (nowNode.x - size/2)	+ "px";
+					}
+					if(nowNode.name.substr(0,2) == "ex") {
+						extrudeLength +=dx/zoomScaleX;
+						doSetAllLengths();
+				} 
+					initCanvas(controlCanvas, gap, W, H);
+					createPath(controlNodes[currentControl], controlCanvas);
+					doControlUpdates(controlNodes[currentControl]);				
+				}
+				else {
+					dlgbox.style.top = (parseInt(dlgbox.style.top) + dy)+"px";
+					dlgbox.style.left = (parseInt(dlgbox.style.left) + dx)+"px";
+				}
+			};
+	
+			function enddbDrag(e) {
+				downMouse = false;				
+			};
 			
 		</script>
 			
@@ -105,15 +179,137 @@
 	<body>
 		<canvas id="productCanvas" class="canvas"></canvas>
 		<canvas id="extrudeCanvas" class="canvas"></canvas>
+		<div id="canvasHolder">
+			<div id="controlLength" class="controlLabel">1200.99 units</div>
+			<div id="controlMax" class="controlLabel">180</div>
+			<div id="controlMid" class="controlLabel">0.5</div>	
+			<div id="controlMin" class="controlLabel">0</div>
+			<div id="controlHeight" class="controlLabel">1</div>
+			<div id="controlVar" class="controlLabel">1</div>
+			
+			<div id='controlSeg' class="dialogueBox">
+				<div class="row">
+					<div class="space"> </div>
+					<div id='controlSegContent' class='content'>
+						<div id="controlSeg_title">&nbsp;&nbsp;Path</div>
+					</div>
+				</div>
+				<div class="row">
+					<div class="space"> </div>
+					<div id='controlSegContent' class='content'>
+						<div id="B_add" class="noTextCursor">&nbsp;Add Point</div>
+						<div id="B_delete" class="noTextCursor">&nbsp;Delete</div>
+						<div id="B_straight" class="noTextCursor">&nbsp;Straight</div>
+						<div id="B_curved" class="noTextCursor">&nbsp;Curved</div>
+						<div id="B_zoom" class="noTextCursor">&nbsp;Zoom</div>
+					</div>
+				</div>
+			</div>	
+			<div id='paramSeg' class="dialogueBox">
+				<div class="row">
+					<div class="space"> </div>
+					<div id='paramSegContent' class='content'>
+						<div id="paramSeg_title">&nbsp;&nbsp;Variable</div>
+					</div>
+				</div>
+				<div class="row">
+					<div class="space"> </div>
+					<div id='paramSegContent' class='content'>
+						<div id="B_scalex" class="noTextCursor">&nbsp;Scale X</div>
+						<div id="B_scaley" class="noTextCursor">&nbsp;Scale Y</div>
+						<div id="B_rotate" class="noTextCursor">&nbsp;Rotate</div>
+						<div id="B_tilt" class="noTextCursor">&nbsp;Tilt</div>
+						<div id="B_twist" class="noTextCursor">&nbsp;Twist</div>
+						<div id="B_movex" class="noTextCursor">&nbsp;Move X</div>
+						<div id="B_moveY" class="noTextCursor">&nbsp;Move Y</div>
+					</div>
+				</div>
+				<div class="row">
+					<div class="space"> </div>
+					<div class='content'>
+						<div id="B_pzoom" class="noTextCursor">&nbsp;Zoom</div>
+					</div>
+				</div>
+			</div>
+			<canvas id="controlCanvas"></canvas>
+			<div id = "Bsq"></div>
+			<div id = "sizexHolder" class = "varHolder"></div>
+			<div id = "sizeyHolder" class = "varHolder"></div>
+			<div id = "rotateHolder" class = "varHolder"></div>
+			<div id = "tiltHolder" class = "varHolder"></div>
+			<div id = "twistHolder" class = "varHolder"></div>
+			<div id = "movexHolder" class = "varHolder"></div>
+			<div id = "moveyHolder" class = "varHolder"></div>
+		</div>
 		
 		<!--dialogue boxes-->
 		<div id='segment' class="dialogueBox">
 			<div class="row">
 				<div class="space"> </div>
 				<div id='segmentContent' class='content'>
+					<div id="segment_title">&nbsp;&nbsp;Extruder</div>
+				</div>
+			</div>
+			<div class="row">
+				<div class="space"> </div>
+				<div id='segmentContent' class='content'>
 					<div id="p_add" class="noTextCursor">&nbsp;&nbsp;Add Point</div>
+					<div id="p_delete" class="noTextCursor">&nbsp;&nbsp;Delete</div>
 					<div id="p_straight" class="noTextCursor">&nbsp;&nbsp;Straight</div>
 					<div id="p_curved" class="noTextCursor">&nbsp;&nbsp;Curved</div>
+				</div>
+			</div>
+		</div>
+		
+		<div id='export'>
+			<input id="exportButton" type="button" value = "Export">
+		</div>
+		
+		<div id='download'>
+			<input id="downloadButton" type="button" value = "Download">
+		</div>
+		
+		<div id='menu'>
+			<input id="menuButton" type="button" value = "Menu">
+		</div>
+		
+		<div id='the_menu' class="dialogueBox">
+			<div class="row">
+				<div class="space"> </div>
+				<div id='nodeContent' class='content'>
+					<div id="help" class="noTextCursor">&nbsp;&nbsp;Help</div>
+				</div>
+			</div>
+			<div class="row">
+				<div class="space"> </div>
+				<div id='nodeContent' class='content'>
+					<div id="cubeesize" class="noTextCursor">&nbsp;&nbsp;Cubee Size</div>
+					<div id="minisize" class="noTextCursor">&nbsp;&nbsp;Mini Size</div>
+					<div id="microsize" class="noTextCursor">&nbsp;&nbsp;Micro Size</div>
+					<div id="freesize" class="noTextCursor">&nbsp;&nbsp;Free Size</div>
+				</div>
+			</div>
+			<div class="row">
+				<div class="space"> </div>
+				<div id='nodeContent' class='content'>
+					<div id="boxHtitle" class="noClickCursor">&nbsp;&nbsp;Container Height</div>
+					<div id="boxH" class="noClickCursor">&nbsp;&nbsp;&nbsp;&nbsp;200 Micro Cubees</div>
+					<div id="boxWtitle" class="noClickCursor">&nbsp;&nbsp;Container Width</div>
+					<div id="boxW" class="noClickCursor">&nbsp;&nbsp;&nbsp;&nbsp;200 Micro Cubees</div>
+				</div>
+			</div>
+			<div class="row">
+				<div class="space"> </div>	
+				<div id='nodeContent' class='content'>
+					<div id="zoomin" class="noTextCursor">&nbsp;&nbsp;Zoom In</div>
+					<div id="zoomout" class="noTextCursor">&nbsp;&nbsp;Zoom Out</div>
+					<div id="nozoom" class="noTextCursor">&nbsp;&nbsp;No Zoom</div>
+				</div>
+			</div>	
+			<div class="row">
+				<div class="space"> </div>
+				<div id='nodeContent' class='content'>
+					<div id="close" class="noTextCursor">&nbsp;&nbsp;Close Menu</div>
 				</div>
 			</div>
 		</div>
@@ -128,6 +324,41 @@
 				</div>
 			</div>
 		</div>
+		
+		<div id='storeDB' class="dragDialogueBox" draggable="true">
+			<div class="row">
+				<div class="heading"> 
+					<div class="titlediv">Download</div>
+					<div class="closediv">X</div>
+				</div>
+				<div class='dragContent'>
+					<div id = 'storeDesc'>Download to Download Folder</div>
+					<div id = 'storeName' >
+						<label for="storeIn">File name: </label><input id="storeIn" class="inpt" type="text" size="15"/>
+					</div>
+				</div>
+				<div class="footer">	
+					<input id = "storeBut" class='DBBut' type = 'button' value = "Download" />
+					<input id = "storeCancel" class = 'DBCancel' type = 'button' value = "Cancel" />
+				</div>
+			</div>
+		</div>
+		
+		<div id='zoomDB' class="dragDialogueBox" draggable="true">
+			<div class="row">
+				<div class="heading"> 
+					<div class="titlediv">Zoom</div>
+					<div id="zoomCentre" title="Center">&oplus;</div>
+					<div class="closediv">X</div>
+				</div>
+				<div class='dragContent'>
+					<div id = 'zoomBack'>
+						<div id = 'zoomMarker'></div>
+					</div>
+				</div>
+			</div>
+		</div>
+
 		
 	</body>
 

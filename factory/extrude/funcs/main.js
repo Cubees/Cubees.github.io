@@ -1,14 +1,24 @@
 function main() {
+	/*-------------SET CONTROLS ---------------*/
+	controlNodes = setControls(W, H, gap);
+	
 	/*-------------MAIN VARIABLES ---------------*/
 	var num_of_nodes = 3;
 	var node_index = 0;
 	var num_of_steps = 25;
 	var num_of_turns = 25;
 	
+	var grid = 60;
+	var setzoom = -200;
+	
+	var bound;
+	
+	
 	/*-------------MENU ELEMENTS---------------*/	
 	//Get Menu Elements 
 	var segment=document.getElementById("segment");
 	var pAdd=document.getElementById("p_add");
+	var pDelete=document.getElementById("p_delete");
 	var pStraight=document.getElementById("p_straight");
 	var pCurved=document.getElementById("p_curved");
 	
@@ -16,6 +26,37 @@ function main() {
 	var pCorner=document.getElementById("p_corner");
 	var pSmooth=document.getElementById("p_smooth");
 	var pJoined=document.getElementById("p_joined");
+	
+	var export_=document.getElementById("export");
+	var download=document.getElementById("download");
+	var menu=document.getElementById("menu");
+	
+	var the_menu=document.getElementById("the_menu");
+	var help=document.getElementById("help");
+	var cubeesize=document.getElementById("cubeesize");
+	var minisize=document.getElementById("minisize");
+	var microsize=document.getElementById("microsize");
+	var freesize=document.getElementById("freesize");
+	var boxHtitle=document.getElementById("boxHtitle");
+	var boxH=document.getElementById("boxH");
+	var boxWtitle=document.getElementById("boxWtitle");
+	var boxW=document.getElementById("boxW");
+	var zoomin=document.getElementById("zoomin");
+	var zoomout=document.getElementById("zoomout");
+	var nozoom=document.getElementById("nozoom");
+	var close=document.getElementById("close");
+	
+	var ddb = document.getElementsByClassName("dragDialogueBox");
+	var closediv = document.getElementsByClassName("closediv");
+	var headerDiv = document.getElementsByClassName("heading");
+	var cancelDiv = document.getElementsByClassName("DBCancel"); 
+	var inpt = document.getElementsByClassName("inpt");
+	
+	var storeDB = document.getElementById("storeDB"); 
+	var storeIn = document.getElementById("storeIn");
+	var storeBut = document.getElementById("storeBut");
+	
+	controlSeg_title = document.getElementById("controlSeg_title");
 		
 	//Set readable styles for Elements
 	pStraight.style.color="#888888";
@@ -24,8 +65,15 @@ function main() {
 	pCorner.style.color="#888888";
 	pSmooth.style.color="#000000";
 	pJoined.style.color="#000000";
-
 	
+	cubeesize.style.color="#888888";
+	minisize.style.color="#000000";
+	microsize.style.color="#000000";
+	freesize.style.color="#000000";
+	
+	zoomin.style.color="#888888";
+	zoomout.style.color="#000000";
+	nozoom.style.color="#888888";
 
 	/*-------------EXTRUDE STUDIO ---------------*/	
 	// Set the extrude studio
@@ -35,7 +83,7 @@ function main() {
 
 	var extrudeStudio = new Studio(extrudeEngine);
 	extrudeStudio.camera = new BABYLON.ArcRotateCamera("Camera", 0, 0, 10, new BABYLON.Vector3(0, 0, 0), extrudeStudio.scene);
-	extrudeStudio.camera.setPosition(new BABYLON.Vector3(0, 0, -400));
+	extrudeStudio.camera.setPosition(new BABYLON.Vector3(0, 0, -200));
 	extrudeStudio.light = new BABYLON.DirectionalLight("light", new BABYLON.Vector3(0, 0, 0), extrudeStudio.scene);
 	extrudeStudio.scene.clearColor = new BABYLON.Color3(0, 0, 0);
 	
@@ -192,7 +240,7 @@ function main() {
 			controlLines[i]=BABYLON.Mesh.CreateLines(null,extrudeTool.controls[i],null,null, controlLines[i]);
 		}
 		
-		//turned = updateTurned(turned, extrudeTool.blade, num_of_turns);
+		//extruded = updateExtruded(extruded, extrudeTool.blade, num_of_turns);
 
 		startingPoint = current;
 
@@ -216,6 +264,8 @@ function main() {
 	// Watch for browser/canvas resize events
 	window.addEventListener("resize", function () {
 		extrudeEngine.resize();
+		CHT = Math.floor(window.innerHeight*0.67);
+		document.getElementById("canvasHolder").style.top = CHT +"px";
 	});
 	
 	/*-------------PRODUCT STUDIO ---------------*/	
@@ -237,7 +287,7 @@ function main() {
 	productStudio.scene.clearColor = new BABYLON.Color3(0.75, 0.75, 0.75);
 	
 	// Create product
-	//var turned=createTurned("turned", extrudeTool.blade, num_of_turns, productStudio.scene, true, BABYLON.Mesh.FRONTSIDE);
+	//var extruded=createExtruded("extruded", extrudeTool.blade, num_of_turns, productStudio.scene, true, BABYLON.Mesh.FRONTSIDE);
 	
 	// material
 	var darkMat = new BABYLON.StandardMaterial("dark", productStudio.scene);
@@ -245,7 +295,7 @@ function main() {
     darkMat.specularColor = new BABYLON.Color3(0.4, 0.4, 0.4);
     darkMat.emissiveColor = new BABYLON.Color3(0.1, 0.1, 0.1);
 	
-	//turned.material=darkMat;
+	//extruded.material=darkMat;
 		
 	// Register a render loop to repeatedly render the scene
 	productEngine.runRenderLoop(function () {
@@ -257,7 +307,7 @@ function main() {
 		productEngine.resize();
 	});
 	
-	/*-------------MENU ELEMENTS EVENTS---------------*/	
+		/*-------------MENU ELEMENTS EVENTS---------------*/	
 	
 	//Menu Events
 	pAdd.addEventListener('click', onAdd, false);
@@ -294,9 +344,62 @@ function main() {
 				controlLines[i]=BABYLON.Mesh.CreateLines("cl"+node_index+i,extrudeTool.controls[i],extrudeStudio.scene,true);
 		}
 		
-		turned.dispose();
-		turned=createTurned("turned", extrudeTool.blade, num_of_turns, productStudio.scene, true, BABYLON.Mesh.FRONTSIDE);
+		extruded.dispose();
+		
+		extruded=createExtruded("BWXEextruded", extrudeTool.blade, num_of_turns, productStudio.scene, true, BABYLON.Mesh.FRONTSIDE);
+		
+		bound.dispose();
+		bound = container(extrudeTool.blade, productStudio.scene, grid);
+	
 	}
+	
+	pDelete.addEventListener('click', onDelete, false);
+	
+	function onDelete () {
+		if(pDelete.style.color=="rgb(136, 136, 136)") {
+			return
+		}
+		for(var i=0; i<controlLines.length;i++) {
+			controlLines[i].dispose();
+		}	
+		segment.style.visibility="hidden";		
+		var xa, xb, ya, yb;
+		square_M.position.z=10;
+		num_of_nodes--;
+		if(num_of_nodes == 2) {
+			pDelete.style.color = "#888888";
+		}
+		if(foundNode ==startNode) {
+			foundNode=foundNode.next;
+		}
+		foundNode.marker.dispose();
+		foundNode.ctrl1.marker.dispose();
+		delete foundNode.ctrl1;
+		foundNode.prev.ctrl2.marker.dispose();
+		foundNode.prev.ctrl2 = foundNode.ctrl2;
+		foundNode.next.prev = foundNode.prev;
+		foundNode.prev.next = foundNode.next;
+		delete foundNode;		
+		extrudeBlade.dispose();
+		
+		
+	
+		extrudeTool=createTool(startNode,startNode,extrudeStudio.scene,num_of_steps);	
+				
+		extrudeBlade = BABYLON.Mesh.CreateLines("vcc", extrudeTool.blade, extrudeStudio.scene, true);
+				
+		for(var i=0; i<extrudeTool.controls.length;i++) {
+				controlLines[i]=BABYLON.Mesh.CreateLines("cl"+node_index+i,extrudeTool.controls[i],extrudeStudio.scene,true);
+		}
+		
+		extruded.dispose();
+		
+		extruded=createExtruded("BWXEextruded", extrudeTool.blade, num_of_turns, productStudio.scene, true, BABYLON.Mesh.FRONTSIDE);
+		
+		bound.dispose();
+		bound = container(extrudeTool.blade, productStudio.scene, grid); 
+	
+	}	
 
 	pStraight.addEventListener("click", onStraight, false);
 	
@@ -322,9 +425,11 @@ function main() {
 				controlLines[i]=BABYLON.Mesh.CreateLines("cl"+node_index+i,extrudeTool.controls[i],extrudeStudio.scene,true);
 		}
 		
-		turned.dispose();
-		turned=createTurned("turned", extrudeTool.blade, num_of_turns, productStudio.scene, true, BABYLON.Mesh.FRONTSIDE);
-
+		extruded.dispose();
+		extruded=createExtruded("BWXEextruded", extrudeTool.blade, num_of_turns, productStudio.scene, true, BABYLON.Mesh.FRONTSIDE);
+		
+		bound.dispose();
+		bound = container(extrudeTool.blade, productStudio.scene, grid);
 	}
 	
 	pCurved.addEventListener("click", onCurved, false);
@@ -338,7 +443,7 @@ function main() {
 		pStraight.style.color="#000000";
 		pCurved.style.color="#888888";
 		foundNode.segmentType = "curved";
-		extrudeBlade.dispose()
+		extrudeBlade.dispose();
 		for(var i=0; i<controlLines.length;i++) {
 			controlLines[i].dispose();
 		}
@@ -351,8 +456,179 @@ function main() {
 				controlLines[i]=BABYLON.Mesh.CreateLines("cl"+node_index+i,extrudeTool.controls[i],extrudeStudio.scene,true);
 		}
 		
-		turned.dispose();
-		turned=createTurned("turned", extrudeTool.blade, num_of_turns, productStudio.scene, true, BABYLON.Mesh.FRONTSIDE);
-
+		extruded.dispose();
+		extruded=createExtruded("BWXEextruded", extrudeTool.blade, num_of_turns, productStudio.scene, true, BABYLON.Mesh.FRONTSIDE);
+		
+		bound.dispose();
+		bound = container(extrudeTool.blade, productStudio.scene, grid);
 	}
+	
+	export_.addEventListener("click", doExport, false);
+	
+	function doExport() {
+		writeExport(extruded);
+	}
+	
+	download.addEventListener("click", function() {storeDB.style.visibility='visible';}, false);
+	
+	menu.addEventListener("click", function() {the_menu.style.visibility="visible"}, false);
+	
+	close.addEventListener("click", function() {the_menu.style.visibility="hidden"}, false);
+	
+	cubeesize.addEventListener("click", doCubeeSize, false);
+		
+	function doCubeeSize() {
+		if(cubeesize.style.color=="rgb(136, 136, 136)") {
+			return
+		}
+		cubeesize.style.color="#888888";
+		minisize.style.color="#000000";
+		microsize.style.color="#000000";
+		freesize.style.color="#000000";
+		grid = 60;
+		bound.dispose();
+		bound = container(extrudeTool.blade, productStudio.scene, grid);
+	}
+	
+	minisize.addEventListener("click", doMiniSize, false);
+		
+	function doMiniSize() {
+		if(minisize.style.color=="rgb(136, 136, 136)") {
+			return
+		}
+		cubeesize.style.color="#000000";
+		minisize.style.color="#888888";
+		microsize.style.color="#000000";
+		freesize.style.color="#000000";
+		grid = 15;
+		bound.dispose();
+		bound = container(extrudeTool.blade, productStudio.scene, grid);
+	}
+	
+	microsize.addEventListener("click", doMicroSize, false);
+		
+	function doMicroSize() {
+		if(microsize.style.color=="rgb(136, 136, 136)") {
+			return
+		}
+		cubeesize.style.color="#000000";
+		minisize.style.color="#000000";
+		microsize.style.color="#888888";
+		freesize.style.color="#000000";
+		grid = 1;
+		bound.dispose();
+		bound = container(extrudeTool.blade, productStudio.scene, grid);
+	}
+	
+	freesize.addEventListener("click", doFreeSize, false);
+		
+	function doFreeSize() {
+		if(freesize.style.color=="rgb(136, 136, 136)") {
+			return
+		}
+		cubeesize.style.color="#000000";
+		minisize.style.color="#000000";
+		microsize.style.color="#000000";
+		freesize.style.color="#888888";
+		grid = 0;
+		bound.dispose();
+		bound = container(extrudeTool.blade, productStudio.scene, grid);
+		bound.showBoundingBox = false;
+	}
+	
+	zoomin.addEventListener('click', doZoomin, false) 
+	
+	function doZoomin() {
+		if(zoomin.style.color=="rgb(136, 136, 136)") {
+			return
+		}
+		setzoom +=50;
+		zoomout.style.color ="#000000";
+		extrudeStudio.camera.setPosition(new BABYLON.Vector3(0, 0, setzoom));
+		productStudio.camera.setPosition(new BABYLON.Vector3(0, 0, setzoom));
+		if(setzoom ==-200) {
+			zoomin.style.color ="#888888";
+			nozoom.style.color ="#888888";
+		}
+	}
+	
+	zoomout.addEventListener('click', doZoomout, false);
+	
+	function doZoomout() {
+		if(zoomout.style.color=="rgb(136, 136, 136)") {
+			return;
+		}
+		setzoom -=50;
+		zoomin.style.color ="#000000";
+		nozoom.style.color ="#000000";
+		extrudeStudio.camera.setPosition(new BABYLON.Vector3(0, 0, setzoom));
+		productStudio.camera.setPosition(new BABYLON.Vector3(0, 0, setzoom));
+		if(setzoom ==-600) {
+			zoomout.style.color ="#888888";
+		}
+	}
+
+	nozoom.addEventListener('click', doNoZoom, false) 
+	
+	function doNoZoom() {
+		if(zoomout.style.color=="rgb(136, 136, 136)") {
+			return
+		}
+		setzoom =-200;
+		extrudeStudio.camera.setPosition(new BABYLON.Vector3(0, 0, setzoom));
+		productStudio.camera.setPosition(new BABYLON.Vector3(0, 0, setzoom));
+		zoomout.style.color ="#000000";
+		zoomin.style.color ="#888888";
+		nozoom.style.color ="#000000";
+	}
+	
+	/*-----------DRAG DIALOGUE BOX EVENTS--------------------*/
+	
+	
+	for(var i=0;i<ddb.length;i++){
+        ddb[i].style.top = "150px";
+        ddb[i].style.left = "500px";        
+   };
+	
+	for(var i=0;i<headerDiv.length;i++){
+        headerDiv[i].addEventListener('mousedown', function(e) {startdbDrag(e, this)}, false);
+        headerDiv[i].addEventListener('mouseup', function(e) {enddbDrag(e)}, false);
+   };
+   
+   
+	//Close dialogue box
+	for(var i=0;i<closediv.length;i++){
+        closediv[i].addEventListener('click', function() {doClose(this)}, false);
+   };
+    
+    //Cancel dialogue box
+    for(var i=0;i<cancelDiv.length;i++){
+        cancelDiv[i].addEventListener('click', function() {doClose(this)}, false);
+    };
+    
+    //input dialogue box
+    for(var i=0;i<inpt.length;i++){   	
+        inpt[i].addEventListener('keydown', function(evt) {inpKeyDown(evt)}, false);
+    };    
+ 
+    
+    //Download
+   storeBut.addEventListener('click', startDownload, false);
+       
+    
+    /*-------------DIALOGUE BOX FUNCTIONS--------*/
+
+	function doClose(box) {
+		box.parentNode.parentNode.parentNode.style.visibility = 'hidden';
+	}
+	
+	
+	function inpKeyDown(evt) {		
+		evt.stopPropagation();
+	};
+	
+	function startDownload() {
+		doDownload(storeIn.value,extruded, storeDB);
+	}
+	
 }	

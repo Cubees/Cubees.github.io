@@ -8,13 +8,30 @@ html, body {
 
 .canvas {
 	width: 49.5%;
-	height: 100%;
+	height: 66%;
+	margin-bottom:0.5%
 	touch-action: none;
 	float:left;
 }
 
 #productCanvas {
 	margin-right:0.5%;
+}
+
+#canvasHolder {
+	position:absolute;
+	top:66%;
+	width:100%;
+	height:33%;
+}
+
+.varHolder {
+	visibility:hidden;
+	position:absolute;
+	top:0px;
+	left:0px;
+	width:100%;
+	height:100%;
 }
 
 .noTextCursor, .noClickCursor {
@@ -189,4 +206,75 @@ html, body {
 	left:5px;
 }
 
+#controlSeg {
+	visibility:hidden;
+	top:15px;
+	left:5px;
+	font-size:0.75em;
+	width:84px;
+}
 
+#paramSeg {
+	visibility:visible;
+	top:15px;
+	left:5px;
+	font-size:0.75em;
+	width:84px;
+}
+
+.controlLabel {
+	position:absolute;
+	height:12px;
+	font-size:0.5em;
+	background-color:#FFFFFF;
+	border: 1px solid #000000;
+	text-align:center;
+	visibility:visible;
+	cursor:default;
+}
+
+#controlLength {
+	top:22px;
+}
+
+#controlVar {
+	top:2px;
+	background-color:#404040;
+	color: #FFFFFF;
+	text-align:center;
+	height:18px;
+	font-size:0.75em;
+}
+
+
+#Bsq {
+	position:absolute;
+	width:10px;
+	height:10px;
+	visibility:hidden;
+	border: solid 1px #FFFFFF;
+}
+
+
+#zoomDB {
+	height:240px;
+	background-color:#808080;
+}
+
+#zoomCentre {
+	top:-5px;
+	right:20px;
+	opacity:0.6;
+	font-family: sans-serif;
+	cursor:default;
+	font-size:1.2em;
+}
+
+#zoomCentre:hover {
+	opacity:1;
+}
+
+#zoomMarker {
+	background-color:#C0C0C0;
+	border:solid 1px #000000;
+}
