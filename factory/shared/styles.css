@@ -219,7 +219,7 @@ html, body {
 	top:15px;
 	left:5px;
 	font-size:0.75em;
-	width:84px;
+	width:105px;
 }
 
 .controlLabel {
@@ -237,13 +237,26 @@ html, body {
 	top:22px;
 }
 
+#controlMarker {
+	visibility:hidden;
+}
+
+#controlLength:hover, #controlMax:hover, #controlMin:hover, #controlHeight:hover, #controlMarker:hover {
+	background-color: #000000;
+	color:#FFFFFF;
+}
+
 #controlVar {
+	position:absolute;
 	top:2px;
 	background-color:#404040;
+	border: 1px solid #000000;
 	color: #FFFFFF;
 	text-align:center;
 	height:18px;
 	font-size:0.75em;
+	visibility:visible;
+	cursor:default;
 }
 
 
@@ -255,26 +268,30 @@ html, body {
 	border: solid 1px #FFFFFF;
 }
 
-
-#zoomDB {
-	height:240px;
-	background-color:#808080;
+#inputDB {
+	visibility:hidden;	
+	height:60px;
 }
 
-#zoomCentre {
-	top:-5px;
-	right:20px;
-	opacity:0.6;
-	font-family: sans-serif;
-	cursor:default;
-	font-size:1.2em;
+#inputDB input {
+	position:absolute;
 }
 
-#zoomCentre:hover {
-	opacity:1;
+#inputParamLabel {
+	top:5px;
+	left:5px;
+	width:75px;
+	text-align:right;
 }
 
-#zoomMarker {
-	background-color:#C0C0C0;
-	border:solid 1px #000000;
+#inputParam {
+	top:5px;
+	left:85px;
+	text-align: right;
+	padding-right: 1px;
+}
+
+#inputParamUnit {
+	top:5px;
+	left:145px;
 }

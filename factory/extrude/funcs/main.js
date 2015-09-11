@@ -2,6 +2,21 @@ function main() {
 	/*-------------SET CONTROLS ---------------*/
 	controlNodes = setControls(W, H, gap);
 	
+	
+	BABYLON.Vector3.prototype.scaleInPlace = function (scale) {
+		if(typeof scale === 'number') {
+			this.x *= scale;
+			this.y *= scale;
+			this.z *= scale;
+		}
+		else {
+			this.x *= scale.x;
+			this.y *= scale.y;
+			this.z *= scale.z;
+		}
+		return this;
+	};
+	
 	/*-------------MAIN VARIABLES ---------------*/
 	var num_of_nodes = 3;
 	var node_index = 0;
@@ -9,7 +24,8 @@ function main() {
 	var num_of_turns = 25;
 	
 	var grid = 60;
-	var setzoom = -200;
+	var setzoomEX = -200;
+	var setzoomPR = -900;
 	
 	var bound;
 	
@@ -127,7 +143,7 @@ function main() {
 	leftNode.next=startNode;
 	leftNode.prev=rightNode;
 		
-	var extrudeTool=createTool(startNode,startNode,extrudeStudio.scene,num_of_steps);
+	extrudeTool=createTool(startNode,startNode,extrudeStudio.scene,num_of_steps);
 
 	var extrudeBlade = BABYLON.Mesh.CreateLines("vcc", extrudeTool.blade, extrudeStudio.scene, true);
 	
@@ -240,7 +256,8 @@ function main() {
 			controlLines[i]=BABYLON.Mesh.CreateLines(null,extrudeTool.controls[i],null,null, controlLines[i]);
 		}
 		
-		//extruded = updateExtruded(extruded, extrudeTool.blade, num_of_turns);
+		extruded.dispose();
+		extruded=extruded=createExtruded("BWXEextruded", extrudeTool.blade, productStudio.scene, BABYLON.Mesh.DOUBLESIDE);
 
 		startingPoint = current;
 
@@ -274,20 +291,20 @@ function main() {
 
 	var productEngine = new BABYLON.Engine(productCanvas, true);
 
-	var productStudio = new Studio(productEngine);
+	productStudio = new Studio(productEngine);
 	productStudio.camera = new BABYLON.ArcRotateCamera("Camera", 0, 0, 10, new BABYLON.Vector3(0, 0, 0), productStudio.scene);
-	productStudio.camera.setPosition(new BABYLON.Vector3(0, 0, -200));
+	productStudio.camera.setPosition(new BABYLON.Vector3(150, 50, -900));
 	productStudio.camera.attachControl(productCanvas, true);	
-	productStudio.frontLight = new BABYLON.PointLight("omni", new BABYLON.Vector3(0, 50, -100), productStudio.scene);
-	productStudio.backLight = new BABYLON.PointLight("omni", new BABYLON.Vector3(10, 50, 150), productStudio.scene);
-	productStudio.bottomLight = new BABYLON.PointLight("omni", new BABYLON.Vector3(-10, -150, 5), productStudio.scene);
+	productStudio.frontLight = new BABYLON.PointLight("omni", new BABYLON.Vector3(0, 150, -600), productStudio.scene);
+	productStudio.backLight = new BABYLON.PointLight("omni", new BABYLON.Vector3(50, 150, 600), productStudio.scene);
+	productStudio.bottomLight = new BABYLON.PointLight("omni", new BABYLON.Vector3(-50, -150, 0), productStudio.scene);
 	productStudio.frontLight.intensity = 0.7;
 	productStudio.backLight.intensity = 0.6;
 	productStudio.bottomLight.intensity = 0.5;
 	productStudio.scene.clearColor = new BABYLON.Color3(0.75, 0.75, 0.75);
 	
 	// Create product
-	//var extruded=createExtruded("extruded", extrudeTool.blade, num_of_turns, productStudio.scene, true, BABYLON.Mesh.FRONTSIDE);
+	extruded=createExtruded("BWXEextruded", extrudeTool.blade, productStudio.scene);
 	
 	// material
 	var darkMat = new BABYLON.StandardMaterial("dark", productStudio.scene);
@@ -345,8 +362,7 @@ function main() {
 		}
 		
 		extruded.dispose();
-		
-		extruded=createExtruded("BWXEextruded", extrudeTool.blade, num_of_turns, productStudio.scene, true, BABYLON.Mesh.FRONTSIDE);
+		extruded=extruded=createExtruded("BWXEextruded", extrudeTool.blade, productStudio.scene, BABYLON.Mesh.DOUBLESIDE);
 		
 		bound.dispose();
 		bound = container(extrudeTool.blade, productStudio.scene, grid);
@@ -393,8 +409,7 @@ function main() {
 		}
 		
 		extruded.dispose();
-		
-		extruded=createExtruded("BWXEextruded", extrudeTool.blade, num_of_turns, productStudio.scene, true, BABYLON.Mesh.FRONTSIDE);
+		extruded=extruded=createExtruded("BWXEextruded", extrudeTool.blade, productStudio.scene, BABYLON.Mesh.DOUBLESIDE);
 		
 		bound.dispose();
 		bound = container(extrudeTool.blade, productStudio.scene, grid); 
@@ -426,7 +441,7 @@ function main() {
 		}
 		
 		extruded.dispose();
-		extruded=createExtruded("BWXEextruded", extrudeTool.blade, num_of_turns, productStudio.scene, true, BABYLON.Mesh.FRONTSIDE);
+		extruded=createExtruded("BWXEextruded", extrudeTool.blade, productStudio.scene, BABYLON.Mesh.DOUBLESIDE);
 		
 		bound.dispose();
 		bound = container(extrudeTool.blade, productStudio.scene, grid);
@@ -457,7 +472,7 @@ function main() {
 		}
 		
 		extruded.dispose();
-		extruded=createExtruded("BWXEextruded", extrudeTool.blade, num_of_turns, productStudio.scene, true, BABYLON.Mesh.FRONTSIDE);
+		extruded=createExtruded("BWXEextruded", extrudeTool.blade, productStudio.scene, BABYLON.Mesh.DOUBLESIDE);
 		
 		bound.dispose();
 		bound = container(extrudeTool.blade, productStudio.scene, grid);
@@ -542,11 +557,12 @@ function main() {
 		if(zoomin.style.color=="rgb(136, 136, 136)") {
 			return
 		}
-		setzoom +=50;
+		setzoomEX +=50;
+		setzoomPR +=50;
 		zoomout.style.color ="#000000";
-		extrudeStudio.camera.setPosition(new BABYLON.Vector3(0, 0, setzoom));
-		productStudio.camera.setPosition(new BABYLON.Vector3(0, 0, setzoom));
-		if(setzoom ==-200) {
+		extrudeStudio.camera.setPosition(new BABYLON.Vector3(0, 0, setzoomEX));
+		productStudio.camera.setPosition(new BABYLON.Vector3(0, 0, setzoomPR));
+		if(setzoomEX ==-200) {
 			zoomin.style.color ="#888888";
 			nozoom.style.color ="#888888";
 		}
@@ -558,12 +574,13 @@ function main() {
 		if(zoomout.style.color=="rgb(136, 136, 136)") {
 			return;
 		}
-		setzoom -=50;
+		setzoomEX -=50;
+		setzoomPR -=50;
 		zoomin.style.color ="#000000";
 		nozoom.style.color ="#000000";
-		extrudeStudio.camera.setPosition(new BABYLON.Vector3(0, 0, setzoom));
-		productStudio.camera.setPosition(new BABYLON.Vector3(0, 0, setzoom));
-		if(setzoom ==-600) {
+		extrudeStudio.camera.setPosition(new BABYLON.Vector3(0, 0, setzoomEX));
+		productStudio.camera.setPosition(new BABYLON.Vector3(0, 0, setzoomPR));
+		if(setzoomEX ==-600) {
 			zoomout.style.color ="#888888";
 		}
 	}
@@ -571,12 +588,13 @@ function main() {
 	nozoom.addEventListener('click', doNoZoom, false) 
 	
 	function doNoZoom() {
-		if(zoomout.style.color=="rgb(136, 136, 136)") {
+		if(nozoom.style.color=="rgb(136, 136, 136)") {
 			return
 		}
-		setzoom =-200;
-		extrudeStudio.camera.setPosition(new BABYLON.Vector3(0, 0, setzoom));
-		productStudio.camera.setPosition(new BABYLON.Vector3(0, 0, setzoom));
+		setzoomEX =-200;
+		setzoomPR = -900;
+		extrudeStudio.camera.setPosition(new BABYLON.Vector3(0, 0, setzoomEX));
+		productStudio.camera.setPosition(new BABYLON.Vector3(0, 0, setzoomPR));
 		zoomout.style.color ="#000000";
 		zoomin.style.color ="#888888";
 		nozoom.style.color ="#000000";

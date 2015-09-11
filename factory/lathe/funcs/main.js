@@ -567,7 +567,7 @@ function main() {
 	nozoom.addEventListener('click', doNoZoom, false) 
 	
 	function doNoZoom() {
-		if(zoomout.style.color=="rgb(136, 136, 136)") {
+		if(nozoom.style.color=="rgb(136, 136, 136)") {
 			return
 		}
 		setzoom =-200;

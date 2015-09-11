@@ -13,7 +13,6 @@ function setControls(W, H, gap) {
 	var BDelete=document.getElementById("B_delete");
 	var BStraight=document.getElementById("B_straight");
 	var BCurved=document.getElementById("B_curved");
-	var BZoom=document.getElementById("B_zoom");
 	
 	var Bscalex = document.getElementById("B_scalex");
 	var Bscaley = document.getElementById("B_scaley");
@@ -22,24 +21,17 @@ function setControls(W, H, gap) {
 	var Btwist = document.getElementById("B_twist");
 	var Bmovex = document.getElementById("B_movex");
 	var Bmovey = document.getElementById("B_moveY");
-	var Bpzoom = document.getElementById("B_pzoom");
+	var BSlock = document.getElementById("B_Slock");
+	var BMlock = document.getElementById("B_Mlock");
+	
+	var inputBD = document.getElementById("inputDB");
 	
 	var Bvar = [Bscalex, Bscaley, Brotate, Btilt, Btwist, Bmovex, Bmovey];
-	
-	zoomMarker = document.getElementById("zoomMarker");
-	zoomMarker.style.left = (120 - size/2) + "px";
-	zoomMarker.style.top = (100 - size/2) + "px";
-	zoomMarker.style.width = size + "px";
-	zoomMarker.style.height = size + "px";
-	zoomMarker.type = "ZM";
-	
-	zoomCentre = document.getElementById("zoomCentre");
 	
 	//Set readable styles for Elements
 	BStraight.style.color="#888888";
 	BCurved.style.color="#000000";
 	BDelete.style.color="#888888";
-	BZoom.style.color="#000000";
 	
 	Bscalex.style.color="#888888";
 	Bscaley.style.color="#000000";
@@ -48,7 +40,6 @@ function setControls(W, H, gap) {
 	Btwist.style.color="#000000";
 	Bmovex.style.color="#000000";
 	Bmovey.style.color="#000000";
-	Bpzoom.style.color="#000000";
 	
 /*---------------MENU EVENTS-------------------------------*/
  
@@ -56,7 +47,6 @@ function setControls(W, H, gap) {
 	BDelete.addEventListener("click", BonDelete, false);
 	BStraight.addEventListener("click", BonStraight, false);
 	BCurved.addEventListener("click", BonCurved, false);
-	BZoom.addEventListener("click", BonZoom, false);
 	
 	
 	Bscalex.addEventListener("click", function() {setControlType(0, Bvar, BHold);}, false);
@@ -66,14 +56,12 @@ function setControls(W, H, gap) {
 	Btwist.addEventListener("click", function() {setControlType(4, Bvar, BHold);}, false);
 	Bmovex.addEventListener("click", function() {setControlType(5, Bvar, BHold);}, false);
 	Bmovey.addEventListener("click", function() {setControlType(6, Bvar, BHold);}, false);
-	Bpzoom.addEventListener("click", BonZoom, false);
+	BSlock.addEventListener("click", BonSlock, false);
+	BMlock.addEventListener("click", BonMlock, false);
 	
-	zoomCentre.addEventListener('mousedown', function() { zoomMarker.style.left = (120 - size/2) + "px";
-														  zoomMarker.style.top = (100 - size/2) + "px";
-														  }, false);
-	
-	zoomMarker.addEventListener('mousedown', function(e) {startZoomDrag(e, this)}, false);
-	zoomMarker.addEventListener('mouseup', function(e) {enddbDrag(e)}, false);
+	document.getElementById("inputParam").addEventListener('focus', reset, false);
+	document.getElementById("inputParam").addEventListener('change', updateValues, false);
+
 	
 /*---------------MENU ACTIONS-------------------------------*/	
 
@@ -98,7 +86,9 @@ function setControls(W, H, gap) {
 		newNode.ctrl2 = BfoundNode.ctrl2;
 		BfoundNode.ctrl2 = new Bcontrol("Bctrl2"+Bnode_index,newNode.x - dx,newNode.y - dy,size, BHold[currentControl]);
 		initCanvas(controlCanvas, gap, W, H);
-		createPath(controlNodes[currentControl], controlCanvas);		
+		createPath(controlNodes[currentControl], controlCanvas);
+		extruded.dispose();
+		extruded=createExtruded("BWXEextruded", extrudeTool.blade, productStudio.scene, BABYLON.Mesh.DOUBLESIDE);		
 	}
 	
 	function BonDelete () {
@@ -116,6 +106,8 @@ function setControls(W, H, gap) {
 		if(BfoundNode ==startNode) {
 			BfoundNode=BfoundNode.next;
 		}
+		nowNode = BfoundNode.prev;
+		nowNode.marker.mk.style.border ="solid 1px #000000";
 		BfoundNode.marker.mk.parentNode.removeChild(BfoundNode.marker.mk);
 		delete BfoundNode.marker;
 		BfoundNode.ctrl1.marker.mk.parentNode.removeChild(BfoundNode.ctrl1.marker.mk);
@@ -130,6 +122,8 @@ function setControls(W, H, gap) {
 		delete BfoundNode;
 		initCanvas(controlCanvas, gap, W, H);
 		createPath(controlNodes[currentControl], controlCanvas);
+		extruded.dispose();
+		extruded=createExtruded("BWXEextruded", extrudeTool.blade, productStudio.scene, BABYLON.Mesh.DOUBLESIDE);
 	}	
 	
 	
@@ -144,6 +138,8 @@ function setControls(W, H, gap) {
 		BfoundNode.segmentType = "straight";
 		initCanvas(controlCanvas, gap, W, H);
 		createPath(controlNodes[currentControl], controlCanvas);
+		extruded.dispose();
+		extruded=createExtruded("BWXEextruded", extrudeTool.blade, productStudio.scene, BABYLON.Mesh.DOUBLESIDE);
 	}
 	
 	function BonCurved () {		
@@ -157,10 +153,46 @@ function setControls(W, H, gap) {
 		BfoundNode.segmentType = "curved";
 		initCanvas(controlCanvas, gap, W, H);
 		createPath(controlNodes[currentControl], controlCanvas);
+		extruded.dispose();
+		extruded=createExtruded("BWXEextruded", extrudeTool.blade, productStudio.scene, BABYLON.Mesh.DOUBLESIDE);
 	}
 	
-	function BonZoom () {
-		zoomDB.style.visibility = "visible";
+	function BonSlock() {
+		scaleLock = !scaleLock;
+		if(scaleLock) {
+			BSlock.innerHTML = "&nbsp;Unlock Scale";
+			if(Bscaley.style.color=="rgb(136, 136, 136)") {
+				setControlType(0, Bvar, BHold);
+			}
+			else {
+				Bscaley.style.color = "#888888";
+			}
+		}
+		else {
+			BSlock.innerHTML = "&nbsp;Lock Scale";
+			Bscaley.style.color = "#000000";
+		}
+		extruded.dispose();
+		extruded=createExtruded("BWXEextruded", extrudeTool.blade, productStudio.scene, BABYLON.Mesh.DOUBLESIDE);
+	}
+	
+	function BonMlock() {
+		moveLock = !moveLock;
+		if(moveLock) {
+			BMlock.innerHTML = "&nbsp;Unlock Move";
+			if(Bmovey.style.color=="rgb(136, 136, 136)") {
+				setControlType(5, Bvar, BHold);
+			}
+			else {
+				Bmovey.style.color = "#888888";
+			}
+		}
+		else {
+			BMlock.innerHTML = "&nbsp;Lock Move";
+			Bmovey.style.color = "#000000";
+		}
+		extruded.dispose();
+		extruded=createExtruded("BWXEextruded", extrudeTool.blade, productStudio.scene, BABYLON.Mesh.DOUBLESIDE);
 	}
 	
 	
@@ -188,6 +220,11 @@ function setControls(W, H, gap) {
 	var controlMin = document.getElementById("controlMin");
 	var controlVar = document.getElementById("controlVar");
 	
+	controlLength.addEventListener('click', function() {setValue(this)}, false);
+	controlHeight.addEventListener('click', function() {setValue(this)}, false);
+	controlMax.addEventListener('click', function() {setValue(this)}, false);
+	controlMin.addEventListener('click', function() {setValue(this)}, false);
+	
 	var Cwidth = 13;
 	
 	//controlHeight.style.height = size + "px";
@@ -198,6 +235,8 @@ function setControls(W, H, gap) {
 	controlMid.style.width = Cwidth*1.2 +"px";
 	controlMin.style.width = Cwidth*1.2 +"px";	
 	controlVar.style.width = Cwidth*8 +"px";
+	
+	
 	
 	controlLength.style.top =(gap - 2*size) +"px";
 	controlHeight.style.top =(gap - size/2) +"px";
@@ -254,13 +293,10 @@ function setControls(W, H, gap) {
 	
 	extrudeLength = W*0.8;
 	
-	zoomScaleX = 10;
-	zoomScaleY = 10;
 	VSMin = 0;
 	VSMax = 1;
 	
-	//controlSeg_title.innerHTML = "&nbsp;&nbsp;Scale X";
-	controlSeg_title.innerHTML = "&nbsp;&nbsp;Position Y";
+	controlSeg_title.innerHTML = "&nbsp;&nbsp;Scale X";
 	
 	controlMax.innerHTML = VSMax;
 	controlMid.innerHTML = (VSMax + VSMin)/2;
@@ -278,13 +314,13 @@ function setControls(W, H, gap) {
 }
 
 function doControlUpdates(startNode) {
-	var currentNode = startNode;
+/*	var currentNode = startNode;
 	while(currentNode.next !== null) {
 		currentNode = currentNode.next;
-	}
+	} */
 	var cw = parseInt(controlLength.style.width)/2
-	controlLength.style.left =(currentNode.x - cw) +"px";
-	var inL = Math.floor(currentNode.x*10)/10;
+	controlLength.style.left =(nowNode.x - cw) +"px";
+	var inL = Math.floor(nowNode.x*10)/10;
 	controlLength.innerHTML = inL +" units";
 	controlHeight.style.top =(nowNode.y - size/2) +"px";
 	var inH = VSMax + (nowNode.y -gap)*(VSMin - VSMax)/H;
@@ -294,20 +330,22 @@ function doControlUpdates(startNode) {
 	}
 	else {
 		controlHeight.innerHTML = inH + " units";
-	}
-	
+	}	
 }
 
-function doSetAllLengths() {
+function doSetAllLengths(newLength) {
 	for (var i=0; i<7; i++) {
 		var currentNode = controlNodes[i];
 		while(currentNode.next !== null) {
 			currentNode = currentNode.next;
+			currentNode.x *= newLength/extrudeLength;
+			currentNode.marker.mk.style.left = (currentNode.x - size/2) + "px";
 		}
-		currentNode.x = W*0.1 + extrudeLength;
+		currentNode.x = newLength;
 		currentNode.marker.mk.style.left = (currentNode.x - size/2) + "px";
 		doControlUpdates(controlNodes[currentControl]);
 	}
+	extrudeLength = newLength;
 }
 
 function onCanvasUp (e) {	
@@ -319,12 +357,24 @@ function onCanvasUp (e) {
 		Bsq.style.top =(mousePos.y - size/2) +"px";
 		Bsq.style.left =(mousePos.x - size/2) +"px";
 		Bsq.style.visibility = "visible";
+		document.getElementById("B_curved").style.color="#000000";
+		document.getElementById("B_straight").style.color="#000000";
+		if(BfoundNode.segmentType == "straight") {
+			document.getElementById("B_straight").style.color="#888888";
+		}
+		if(BfoundNode.segmentType == "curved") {
+			document.getElementById("B_curved").style.color="#888888";
+		}
 		controlSeg.style.visibility = "visible";
 	}
 }
 
 function setControlType(N, Bvar, BHold) {
+	document.getElementById("Bsq").style.visibility = "hidden";
 	Bvar[currentControl].style.color = "#000000";
+	if((currentControl == 1 && scaleLock) || (currentControl == 6 && moveLock)) {
+		Bvar[currentControl].style.color = "#888888";
+	}
 	BHold[currentControl].style.visibility = "hidden";
 	currentControl = N;
 	Bvar[currentControl].style.color = "#888888";
@@ -337,64 +387,52 @@ function setControlType(N, Bvar, BHold) {
 	
 	switch(N) {
 		case 0: //Scale X
-			zoomScaleX = 10;
-			zoomScaleY = 40;
-			VSMin = 0;
-			VSMax = 1;
+			inputDB.style.visibility = 'hidden';
+			VSMin = VS[0][0];
+			VSMax = VS[0][1];
 			Vunit = "units";
 			controlSeg_title.innerHTML = "&nbsp;&nbsp;Scale X";
 			Vvar = "Scale X";
 		break	
 		case 1: //Scale Y
-			zoomScaleX = 10;
-			zoomScaleY = 40;
-			VSMin = 0;
-			VSMax = 1;
+			inputDB.style.visibility = 'hidden';
+			VSMin = VS[1][0];
+			VSMax = VS[1][1];
 			Vunit = "units";
 			controlSeg_title.innerHTML = "&nbsp;&nbsp;Scale Y";
 			Vvar = "Scale Y";
 		break	
 		case 2: //Rotate Z
-			zoomScaleX = 10;
-			zoomScaleY = 36;
-			VSMin = -180;
-			VSMax = 180;
+			VSMin = VS[2][0];
+			VSMax = VS[2][1];
 			Vunit = "degs";
 			controlSeg_title.innerHTML = "&nbsp;&nbsp;Rotate Z";
 			Vvar = "Rotate";
 		break	
 		case 3: //Rotate X
-			zoomScale = 10;
-			zoomScale = 36;
-			VSMin = -180;
-			VSMax = 180;
+			VSMin = VS[3][0];
+			VSMax = VS[3][1];
 			Vunit = "degs";
 			controlSeg_title.innerHTML = "&nbsp;&nbsp;Rotate X";
 			Vvar = "Tilt";
 		break		
 		case 4: //Rotate y
-			zoomScaleX = 10;
-			zoomScaleY = 36;
-			VSMin = -180;
-			VSMax = 180;
+			VSMin = VS[4][0];
+			VSMax = VS[4][1];
 			Vunit = "degs";
 			controlSeg_title.innerHTML = "&nbsp;&nbsp;Rotate Y";
 			Vvar = "Twist";
 		break			
 		case 5: //Position X
-			zoomScaleX = 10;
-			zoomScaleY = 10;
-			VSMin = -200;
-			VSMax = 200;
+			VSMin = VS[5][0];
+			VSMax = VS[5][1];
 			Vunit = "units";
 			controlSeg_title.innerHTML = "&nbsp;&nbsp;Position X";
 			Vvar = "Move X";
 		break			
 		case 6: //Position Y
-			zoomScaleX = 10;
-			zoomScaleY = 10;
-			VSMin = -200;
-			VSMax = 200;
+			VSMin = VS[6][0];
+			VSMax = VS[6][1];
 			Vunit = "units";
 			controlSeg_title.innerHTML = "&nbsp;&nbsp;Position Y";
 			Vvar = "Move Y";
@@ -411,10 +449,86 @@ function setControlType(N, Bvar, BHold) {
 	dlgbox = currentNode.marker.mk;
 	dlgbox.style.border = "solid 1px black";
 	
-	zoomMarker.style.left = (120 - size/2) + "px";
-	zoomMarker.style.top = (100 - size/2) + "px";
-	
 	initCanvas(controlCanvas, gap, W, H);
 	createPath(controlNodes[currentControl], controlCanvas);
 	doControlUpdates(controlNodes[currentControl]);	
 }
+
+function setValue(ctrl) {
+	currentValueId = ctrl.id;	
+	var txt = 'Size';
+	var unitxt = 'Units'
+	if(2<=currentControl && currentControl<=4) {
+		txt = 'Angle';
+		unitxt = 'Degrees';
+	}
+	document.getElementById("inputParamLabel").innerHTML=txt;
+	document.getElementById("inputParamUnit").innerHTML=unitxt;
+	if(ctrl.id == "controlLength") {
+		if(nowNode.name.substr(0,2) == "ex") {
+			document.getElementById("inputParamLabel").innerHTML="Length";
+		}
+		else {
+			document.getElementById("inputParamLabel").innerHTML="Distance";
+		}
+		document.getElementById("inputParamUnit").innerHTML="Units";
+	}
+	else if(ctrl.id == "controlMax") {
+		document.getElementById("inputParamLabel").innerHTML="Max "+txt;
+		document.getElementById("inputParamUnit").innerHTML=unitxt;
+	}
+	else if(ctrl.id == "controlMax") {
+		document.getElementById("inputParamLabel").innerHTML="Min "+txt;
+		document.getElementById("inputParamUnit").innerHTML=unitxt;
+	}
+	document.getElementById("inputParam").value = parseFloat(ctrl.innerHTML);
+	inputDB.style.visibility = 'visible';
+}
+
+function updateValues() {	
+	switch(currentValueId) {
+		case "controlLength":
+			nowNode.x = parseFloat(document.getElementById("inputParam").value);
+			if(nowNode.name.substr(0,2) == "ex") {
+				doSetAllLengths(nowNode.x);
+			}
+		break
+		case "controlHeight":
+			nowNode.y = parseFloat(document.getElementById("inputParam").value);
+		break
+		case "controlMax":
+			controlMax.innerHTML = parseFloat(document.getElementById("inputParam").value);
+			VS[currentControl][1] = parseFloat(document.getElementById("inputParam").value);
+			VSMax = VS[currentControl][1];
+			VSMin = VS[currentControl][0]; 
+			controlMid.innerHTML = (VSMax + VSMin)/2;
+		break
+		case "controlMin":
+			controlMin.innerHTML = parseFloat(document.getElementById("inputParam").value);
+			VS[currentControl][0] = parseFloat(document.getElementById("inputParam").value);
+			VSMax = VS[currentControl][1];
+			VSMin = VS[currentControl][0]; 
+			controlMid.innerHTML = (VSMax + VSMin)/2;
+		break;
+	}
+	initCanvas(controlCanvas, gap, W, H);
+	createPath(controlNodes[currentControl], controlCanvas);
+	extruded.dispose();
+	extruded=createExtruded("BWXEextruded", extrudeTool.blade, productStudio.scene, BABYLON.Mesh.DOUBLESIDE);	
+}
+
+//set caret to end of input number
+var reset = function (e) {
+    if (e.type === 'focus') {
+        this.addEventListener('mouseup', reset, false);
+        this.addEventListener('keyup', reset, false);
+    }
+    else {
+        this.removeEventListener('mouseup', reset, false);
+        this.removeEventListener('keyup', reset, false);
+    }
+     
+    // Following is what we've changed
+    var len = this.value.length;
+    this.setSelectionRange(len, len);
+};

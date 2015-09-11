@@ -115,21 +115,23 @@ function drawCubicBezier(N, ctx) {
 	ctx.moveTo(N.next.x, N.next.y);
 	ctx.lineTo(N.ctrl2.x, N.ctrl2.y);
 	ctx.moveTo(N.x, N.y);
-	N.ctrl1.marker.mk.style.visibility = "visible";
-	N.ctrl2.marker.mk.style.visibility = "visible";
+	N.ctrl1.marker.mk.style.visibility = "inherit";
+	N.ctrl2.marker.mk.style.visibility = "inherit";
 	ctx.bezierCurveTo(N.ctrl1.x, N.ctrl1.y, N.ctrl2.x, N.ctrl2.y, N.next.x, N.next.y);
 	
 	ctx.stroke();
 	ctx.closePath();
 }
 
-function Bpath(currentControl) {
+function BParamPath(currentControl) {
 	var currentNode=controlNodes[currentControl];
-	var pathPoints = []; 
+	var pathPoints = [];
+	var point; 
 	while(currentNode.next !== null) {
-		pathPoints.push(getControlPoints(currentNode, num_controlPoints));
+		point = getControlPoints(currentNode, num_controlPoints);
+		pathPoints.push(point.y);
 	}
-	//need to transform points
+	// transform
 }
 
 function Bproximity(point, currentControl) {	
@@ -146,16 +148,16 @@ function Bproximity(point, currentControl) {
 			if(path[i].y<miny) {miny = path[i].y};
 			if(path[i].y>maxy) {maxy = path[i].y};
 		}			
-		if(miny - 1<=point.y && point.y<=maxy + 1) {			
+		if(miny - 1<=point.y && point.y<=maxy + 1) {						
 			i=0;
 			while(i<path.length-1 && !found) {				
-				if(Math.min(path[i].y,path[i+1].y) - 1 <= point.y && point.y<=Math.max(path[i].y,path[i+1].y) + 1) {				
+				if(Math.min(path[i].y,path[i+1].y) - 1 <= point.y && point.y<=Math.max(path[i].y,path[i+1].y) + 1) {										
 					if(Math.abs(path[i+1].y - path[i].y)<1) {												
-						found = (Math.min(path[i].x,path[i+1].x) <= point.x && point.x<=Math.max(path[i].x,path[i+1].x))
+						found = (Math.min(path[i].x,path[i+1].x) <= point.x && point.x<=Math.max(path[i].x,path[i+1].x));					
 					}
 					else {						
-						x = path[i+1].x+(point.y - path[i+1].y) * (path[i].x - path[i+1].x)/(path[i].y - path[i+1].y);						
-						found = Math.abs(x - point.x)<1; 
+						x = path[i+1].x+(point.y - path[i+1].y) * (path[i].x - path[i+1].x)/(path[i].y - path[i+1].y);											
+						found = Math.abs(x - point.x)<10; 
 					}
 				}
 				i++
