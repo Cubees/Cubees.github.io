@@ -1,7 +1,7 @@
 function main() {
 	/*-------------SET CONTROLS ---------------*/
 	controlNodes = setControls(W, H, gap);
-	
+	doSetAllLengths(W*0.9);
 	
 	BABYLON.Vector3.prototype.scaleInPlace = function (scale) {
 		if(typeof scale === 'number') {
@@ -22,13 +22,10 @@ function main() {
 	var node_index = 0;
 	var num_of_steps = 25;
 	var num_of_turns = 25;
-	
-	var grid = 60;
+
 	var setzoomEX = -200;
 	var setzoomPR = -900;
-	
-	var bound;
-	
+
 	
 	/*-------------MENU ELEMENTS---------------*/	
 	//Get Menu Elements 
@@ -53,10 +50,12 @@ function main() {
 	var minisize=document.getElementById("minisize");
 	var microsize=document.getElementById("microsize");
 	var freesize=document.getElementById("freesize");
-	var boxHtitle=document.getElementById("boxHtitle");
-	var boxH=document.getElementById("boxH");
+	var boxLtitle=document.getElementById("boxLtitle");
+	var boxL=document.getElementById("boxL");
 	var boxWtitle=document.getElementById("boxWtitle");
 	var boxW=document.getElementById("boxW");
+	var boxHtitle=document.getElementById("boxHtitle");
+	var boxH=document.getElementById("boxH");
 	var zoomin=document.getElementById("zoomin");
 	var zoomout=document.getElementById("zoomout");
 	var nozoom=document.getElementById("nozoom");
@@ -151,6 +150,11 @@ function main() {
 	for(var i=0; i<extrudeTool.controls.length;i++) {
 		controlLines[i]=BABYLON.Mesh.CreateLines("cl"+node_index+i,extrudeTool.controls[i],extrudeStudio.scene,true);
 	}
+	
+	//disc to show centre of cross section
+	disc = BABYLON.Mesh.CreateDisc("disc", 2, 30, extrudeStudio.scene);
+	disc.material = new BABYLON.StandardMaterial("cw", extrudeStudio.scene);
+	disc.material.emissiveColor = new BABYLON.Color3(1, 1, 1);
 		
 	//square to mark point on segment of Bezier
 	var square_M = BABYLON.Mesh.CreateLines("square_M", [
@@ -257,11 +261,13 @@ function main() {
 		}
 		
 		extruded.dispose();
-		extruded=extruded=createExtruded("BWXEextruded", extrudeTool.blade, productStudio.scene, BABYLON.Mesh.DOUBLESIDE);
+		extruded=createExtruded("BWXEextruded", extrudeTool.blade, productStudio.scene, BABYLON.Mesh.DOUBLESIDE);
+		bound.dispose();
+		bound = container(extruded, productStudio.scene, grid );
 
 		startingPoint = current;
 
-	}
+	};
 
 	extrudeCanvas.addEventListener("mousedown", onPointerDown, false);
 	extrudeCanvas.addEventListener("mouseup", onPointerUp, false);
@@ -271,7 +277,7 @@ function main() {
 		extrudeCanvas.removeEventListener("mousedown", onPointerDown);
 		extrudeCanvas.removeEventListener("mouseup", onPointerUp);
 		extrudeCanvas.removeEventListener("mousemove", onPointerMove);
-	}
+	};
 
 	 // Register a render loop to repeatedly render the scene
 	extrudeEngine.runRenderLoop(function () {
@@ -305,6 +311,7 @@ function main() {
 	
 	// Create product
 	extruded=createExtruded("BWXEextruded", extrudeTool.blade, productStudio.scene);
+	bound = container(extruded, productStudio.scene, grid );
 	
 	// material
 	var darkMat = new BABYLON.StandardMaterial("dark", productStudio.scene);
@@ -362,10 +369,10 @@ function main() {
 		}
 		
 		extruded.dispose();
-		extruded=extruded=createExtruded("BWXEextruded", extrudeTool.blade, productStudio.scene, BABYLON.Mesh.DOUBLESIDE);
+		extruded=createExtruded("BWXEextruded", extrudeTool.blade, productStudio.scene, BABYLON.Mesh.DOUBLESIDE);
 		
 		bound.dispose();
-		bound = container(extrudeTool.blade, productStudio.scene, grid);
+		bound = container(extruded, productStudio.scene, grid );
 	
 	}
 	
@@ -409,10 +416,10 @@ function main() {
 		}
 		
 		extruded.dispose();
-		extruded=extruded=createExtruded("BWXEextruded", extrudeTool.blade, productStudio.scene, BABYLON.Mesh.DOUBLESIDE);
+		extruded=createExtruded("BWXEextruded", extrudeTool.blade, productStudio.scene, BABYLON.Mesh.DOUBLESIDE);
 		
 		bound.dispose();
-		bound = container(extrudeTool.blade, productStudio.scene, grid); 
+		bound = container(extruded, productStudio.scene, grid );
 	
 	}	
 
@@ -444,7 +451,7 @@ function main() {
 		extruded=createExtruded("BWXEextruded", extrudeTool.blade, productStudio.scene, BABYLON.Mesh.DOUBLESIDE);
 		
 		bound.dispose();
-		bound = container(extrudeTool.blade, productStudio.scene, grid);
+		bound = container(extruded, productStudio.scene, grid );
 	}
 	
 	pCurved.addEventListener("click", onCurved, false);
@@ -475,7 +482,7 @@ function main() {
 		extruded=createExtruded("BWXEextruded", extrudeTool.blade, productStudio.scene, BABYLON.Mesh.DOUBLESIDE);
 		
 		bound.dispose();
-		bound = container(extrudeTool.blade, productStudio.scene, grid);
+		bound = container(extruded, productStudio.scene, grid );
 	}
 	
 	export_.addEventListener("click", doExport, false);
@@ -502,7 +509,7 @@ function main() {
 		freesize.style.color="#000000";
 		grid = 60;
 		bound.dispose();
-		bound = container(extrudeTool.blade, productStudio.scene, grid);
+		bound = container(extruded, productStudio.scene, grid );
 	}
 	
 	minisize.addEventListener("click", doMiniSize, false);
@@ -517,7 +524,7 @@ function main() {
 		freesize.style.color="#000000";
 		grid = 15;
 		bound.dispose();
-		bound = container(extrudeTool.blade, productStudio.scene, grid);
+		bound = container(extruded, productStudio.scene, grid );
 	}
 	
 	microsize.addEventListener("click", doMicroSize, false);
@@ -532,7 +539,7 @@ function main() {
 		freesize.style.color="#000000";
 		grid = 1;
 		bound.dispose();
-		bound = container(extrudeTool.blade, productStudio.scene, grid);
+		bound = container(extruded, productStudio.scene, grid );
 	}
 	
 	freesize.addEventListener("click", doFreeSize, false);
@@ -547,7 +554,7 @@ function main() {
 		freesize.style.color="#888888";
 		grid = 0;
 		bound.dispose();
-		bound = container(extrudeTool.blade, productStudio.scene, grid);
+		bound = container(extruded, productStudio.scene, grid );
 		bound.showBoundingBox = false;
 	}
 	
@@ -598,6 +605,12 @@ function main() {
 		zoomout.style.color ="#000000";
 		zoomin.style.color ="#888888";
 		nozoom.style.color ="#000000";
+	}
+	
+	help.addEventListener('click', doHelp, false);
+	
+	function doHelp() {
+		window.open("../../extrudehelp/home.html");
 	}
 	
 	/*-----------DRAG DIALOGUE BOX EVENTS--------------------*/

@@ -62,7 +62,6 @@ function createExtruded(name, blade, scene) {
 	}
 	
 	var extruded = new BABYLON.Mesh.CreateRibbon(name, paths, true, false, 0, scene, false, BABYLON.Mesh.DOUBLESIDE);
-	
 	return extruded;
 	
 }
@@ -127,4 +126,75 @@ function BPathPoints(currentControl) {
 		currentNode = currentNode.next;
 	}
 	return path_points;
+}
+
+function container(mesh, scene, grid) {
+	var dims = mesh.getBoundingInfo();
+	//var L=dims.maximum.z - dims.minimum.z;
+	var L=extrudeLength - W*0.1;
+	var WB=dims.maximum.x - dims.minimum.x;
+	var H=dims.maximum.y - dims.minimum.y;
+	var Origin= new BABYLON.Vector3((dims.maximum.x + dims.minimum.x)/2, (dims.maximum.y + dims.minimum.y)/2, (dims.maximum.z + dims.minimum.z)/2);	
+	if(grid>0) {
+		var G=Math.floor(L/grid);
+		if(L%grid>0) {
+			G +=1;
+		}
+		L=G*grid;
+		G=Math.floor(WB/grid);
+		if(WB%grid>0) {
+			G +=1;
+		}
+		WB=G*grid;
+		G=Math.floor(H/grid);
+		if(H%grid>0) {
+			G +=1;
+		}
+		H=G*grid;
+	}
+	box = CreateCuboid("box", WB, L + W*0.1, H, scene);
+	box.material = new BABYLON.StandardMaterial("white", scene);
+	box.material.emissiveColor = new BABYLON.Color3(1,1,1);
+	box.material.alpha = 0;
+	box.position = Origin;
+	box.showBoundingBox = false;
+	if(grid>0) {
+		box.showBoundingBox = true;
+	}
+
+	switch(grid) {
+		case 0:
+			boxLtitle.innerHTML="&nbsp;&nbsp;Shape Length";
+			boxL.innerHTML="&nbsp;&nbsp;&nbsp;&nbsp;" + Math.floor(L*100)/100 + " units";
+			boxHtitle.innerHTML="&nbsp;&nbsp;Shape Height";
+			boxH.innerHTML="&nbsp;&nbsp;&nbsp;&nbsp;" + Math.floor(H*100)/100 + " units";
+			boxWtitle.innerHTML="&nbsp;Shape Width";
+			boxW.innerHTML="&nbsp;&nbsp;&nbsp;&nbsp;" + Math.floor(WB*100)/100 + " units";
+		break
+		case 1:
+			boxLtitle.innerHTML="&nbsp;Container Length";
+			boxL.innerHTML="&nbsp;&nbsp;&nbsp;&nbsp;" + Math.floor(L/60) + " cubees "+ (L%60) +" micro cubees";
+			boxHtitle.innerHTML="&nbsp;Container Height";
+			boxH.innerHTML="&nbsp;&nbsp;&nbsp;&nbsp;" + Math.floor(H/60) + " cubees "+ (H%60) +" micro cubees";
+			boxWtitle.innerHTML="&nbsp;Container Width";
+			boxW.innerHTML="&nbsp;&nbsp;&nbsp;&nbsp;" + Math.floor(WB/60) + " cubees "+ (WB%60) +" micro cubees";
+		break
+		case 15:
+			boxLtitle.innerHTML="&nbsp;Container Length";
+			boxL.innerHTML="&nbsp;&nbsp;&nbsp;&nbsp;" + Math.floor(L/60) + " cubees "+ ((L%60)/15) +" mini cubees";
+			boxHtitle.innerHTML="&nbsp;Container Height";
+			boxH.innerHTML="&nbsp;&nbsp;&nbsp;&nbsp;" + Math.floor(H/60) + " cubees "+ ((H%60)/15) +" mini cubees";
+			boxWtitle.innerHTML="&nbsp;Container Width";
+			boxW.innerHTML="&nbsp;&nbsp;&nbsp;&nbsp;" + Math.floor(WB/60) + " cubees "+ ((WB%60)/15) +" mini cubees";
+		break
+		case 60:
+			boxLtitle.innerHTML="&nbsp;Container Length";
+			boxL.innerHTML= "&nbsp;&nbsp;&nbsp;&nbsp;" + Math.floor(L/60);
+			boxHtitle.innerHTML="&nbsp;Container Height";
+			boxH.innerHTML= "&nbsp;&nbsp;&nbsp;&nbsp;" + Math.floor(H/60);
+			boxWtitle.innerHTML="&nbsp;Container Width";
+			boxW.innerHTML= "&nbsp;&nbsp;&nbsp;&nbsp;" + Math.floor(WB/60);
+		break
+	}
+	return box;
 }

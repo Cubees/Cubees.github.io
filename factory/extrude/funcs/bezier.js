@@ -204,4 +204,5 @@ function getControlPoints(node, npoints) {
 		this.y;
 	}
 }
+
 	

@@ -564,7 +564,7 @@ function main() {
 		}
 	}
 
-	nozoom.addEventListener('click', doNoZoom, false) 
+	nozoom.addEventListener('click', doNoZoom, false);
 	
 	function doNoZoom() {
 		if(nozoom.style.color=="rgb(136, 136, 136)") {
@@ -576,6 +576,12 @@ function main() {
 		zoomout.style.color ="#000000";
 		zoomin.style.color ="#888888";
 		nozoom.style.color ="#000000";
+	}
+	
+	help.addEventListener('click', doHelp, false);
+	
+	function doHelp() {
+		window.open("../../lathehelp/home.html");
 	}
 	
 	/*-----------DRAG DIALOGUE BOX EVENTS--------------------*/

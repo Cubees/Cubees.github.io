@@ -6,9 +6,17 @@ html, body {
 	padding: 0;
 }
 
-.canvas {
+.Extcanvas {
 	width: 49.5%;
 	height: 66%;
+	margin-bottom:0.5%
+	touch-action: none;
+	float:left;
+}
+
+.Trncanvas {
+	width: 49.5%;
+	height: 100%;
 	margin-bottom:0.5%
 	touch-action: none;
 	float:left;
@@ -122,7 +130,7 @@ html, body {
 	color:#888888;
 }
 
-#boxH, #boxW {
+#boxH, #boxW, #boxL {
 	font-size: 0.75em;
 }
 

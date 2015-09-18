@@ -88,7 +88,9 @@ function setControls(W, H, gap) {
 		initCanvas(controlCanvas, gap, W, H);
 		createPath(controlNodes[currentControl], controlCanvas);
 		extruded.dispose();
-		extruded=createExtruded("BWXEextruded", extrudeTool.blade, productStudio.scene, BABYLON.Mesh.DOUBLESIDE);		
+		extruded=createExtruded("BWXEextruded", extrudeTool.blade, productStudio.scene, BABYLON.Mesh.DOUBLESIDE);
+		bound.dispose();
+		bound = container(extruded, productStudio.scene, grid );	
 	}
 	
 	function BonDelete () {
@@ -124,6 +126,8 @@ function setControls(W, H, gap) {
 		createPath(controlNodes[currentControl], controlCanvas);
 		extruded.dispose();
 		extruded=createExtruded("BWXEextruded", extrudeTool.blade, productStudio.scene, BABYLON.Mesh.DOUBLESIDE);
+		bound.dispose();
+		bound = container(extruded, productStudio.scene, grid );
 	}	
 	
 	
@@ -140,6 +144,8 @@ function setControls(W, H, gap) {
 		createPath(controlNodes[currentControl], controlCanvas);
 		extruded.dispose();
 		extruded=createExtruded("BWXEextruded", extrudeTool.blade, productStudio.scene, BABYLON.Mesh.DOUBLESIDE);
+		bound.dispose();
+		bound = container(extruded, productStudio.scene, grid );
 	}
 	
 	function BonCurved () {		
@@ -155,6 +161,8 @@ function setControls(W, H, gap) {
 		createPath(controlNodes[currentControl], controlCanvas);
 		extruded.dispose();
 		extruded=createExtruded("BWXEextruded", extrudeTool.blade, productStudio.scene, BABYLON.Mesh.DOUBLESIDE);
+		bound.dispose();
+		bound = container(extruded, productStudio.scene, grid );
 	}
 	
 	function BonSlock() {
@@ -174,6 +182,8 @@ function setControls(W, H, gap) {
 		}
 		extruded.dispose();
 		extruded=createExtruded("BWXEextruded", extrudeTool.blade, productStudio.scene, BABYLON.Mesh.DOUBLESIDE);
+		bound.dispose();
+		bound = container(extruded, productStudio.scene, grid );
 	}
 	
 	function BonMlock() {
@@ -193,6 +203,8 @@ function setControls(W, H, gap) {
 		}
 		extruded.dispose();
 		extruded=createExtruded("BWXEextruded", extrudeTool.blade, productStudio.scene, BABYLON.Mesh.DOUBLESIDE);
+		bound.dispose();
+		bound = container(extruded, productStudio.scene, grid );
 	}
 	
 	
@@ -251,7 +263,7 @@ function setControls(W, H, gap) {
 	controlMin.style.left = (W*0.1 - Cwidth*2) +"px";
 	controlVar.style.left = (W*0.5 - Cwidth*4) +"px"; 
 	
-	controlLength.innerHTML = W*0.9 +" units";
+	controlLength.innerHTML = W*0.8 +" units";
 	controlVar.innerHTML = "Scale X";
 
 	scxH = document.getElementById("sizexHolder");
@@ -293,6 +305,7 @@ function setControls(W, H, gap) {
 	
 	extrudeLength = W*0.8;
 	
+	
 	VSMin = 0;
 	VSMax = 1;
 	
@@ -314,14 +327,10 @@ function setControls(W, H, gap) {
 }
 
 function doControlUpdates(startNode) {
-/*	var currentNode = startNode;
-	while(currentNode.next !== null) {
-		currentNode = currentNode.next;
-	} */
 	var cw = parseInt(controlLength.style.width)/2
 	controlLength.style.left =(nowNode.x - cw) +"px";
 	var inL = Math.floor(nowNode.x*10)/10;
-	controlLength.innerHTML = inL +" units";
+	controlLength.innerHTML = (inL - W*0.1) +" units";
 	controlHeight.style.top =(nowNode.y - size/2) +"px";
 	var inH = VSMax + (nowNode.y -gap)*(VSMin - VSMax)/H;
 	inH = Math.floor(inH *100)/100;
@@ -338,7 +347,9 @@ function doSetAllLengths(newLength) {
 		var currentNode = controlNodes[i];
 		while(currentNode.next !== null) {
 			currentNode = currentNode.next;
+//console.log("B", newLength, extrudeLength, currentNode.x);			
 			currentNode.x *= newLength/extrudeLength;
+//console.log("A",newLength, extrudeLength, currentNode.x);			
 			currentNode.marker.mk.style.left = (currentNode.x - size/2) + "px";
 		}
 		currentNode.x = newLength;
@@ -348,7 +359,7 @@ function doSetAllLengths(newLength) {
 	extrudeLength = newLength;
 }
 
-function onCanvasUp (e) {	
+function onCanvasUp (e) {		
 	mousePos = getPosition(e); 
 	mousePos.y -= CHT;
 	downMouse = false; 
@@ -379,11 +390,8 @@ function setControlType(N, Bvar, BHold) {
 	currentControl = N;
 	Bvar[currentControl].style.color = "#888888";
 	BHold[currentControl].style.visibility = "visible";
-	var currentNode = controlNodes[currentControl];
-	while(currentNode.next !== null) {
-		currentNode = currentNode.next;
-	}
-	nowNode = currentNode;
+	nowNode.marker.mk.style.border ="none";
+	nowNode = controlNodes[currentControl];
 	
 	switch(N) {
 		case 0: //Scale X
@@ -446,12 +454,13 @@ function setControlType(N, Bvar, BHold) {
 	
 	controlVar.innerHTML = Vvar;
 	
-	dlgbox = currentNode.marker.mk;
+	dlgbox = nowNode.marker.mk;
 	dlgbox.style.border = "solid 1px black";
 	
 	initCanvas(controlCanvas, gap, W, H);
 	createPath(controlNodes[currentControl], controlCanvas);
-	doControlUpdates(controlNodes[currentControl]);	
+	doControlUpdates(controlNodes[currentControl]);
+	setValue(document.getElementById(currentValueId));		
 }
 
 function setValue(ctrl) {
@@ -472,6 +481,7 @@ function setValue(ctrl) {
 			document.getElementById("inputParamLabel").innerHTML="Distance";
 		}
 		document.getElementById("inputParamUnit").innerHTML="Units";
+		inputDB.style.visibility = 'visible';
 	}
 	else if(ctrl.id == "controlMax") {
 		document.getElementById("inputParamLabel").innerHTML="Max "+txt;
@@ -482,30 +492,48 @@ function setValue(ctrl) {
 		document.getElementById("inputParamUnit").innerHTML=unitxt;
 	}
 	document.getElementById("inputParam").value = parseFloat(ctrl.innerHTML);
-	inputDB.style.visibility = 'visible';
+	if(currentControl > 1) {
+		inputDB.style.visibility = 'visible';
+	}
 }
 
-function updateValues() {	
+function updateValues() {
+	document.getElementById("Bsq").style.visibility="hidden";	
+	document.getElementById("controlSeg").style.visibility="hidden";
+	var nv = parseFloat(document.getElementById("inputParam").value);
 	switch(currentValueId) {
 		case "controlLength":
-			nowNode.x = parseFloat(document.getElementById("inputParam").value);
+			if(nowNode.prev && nv + W*0.1<nowNode.prev.x + 5  || nv<0.5) {
+				document.getElementById("inputParam").value = nowNode.x - W*0.1;
+				return;
+			}
+			if(nowNode.next && nv>nowNode.next.x + W*0.1 - 5  || nv>W*0.9 - 0.5) {
+				document.getElementById("inputParam").value = nowNode.x - W*0.1;
+				return;
+			}
+			controlLength.innerHTML = nv;			
+			nowNode.x = nv + W*0.1;				
+			nowNode.marker.mk.style.left = (nowNode.x - nowNode.size/2)+"px";
 			if(nowNode.name.substr(0,2) == "ex") {
 				doSetAllLengths(nowNode.x);
 			}
+			
 		break
 		case "controlHeight":
-			nowNode.y = parseFloat(document.getElementById("inputParam").value);
+			controlHeight.innerHTML = nv;
+			nowNode.y = (nv - VSMax)*H/(VSMin - VSMax) + gap;
+			nowNode.marker.mk.style.top = (nowNode.y - nowNode.size/2)+"px";
 		break
 		case "controlMax":
-			controlMax.innerHTML = parseFloat(document.getElementById("inputParam").value);
-			VS[currentControl][1] = parseFloat(document.getElementById("inputParam").value);
+			controlMax.innerHTML = nv;
+			VS[currentControl][1] = nv;
 			VSMax = VS[currentControl][1];
 			VSMin = VS[currentControl][0]; 
 			controlMid.innerHTML = (VSMax + VSMin)/2;
 		break
 		case "controlMin":
-			controlMin.innerHTML = parseFloat(document.getElementById("inputParam").value);
-			VS[currentControl][0] = parseFloat(document.getElementById("inputParam").value);
+			controlMin.innerHTML = nv;
+			VS[currentControl][0] = nv;
 			VSMax = VS[currentControl][1];
 			VSMin = VS[currentControl][0]; 
 			controlMid.innerHTML = (VSMax + VSMin)/2;
@@ -513,8 +541,11 @@ function updateValues() {
 	}
 	initCanvas(controlCanvas, gap, W, H);
 	createPath(controlNodes[currentControl], controlCanvas);
+	doControlUpdates(controlNodes[currentControl]);	alert
 	extruded.dispose();
-	extruded=createExtruded("BWXEextruded", extrudeTool.blade, productStudio.scene, BABYLON.Mesh.DOUBLESIDE);	
+	extruded=createExtruded("BWXEextruded", extrudeTool.blade, productStudio.scene, BABYLON.Mesh.DOUBLESIDE);
+	bound.dispose();
+	bound = container(extruded, productStudio.scene, grid );
 }
 
 //set caret to end of input number

@@ -49,3 +49,63 @@ function getDimensions(path) {
 	var length = 2*maxX;
 	return {L:length, W:width, H:height};
 }
+
+function container(path, scene, grid) {
+	var dims = getDimensions(path);
+	var L=dims.L;
+	var W=dims.W;
+	var H=dims.H;	
+	if(grid>0) {
+		var G=Math.floor(L/grid);
+		if(L%grid>0) {
+			G +=1;
+		}
+		L=G*grid;
+		G=Math.floor(W/grid);
+		if(W%grid>0) {
+			G +=1;
+		}
+		W=G*grid;
+		G=Math.floor(H/grid);
+		if(H%grid>0) {
+			G +=1;
+		}
+		H=G*grid;
+	}
+	box = CreateCuboid("box", L, W, H, scene);
+	box.material = new BABYLON.StandardMaterial("white", scene);
+	box.material.emissiveColor = new BABYLON.Color3(1,1,1);
+	box.material.alpha = 0;
+	box.showBoundingBox = false;
+	if(grid>0) {
+		box.showBoundingBox = true;
+	}
+
+	switch(grid) {
+		case 0:
+			boxHtitle.innerHTML="&nbsp;&nbsp;Shape Height";
+			boxH.innerHTML="&nbsp;&nbsp;&nbsp;&nbsp;" + Math.floor(H*100)/100 + " units";
+			boxWtitle.innerHTML="&nbsp;Shape Radius";
+			boxW.innerHTML="&nbsp;&nbsp;&nbsp;&nbsp;" + Math.floor(W*100)/100 + " units";
+		break
+		case 1:
+			boxHtitle.innerHTML="&nbsp;Container Height";
+			boxH.innerHTML="&nbsp;&nbsp;&nbsp;&nbsp;" + Math.floor(H/60) + " cubees "+ (H%60) +" micro cubees";
+			boxWtitle.innerHTML="&nbsp;Container Width";
+			boxW.innerHTML="&nbsp;&nbsp;&nbsp;&nbsp;" + Math.floor(W/60) + " cubees "+ (W%60) +" micro cubees";
+		break
+		case 15:
+			boxHtitle.innerHTML="&nbsp;Container Height";
+			boxH.innerHTML="&nbsp;&nbsp;&nbsp;&nbsp;" + Math.floor(H/60) + " cubees "+ ((H%60)/15) +" mini cubees";
+			boxWtitle.innerHTML="&nbsp;Container Width";
+			boxW.innerHTML="&nbsp;&nbsp;&nbsp;&nbsp;" + Math.floor(W/60) + " cubees "+ ((W%60)/15) +" mini cubees";
+		break
+		case 60:
+			boxHtitle.innerHTML="&nbsp;Container Height";
+			boxH.innerHTML= "&nbsp;&nbsp;&nbsp;&nbsp;" + Math.floor(H/60);
+			boxWtitle.innerHTML="&nbsp;Container Width";
+			boxW.innerHTML= "&nbsp;&nbsp;&nbsp;&nbsp;" + Math.floor(W/60);
+		break
+	}
+	return box;
+}

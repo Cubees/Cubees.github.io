@@ -33,6 +33,9 @@
 			var extruded;
 			var extrudeTool;
 			var productStudio;
+			var bound;
+			
+			var grid = 60;
 			
 			var dlgbox;
 			
@@ -147,6 +150,8 @@
 				if(dlgbox.type && dlgbox.type.substr(0,3) == "B2D") {
 					extruded.dispose();
 					extruded=createExtruded("BWXEextruded", extrudeTool.blade, productStudio.scene, BABYLON.Mesh.DOUBLESIDE);
+					bound.dispose();
+					bound = container(extruded, productStudio.scene, grid );
 				}				
 			};
 			
@@ -155,8 +160,8 @@
 	</head>
 
 	<body>
-		<canvas id="productCanvas" class="canvas"></canvas>
-		<canvas id="extrudeCanvas" class="canvas"></canvas>
+		<canvas id="productCanvas" class="Extcanvas"></canvas>
+		<canvas id="extrudeCanvas" class="Extcanvas"></canvas>
 		<div id="canvasHolder">
 			
 			
@@ -279,10 +284,12 @@
 			<div class="row">
 				<div class="space"> </div>
 				<div id='nodeContent' class='content'>
-					<div id="boxHtitle" class="noClickCursor">&nbsp;&nbsp;Container Height</div>
-					<div id="boxH" class="noClickCursor">&nbsp;&nbsp;&nbsp;&nbsp;200 Micro Cubees</div>
+					<div id="boxLtitle" class="noClickCursor">&nbsp;&nbsp;Container Length</div>
+					<div id="boxL" class="noClickCursor">&nbsp;&nbsp;&nbsp;&nbsp;200 Micro Cubees</div>
 					<div id="boxWtitle" class="noClickCursor">&nbsp;&nbsp;Container Width</div>
 					<div id="boxW" class="noClickCursor">&nbsp;&nbsp;&nbsp;&nbsp;200 Micro Cubees</div>
+					<div id="boxHtitle" class="noClickCursor">&nbsp;&nbsp;Container Height</div>
+					<div id="boxH" class="noClickCursor">&nbsp;&nbsp;&nbsp;&nbsp;200 Micro Cubees</div>
 				</div>
 			</div>
 			<div class="row">
