@@ -15,7 +15,7 @@ function node(name,x,y,z,scene) { //x,y coordinates of centre
 	this.next=null;
 	this.prev=null;
 	
-	this.marker=BABYLON.Mesh.CreatePlane("plane"+this.name,4,scene,true,BABYLON.Mesh.FRONTSIDE)
+	this.marker=BABYLON.Mesh.CreatePlane("plane"+this.name,4*mscale,scene,true,BABYLON.Mesh.FRONTSIDE)
 	var lightGreyMat = new BABYLON.StandardMaterial("lightGrey", scene);
 	lightGreyMat.emissiveColor = new BABYLON.Color3(0.75,0.75,0.75);
 	this.marker.material = lightGreyMat;
@@ -35,7 +35,7 @@ function control(name,x,y,z,scene) { //x,y coordinates of centre
 	this.y=y;
 	this.z=z;
 	
-	this.marker=BABYLON.Mesh.CreateDisc("sphere"+this.name, 12, 12,scene)
+	this.marker=BABYLON.Mesh.CreateDisc("sphere"+this.name, 12*mscale, 12*mscale,scene)
 	var darkGreyMat = new BABYLON.StandardMaterial("darkGrey", scene);
 	darkGreyMat.emissiveColor = new BABYLON.Color3(0.25,0.25,0.25);
 	this.marker.scaling = scale;
