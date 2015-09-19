@@ -71,6 +71,35 @@ function main() {
 	var storeIn = document.getElementById("storeIn");
 	var storeBut = document.getElementById("storeBut");
 	
+	var coords = document.getElementById("coords");
+	var inX = document.getElementById("inputX");
+	var inY = document.getElementById("inputY");
+	
+	inX.addEventListener("change", function() {updateX(this.value)}, false);
+	inY.addEventListener("change", function() {updateY(this.value)}, false);
+	
+	function updateX(val) {
+		currentMesh.position.x = parseFloat(val);
+		updateExtruded();
+	}
+	
+	function updateY(val) {
+		currentMesh.position.y = parseFloat(val);
+		updateExtruded();
+	}
+	
+	function updateExtruded() {
+		extrudeTool=createTool(startNode,startNode,extrudeStudio.scene,num_of_steps);
+		extrudeBlade = BABYLON.Mesh.CreateLines(null, extrudeTool.blade, null, null, extrudeBlade);
+		for(var i=0; i<extrudeTool.controls.length;i++) {
+			controlLines[i]=BABYLON.Mesh.CreateLines(null,extrudeTool.controls[i],null,null, controlLines[i]);
+		}
+		extruded.dispose();
+		extruded=createExtruded("BWXEextruded", extrudeTool.blade, productStudio.scene, BABYLON.Mesh.DOUBLESIDE);
+		bound.dispose();
+		bound = container(extruded, productStudio.scene, grid );
+	}
+	
 	controlSeg_title = document.getElementById("controlSeg_title");
 		
 	//Set readable styles for Elements
@@ -187,7 +216,7 @@ function main() {
 		}
 
 		return null;
-	}
+	};
 
 	var onPointerDown = function (evt) {
 		if (evt.button !== 0) {
@@ -204,9 +233,15 @@ function main() {
 			if(currentMesh.CType != "ctrl" ) {
 				currentMesh.material = whiteMat;
 			}
+			coords.style.visibility = "visible";
+			inX.value = Math.floor(currentMesh.position.x*100)/100;
+			inY.value = Math.floor(currentMesh.position.y*100)/100;
 			startingPoint = getBackboardPosition(evt);	
 		}
-	}
+		else {
+			coords.style.visibility = "hidden";
+		}
+	};
 
 	var onPointerUp = function (evt) {			
 		if (startingPoint) {
@@ -266,6 +301,9 @@ function main() {
 		bound = container(extruded, productStudio.scene, grid );
 
 		startingPoint = current;
+		
+		inX.value = Math.floor(currentMesh.position.x*100)/100;
+		inY.value = Math.floor(currentMesh.position.y*100)/100;
 
 	};
 

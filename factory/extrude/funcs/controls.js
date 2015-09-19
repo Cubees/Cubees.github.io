@@ -346,10 +346,8 @@ function doSetAllLengths(newLength) {
 	for (var i=0; i<7; i++) {
 		var currentNode = controlNodes[i];
 		while(currentNode.next !== null) {
-			currentNode = currentNode.next;
-//console.log("B", newLength, extrudeLength, currentNode.x);			
-			currentNode.x *= newLength/extrudeLength;
-//console.log("A",newLength, extrudeLength, currentNode.x);			
+			currentNode = currentNode.next;			
+			currentNode.x *= newLength/extrudeLength;			
 			currentNode.marker.mk.style.left = (currentNode.x - size/2) + "px";
 		}
 		currentNode.x = newLength;
@@ -364,7 +362,7 @@ function onCanvasUp (e) {
 	mousePos.y -= CHT;
 	downMouse = false; 
 	BfoundNode = Bproximity(mousePos, currentControl);		
-	if(BfoundNode) {		
+	if(BfoundNode && !overMarker) {		
 		Bsq.style.top =(mousePos.y - size/2) +"px";
 		Bsq.style.left =(mousePos.x - size/2) +"px";
 		Bsq.style.visibility = "visible";

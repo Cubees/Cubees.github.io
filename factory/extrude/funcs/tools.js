@@ -130,9 +130,8 @@ function BPathPoints(currentControl) {
 
 function container(mesh, scene, grid) {
 	var dims = mesh.getBoundingInfo();
-	//var L=dims.maximum.z - dims.minimum.z;
-	var L=extrudeLength - W*0.1;
-	var WB=dims.maximum.x - dims.minimum.x;
+	var L=dims.maximum.z - dims.minimum.z;
+	var W=dims.maximum.x - dims.minimum.x;
 	var H=dims.maximum.y - dims.minimum.y;
 	var Origin= new BABYLON.Vector3((dims.maximum.x + dims.minimum.x)/2, (dims.maximum.y + dims.minimum.y)/2, (dims.maximum.z + dims.minimum.z)/2);	
 	if(grid>0) {
@@ -141,18 +140,18 @@ function container(mesh, scene, grid) {
 			G +=1;
 		}
 		L=G*grid;
-		G=Math.floor(WB/grid);
-		if(WB%grid>0) {
+		G=Math.floor(W/grid);
+		if(W%grid>0) {
 			G +=1;
 		}
-		WB=G*grid;
+		W=G*grid;
 		G=Math.floor(H/grid);
 		if(H%grid>0) {
 			G +=1;
 		}
 		H=G*grid;
 	}
-	box = CreateCuboid("box", WB, L + W*0.1, H, scene);
+	box = CreateCuboid("box", W, L, H, scene);
 	box.material = new BABYLON.StandardMaterial("white", scene);
 	box.material.emissiveColor = new BABYLON.Color3(1,1,1);
 	box.material.alpha = 0;
@@ -169,7 +168,7 @@ function container(mesh, scene, grid) {
 			boxHtitle.innerHTML="&nbsp;&nbsp;Shape Height";
 			boxH.innerHTML="&nbsp;&nbsp;&nbsp;&nbsp;" + Math.floor(H*100)/100 + " units";
 			boxWtitle.innerHTML="&nbsp;Shape Width";
-			boxW.innerHTML="&nbsp;&nbsp;&nbsp;&nbsp;" + Math.floor(WB*100)/100 + " units";
+			boxW.innerHTML="&nbsp;&nbsp;&nbsp;&nbsp;" + Math.floor(W*100)/100 + " units";
 		break
 		case 1:
 			boxLtitle.innerHTML="&nbsp;Container Length";
@@ -177,7 +176,7 @@ function container(mesh, scene, grid) {
 			boxHtitle.innerHTML="&nbsp;Container Height";
 			boxH.innerHTML="&nbsp;&nbsp;&nbsp;&nbsp;" + Math.floor(H/60) + " cubees "+ (H%60) +" micro cubees";
 			boxWtitle.innerHTML="&nbsp;Container Width";
-			boxW.innerHTML="&nbsp;&nbsp;&nbsp;&nbsp;" + Math.floor(WB/60) + " cubees "+ (WB%60) +" micro cubees";
+			boxW.innerHTML="&nbsp;&nbsp;&nbsp;&nbsp;" + Math.floor(W/60) + " cubees "+ (W%60) +" micro cubees";
 		break
 		case 15:
 			boxLtitle.innerHTML="&nbsp;Container Length";
@@ -185,15 +184,15 @@ function container(mesh, scene, grid) {
 			boxHtitle.innerHTML="&nbsp;Container Height";
 			boxH.innerHTML="&nbsp;&nbsp;&nbsp;&nbsp;" + Math.floor(H/60) + " cubees "+ ((H%60)/15) +" mini cubees";
 			boxWtitle.innerHTML="&nbsp;Container Width";
-			boxW.innerHTML="&nbsp;&nbsp;&nbsp;&nbsp;" + Math.floor(WB/60) + " cubees "+ ((WB%60)/15) +" mini cubees";
+			boxW.innerHTML="&nbsp;&nbsp;&nbsp;&nbsp;" + Math.floor(W/60) + " cubees "+ ((W%60)/15) +" mini cubees";
 		break
 		case 60:
 			boxLtitle.innerHTML="&nbsp;Container Length";
-			boxL.innerHTML= "&nbsp;&nbsp;&nbsp;&nbsp;" + Math.floor(L/60);
+			boxL.innerHTML= "&nbsp;&nbsp;&nbsp;&nbsp;" + Math.floor(L/60) +" cubees";
 			boxHtitle.innerHTML="&nbsp;Container Height";
-			boxH.innerHTML= "&nbsp;&nbsp;&nbsp;&nbsp;" + Math.floor(H/60);
+			boxH.innerHTML= "&nbsp;&nbsp;&nbsp;&nbsp;" + Math.floor(H/60) +" cubees";
 			boxWtitle.innerHTML="&nbsp;Container Width";
-			boxW.innerHTML= "&nbsp;&nbsp;&nbsp;&nbsp;" + Math.floor(WB/60);
+			boxW.innerHTML= "&nbsp;&nbsp;&nbsp;&nbsp;" + Math.floor(W/60) +" cubees";
 		break
 	}
 	return box;

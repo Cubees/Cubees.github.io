@@ -53,6 +53,8 @@ function square(x, y, node, holder) {
 	this.mk.style.left = (x - w/2) +"px";
 	this.mk.addEventListener('mousedown', function(e) {startMkrDrag(e, this)}, false);
 	this.mk.addEventListener('mouseup', function(e) {enddbDrag(e)}, false);
+	this.mk.addEventListener('mouseover', function() {overMarker=true}, false);
+	this.mk.addEventListener('mouseout', function() {overMarker=false}, false);
 	holder.appendChild(this.mk);
 }
 
@@ -72,6 +74,8 @@ function circle(x, y, node, holder) {
 	this.mk.style.left = (x - w/2) +"px";
 	this.mk.addEventListener('mousedown', function(e) {startMkrDrag(e, this)}, false);
 	this.mk.addEventListener('mouseup', function(e) {enddbDrag(e)}, false);
+	this.mk.addEventListener('mouseover', function() {overMarker=true}, false);
+	this.mk.addEventListener('mouseout', function() {overMarker=false}, false);
 	holder.appendChild(this.mk);
 }
 

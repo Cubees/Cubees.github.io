@@ -102,9 +102,9 @@ function container(path, scene, grid) {
 		break
 		case 60:
 			boxHtitle.innerHTML="&nbsp;Container Height";
-			boxH.innerHTML= "&nbsp;&nbsp;&nbsp;&nbsp;" + Math.floor(H/60);
+			boxH.innerHTML= "&nbsp;&nbsp;&nbsp;&nbsp;" + Math.floor(H/60) +" cubees";
 			boxWtitle.innerHTML="&nbsp;Container Width";
-			boxW.innerHTML= "&nbsp;&nbsp;&nbsp;&nbsp;" + Math.floor(W/60);
+			boxW.innerHTML= "&nbsp;&nbsp;&nbsp;&nbsp;" + Math.floor(W/60) +" cubees";
 		break
 	}
 	return box;

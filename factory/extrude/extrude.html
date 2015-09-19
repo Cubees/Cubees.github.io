@@ -6,14 +6,6 @@
 		<title>Extrude</title>
 	  
 		<link rel="stylesheet" type="text/css" href="../shared/styles.css">
-		<style>
-			#segment_title {
-				background-color:#000000;
-				color:#FFFFFF;
-				cursor:default;
-			}
-
-		</style>
 		
 		<script src="../../Babylon/babylon2.2_min.js"></script>
 		<script src="../../Babylon/hand.js"></script>
@@ -43,6 +35,7 @@
 			
 			var cursorPos;
 			var downMouse = false;
+			var overMarker = false;
 			
 			var W=Math.floor(screen.availWidth/60)*60;
 			var H = 120;
@@ -148,8 +141,8 @@
 			};
 	
 			function enddbDrag(e) {
-				downMouse = false;
-				if(dlgbox.type && dlgbox.type.substr(0,3) == "B2D") {
+				downMouse = false;				
+				if(dlgbox.type && dlgbox.type.substr(0,3) == "B2D") {				
 					extruded.dispose();
 					extruded=createExtruded("BWXEextruded", extrudeTool.blade, productStudio.scene, BABYLON.Mesh.DOUBLESIDE);
 					bound.dispose();
@@ -173,9 +166,9 @@
 			
 			<div id='controlSeg' class="dialogueBox">
 				<div class="row">
-					<div class="space"> </div>
+					<div class="space"></div>
 					<div id='controlSegContent' class='content'>
-						<div id="controlSeg_title">&nbsp;&nbsp;Path</div>
+						<div id="controlSeg_title" class="segtitle">&nbsp;&nbsp;Path</div>
 					</div>
 				</div>
 				<div class="row">
@@ -192,7 +185,7 @@
 				<div class="row">
 					<div class="space"> </div>
 					<div id='paramSegContent' class='content'>
-						<div id="paramSeg_title">&nbsp;&nbsp;Variable</div>
+						<div id="paramSeg_title" class="segtitle">&nbsp;&nbsp;Variable</div>
 					</div>
 				</div>
 				<div class="row">
@@ -241,7 +234,7 @@
 			<div class="row">
 				<div class="space"> </div>
 				<div id='segmentContent' class='content'>
-					<div id="segment_title">&nbsp;&nbsp;Extruder</div>
+					<div id="segment_title" class="segtitle">&nbsp;&nbsp;Extruder</div>
 				</div>
 			</div>
 			<div class="row">
@@ -251,6 +244,22 @@
 					<div id="p_delete" class="noTextCursor">&nbsp;&nbsp;Delete</div>
 					<div id="p_straight" class="noTextCursor">&nbsp;&nbsp;Straight</div>
 					<div id="p_curved" class="noTextCursor">&nbsp;&nbsp;Curved</div>
+				</div>
+			</div>
+		</div>
+		
+		<div id='coords'>
+			<div id="row1" class="Crow">
+				<div class="Cspace"> </div>
+				<div id="coords_title" class='Ccontent'>
+					<div >&nbsp;&nbsp;Coordinates (x, y)</div>
+				</div>
+			</div>
+			<div id="row2" class="Crow">
+				<div class="Cspace"> </div>
+				<div class='Ccontent'>
+					<div id = 'inputXLabel'>x =</div> <input id = 'inputX' type="text" size = "5"><div id = 'inputXUnit'>units</div>
+					<div id = 'inputYLabel'>y =</div> <input id = 'inputY' type="text" size = "5"><div id = 'inputYUnit'>units</div>
 				</div>
 			</div>
 		</div>
@@ -349,10 +358,10 @@
 				</div>
 				<div class='dragContent'>
 					<div id = 'inputParamLabel'></div><input id = 'inputParam' type="text" size = "5"><div id = 'inputParamUnit'></div>
-					</div>
 				</div>
 			</div>
 		</div>
+		
 
 		
 	</body>
