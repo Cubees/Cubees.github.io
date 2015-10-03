@@ -3,7 +3,7 @@
 
 	<head>
 		<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
-		<title>Just Cubees Workshop</title>
+		<title>Squash and Stretch Cubees Workshop</title>
 	  
 		<style>
 			html, body {
@@ -25,6 +25,7 @@
 		
 		<link rel="stylesheet" type="text/css" href="styles/menu.css">
 		<link rel="stylesheet" type="text/css" href="styles/dialogues.css">
+		<link rel="stylesheet" type="text/css" href="styles/colpick.css">
 		
 		<script src="../Babylon/babylon2.2_min.js"></script>
 		<script src="../Babylon/cuboid.js"></script>
@@ -32,7 +33,8 @@
 		<script src="../Babylon/hand.min.js"></script>
 		<script src="funcs/classes.js"></script>
 		<script src="funcs/tools.js"></script> 
-		<script src="funcs/collisions.js"></script>		
+		<script src="funcs/collisions.js"></script>
+		<script src="funcs/colorpicker.js"></script>		
 		<script src="funcs/main.js"></script>
 			
 		<script>
@@ -52,6 +54,7 @@
 		<div id='Header' class = 'headerBox'>Construction Room</div>
 		
 		<!--menu dialogue boxes-->
+		
 		<div id='menu' class="dialogueBox">
 			<div id="menulist" class="row">
 				<div id='file' class='content'>File</div>
@@ -66,6 +69,7 @@
 				<div id='blank' class='gapcontent'></div>
 				<div id='logo'></div>
 				<div id='blank1' class='content'></div>
+				
 			</div>
 		</div>
 		
@@ -112,13 +116,7 @@
 				<div class="blankcontent"></div>
 				<div id="delete_" class="dividr">Delete</div>
 				<div class="blankcontent"></div>
-				<div id="colours">
-					
-				</div>
-				<div id="currentColour" class="dividr">
-					<div id="colour"></div>
-				</div>
-				<div class="blankcontent"></div>
+				
 				<div id="textures" class="dividr">
 					<div id="texturepics">
 		
@@ -127,6 +125,10 @@
 				<div class="blankcontent"></div>
 				<div class="subcontent"></div>
 			</div>
+		</div>
+		
+		<div id="colours">
+					
 		</div>
 		
 		<div id='vertmenu' >
@@ -340,6 +342,7 @@
 			</div>
 		</div>
 		
+
 	</body>
 
 </html>

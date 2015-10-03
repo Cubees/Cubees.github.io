@@ -11,11 +11,13 @@ function main() {
 	var exportMarker = exportIcon;
 	var scene_exportMarker = exportIcon;
 	var objectUrl;
+	var dmddown=false;
 	
 	// Event variables
     var groundPoint;
 	var currentMeshes={};
 	var currentParents={};
+	var currentColour;
     
     var newModel=true;
 	var detached = false;
@@ -178,12 +180,12 @@ function main() {
 	logo.addEventListener("click", function() {window.open("http://www.babylonjs.com/")}, false);
 
 	//move events
-	leftarrow.addEventListener("mousedown", leftMove, false);
-	rightarrow.addEventListener("mousedown", rightMove, false);
-	uparrow.addEventListener("mousedown", upMove, false);
-	downarrow.addEventListener("mousedown", downMove, false);
-	forwardarrow.addEventListener("mousedown", forwardMove, false);
-	backarrow.addEventListener("mousedown", backMove, false);
+	leftarrow.addEventListener("mousedown", function() {doMove(moveLeft, leftSidePlane)}, false);
+	rightarrow.addEventListener("mousedown", function() {doMove(moveRight, rightSidePlane)}, false);
+	uparrow.addEventListener("mousedown", function() {doMove(moveUp, ceiling)}, false);
+	downarrow.addEventListener("mousedown", function() {doMove(moveDown, ground)}, false);
+	forwardarrow.addEventListener("mousedown", function() {doMove(moveForward, backPlane)}, false);
+	backarrow.addEventListener("mousedown", function() {doMove(moveBackward, frontPlane)}, false);
 	
 	//file events
 	file_.addEventListener('click', showFileMenu, false);
@@ -235,6 +237,7 @@ function main() {
 	
 	//Drag events
 	window.addEventListener('mousemove', function(e) {doDrag(e)}, false);
+	window.addEventListener('mouseup', function(e) {enddbDrag(e)}, false);
 	
 	for(var i=0;i<ddb.length;i++){
         ddb[i].style.top = "150px";
@@ -277,33 +280,183 @@ function main() {
 		saveBut.addEventListener('click', doSaveAs, false);
 		manageBut.addEventListener('click', doDeleteSaved, false);
 	}
+	
+	function HSVtoRGB(h, s, v) {
+    var r, g, b, i, f, p, q, t;
+    if (arguments.length === 1) {
+        s = h.s, v = h.v, h = h.h;
+    }
+    i = Math.floor(h * 6);
+    f = h * 6 - i;
+    p = v * (1 - s);
+    q = v * (1 - f * s);
+    t = v * (1 - (1 - f) * s);
+    switch (i % 6) {
+        case 0: r = v, g = t, b = p; break;
+        case 1: r = q, g = v, b = p; break;
+        case 2: r = p, g = v, b = t; break;
+        case 3: r = p, g = q, b = v; break;
+        case 4: r = t, g = p, b = v; break;
+        case 5: r = v, g = p, b = q; break;
+    }
+    return {
+        r: Math.round(r * 255),
+        g: Math.round(g * 255),
+        b: Math.round(b * 255)
+    };
+}
+
 		
 	/*-------------CONSTRUCTION MENU FUNCTIONS ---------------*/
 	//set colours in selection menu
 	function setColours(colours) {
-		var colarray = [ 
-						[[255,0,0],[255,192,0],[255,255,0]],
-						[[192,255,0],[0,255,0],[0,255,192]],
-						[[0,0,255],[255,0,255],[192,0,255]],
-						[[255,255,255],[127,127,127],[0,0,0]]
-		];
+		var colourHolder =[];
+		var RGB;
+		for(var i=0;i<64;i++){
+			var rbg_value=HSVtoRGB(i/63, 1, 1)
+			RGB=[rbg_value.r,rbg_value.g,rbg_value.b];
+			colourHolder.push(RGB);
+		}	
 		
-		for(row=0;row<4;row++) {
-			for(clmn=0;clmn<3;clmn++) {
+		var colarray=[];
+		for(var i=0; i<64;i++) {
+			if(i%8 == 0) {
+				k=i/8;				
+				colarray[k]=[];
+			}
+			colarray[k].push(colourHolder[i]);
+		} 
+		
+		var matholder=[[25,100],[50,100],[75,100],[100,100],[100,75],[100,50],[100,25]];
+		
+		for(row=0;row<8;row++) {
+			for(clmn=0;clmn<8;clmn++) {
 				col = document.createElement('div');
+				col.id="id"+row+clmn;
 				col.colarray = colarray[row][clmn];
 				col.style.backgroundColor = "rgb("+colarray[row][clmn][0] +","+colarray[row][clmn][1]+","+colarray[row][clmn][2]+")";
-				col.style.opacity = 0.5;
 				col.className="chart";
-				col.material = new BABYLON.StandardMaterial("mat"+clmn+row, jccsStudio.scene);
+				col.materials=[]
+				for(var m=0; m<7;m++) {
+					col.materials[i] = new BABYLON.StandardMaterial("mat"+row+clmn+matholder[m][0]+matholder[m][1], jccsStudio.scene);
+				}
+				col.material=col.materials[3];
 				col.material.emissiveColor = new BABYLON.Color3(col.colarray[0]/255,col.colarray[1]/255,col.colarray[2]/255);
-				col.addEventListener("mouseover", function() {this.style.opacity = 1}, false );
-				col.addEventListener("mouseout", function() {this.style.opacity = 0.5}, false );
 				col.addEventListener("click", function() {setMeshColour(this)}, false );
 				colours.appendChild(col);
 			}
 		}
+		
+		currentColour=document.getElementById("id53");
+		colour.style.backgroundColor = currentColour.style.backgroundColor;
+		currentColour.style.border="solid 1px #000000";
+		
+		var slider = document.createElement('div');
+		slider.style.width="122px";
+		slider.style.border="solid 1px #000000";
+		slider.style.height="14px";
+		slider.style.display="block";
+		slider.style.float="left";
+		slider.style.margin="2px 2px 2px 2px";
+		slider.style.backgroundColor="#AAAAAA";
+		colours.appendChild(slider);
+		whiteDiv = document.createElement('div');
+		whiteDiv.style.position="absolute";
+		whiteDiv.style.left="3px";
+		whiteDiv.style.height="10px";
+		whiteDiv.style.width="10px";
+		whiteDiv.style.backgroundColor="#FFFFFF";
+		whiteDiv.style.borderRadius="5px";
+		whiteDiv.style.margin="2px 1px 2px 1px";
+		slider.appendChild(whiteDiv);
+		blackDiv = document.createElement('div');
+		blackDiv.style.position="absolute";
+		blackDiv.style.right="4px";
+		blackDiv.style.height="10px";
+		blackDiv.style.width="10px";
+		blackDiv.style.backgroundColor="#000000";
+		blackDiv.style.borderRadius="5px";
+		blackDiv.style.margin="2px 1px 2px 1px";
+		slider.appendChild(blackDiv);
+		diamond = document.createElement('div');
+		diamond.style.position="absolute";
+		diamond.style.left="60px";
+		diamond.style.width="10px";
+		diamond.style.height="10px";
+		diamond.style.transform="rotate(45deg)";
+		diamond.style.backgroundColor="#555555";
+		diamond.style.margin="2px 0px 2px 0px";
+		diamond.draggable=true;
+		slider.appendChild(diamond);
+		diamond.addEventListener('mousedown', dmddragstart, false);
+		diamond.addEventListener('mousemove', dmddrag, false);
+		diamond.addEventListener('mouseup', dmddragend, false);
+		
+		var dpx,nowx;
+		
+		function dmddragstart(e) {
+			dpx=parseInt(diamond.style.left);
+			nowx=getPosition(e).x;
+			dmddown=true;
+			
+		}
+		
+		function dmddrag(e) {
+			if(!dmddown) {
+				return
+			}
+			var s = v = 1;
+			var dx=getPosition(e).x-nowx;
+			nowx = getPosition(e).x
+			dx = dx/Math.abs(dx);
+						
+			if(10<dx*16+dpx && dx*16+dpx<110) {
+				dpx+=dx*16;	
+				if(dpx > 60 ) {
+					v= 1 -(dpx - 60)/64;
+				}
+				else {
+					s = (dpx+4)/64;
+				}			
+				diamond.style.left=dpx+"px";
+				changeTone(s, v);
+			}
+		}
+		
+		function dmddragend() {
+			dmddown=false;
+		}
+		
+		function changeTone(s,v) {
+			var colourHolder =[];
+			var RGB;
+			for(var i=0;i<64;i++){
+				var rbg_value=HSVtoRGB(i/63, s, v)
+				RGB=[rbg_value.r,rbg_value.g,rbg_value.b];
+				colourHolder.push(RGB);
+			}	
+		
+			colarray=[];
+			for(var i=0; i<64;i++) {
+				if(i%8 == 0) {
+					k=i/8;				
+					colarray[k]=[];
+				}
+				colarray[k].push(colourHolder[i]);
+			} 
+		
+			for(row=0;row<8;row++) {
+				for(clmn=0;clmn<8;clmn++) {
+					col = document.getElementById('id'+row+clmn);
+					col.colarray = colarray[row][clmn];
+					col.style.backgroundColor = "rgb("+colarray[row][clmn][0] +","+colarray[row][clmn][1]+","+colarray[row][clmn][2]+")";
+					col.material.emissiveColor = new BABYLON.Color3(col.colarray[0]/255,col.colarray[1]/255,col.colarray[2]/255);
+				}
+			}
+		}
 	}
+	
+	
 	
 	//set textures in selection menu
 	var T;
@@ -827,12 +980,7 @@ function main() {
 		var tempMeshes=[];
 		var name;
 		for(var ref in currentMeshes) {
-			newRef = "L"+currentModelName+"¬"+getType(ref)+(num_of_boxes++);
-			//x = JCubees[ref].Jcubee.position.x;
-			//y = JCubees[ref].Jcubee.position.y;
-			//z = JCubees[ref].Jcubee.position.z;
-			//material = JCubees[ref].Jcubee.material;
-			//JCubees[newRef] = new JcubeeClone(baseMeshes[getType(ref)], newRef, x, y, z, material);				
+			newRef = "L"+currentModelName+"¬"+getType(ref)+(num_of_boxes++);				
 			JCubees[newRef] = new JcubeeBlank(newRef);
 			JCubees[newRef].Jcubee = JCubees[ref].Jcubee.clone(newRef);
 			JCubees[newRef].Jcubee.position.y += 6*60;
@@ -946,11 +1094,6 @@ function main() {
 		var newRef;	
 	
 		for(var ref in JCubees) {	
-			//material = JCubees[ref].Jcubee.material;
-			//x = JCubees[ref].Jcubee.position.x;
-			//y = JCubees[ref].Jcubee.position.y;
-			//z = JCubees[ref].Jcubee.position.z;
-			//sceneModels[modelName+ref] = new JcubeeClone(baseMeshes[getType(ref)], modelName+ref, x, y, z, material);
 			sceneModels[modelName+ref] = new JcubeeBlank(modelName+ref);
 			sceneModels[modelName+ref].Jcubee = JCubees[ref].Jcubee.clone(modelName+ref);			
 			sceneModels[modelName+ref].showSelected();		
@@ -1011,13 +1154,16 @@ function main() {
 	}
 
 	function setMeshColour(elm) {
+		currentColour.style.border="solid 1px #FFFFFF";
+		currentColour=elm;
 		for(var mesh in currentMeshes) {						
 			currentMeshes[mesh].material = elm.material;
 		}
 		colour.material=elm.material;
 		colour.colarray=elm.colarray;
 		colour.style.backgroundColor="rgb("+elm.colarray[0] +","+elm.colarray[1]+","+elm.colarray[2]+")";
-	}
+		currentColour.style.border="solid 1px #000000";
+	};
 	
 	function setMeshTexture(material) {
 		for(var mesh in currentMeshes) {						
@@ -1069,7 +1215,8 @@ function main() {
 	};
 	
 	function enddbDrag(e) {
-		downMouse = false;				
+		downMouse = false;	
+		dmddown=false;			
 	};
 	
 	function inpKeyDown(evt) {		
@@ -1193,11 +1340,6 @@ function main() {
 		sceneParents[parentName].modelChildren = [];	
 	
 		for(var ref in jcModels[name]) {
-			//material = JCubees[ref].Jcubee.material;
-			//x = JCubees[ref].Jcubee.position.x;
-			//y = JCubees[ref].Jcubee.position.y;
-			//z = JCubees[ref].Jcubee.position.z;
-			//sceneModels[modelName+ref] = new JcubeeClone(baseMeshes[getType(ref)], modelName+ref, x, y, z, material);
 			sceneModels[modelName+ref] = new JcubeeBlank(modelName+ref);
 			sceneModels[modelName+ref].Jcubee = JCubees[ref].Jcubee.clone(modelName+ref);					
 			sceneModels[modelName+ref] = new JcubeeClone(baseMeshes[getType(ref)], name, x, y, z, material);	
@@ -2096,8 +2238,10 @@ function main() {
 	
 	jccsStudio.scene.clearColor = new BABYLON.Color3(0.75, 0.75, 0.75);
 	
+	jccsStudio.scene.collisionsEnabled = true;
+	
 	jccsStudio.camera = new BABYLON.ArcRotateCamera("Camera", 0, 50, 300, new BABYLON.Vector3(0, 300, 0), jccsStudio.scene);
-	jccsStudio.camera.setPosition(new BABYLON.Vector3(0, 200, -1400));	
+	jccsStudio.camera.setPosition(new BABYLON.Vector3(0, 1800, -2800));	
 	jccsStudio.camera.lowerBetaLimit = 0.1;
 	jccsStudio.camera.upperBetaLimit = (Math.PI / 2) * 0.9;
 	jccsStudio.camera.attachControl(jcCanvas, true);
@@ -2117,7 +2261,7 @@ function main() {
 	setColours(colours);
 	setTextures();
 
-	colour.material = jccsStudio.scene.getMaterialByName("mat02");
+	colour.material = jccsStudio.scene.getMaterialByName("mat53");
 		
 	//Materials
 	var greenGridMat = new BABYLON.StandardMaterial("greenGrid", jccsStudio.scene);
@@ -2137,12 +2281,6 @@ function main() {
 	
 	var brownGridMat = new BABYLON.StandardMaterial("brown", jccsStudio.scene);
 	brownGridMat.emissiveColor = new BABYLON.Color3(0.4,0.2,0);
-	
-	//var blueMat = new BABYLON.StandardMaterial("mat02", jccsStudio.scene);
-	//blueMat.emissiveColor = new BABYLON.Color3(0,0,1);
-	
-	//var redMat = new BABYLON.StandardMaterial("red", jccsStudio.scene);
-	//redMat.emissiveColor = new BABYLON.Color3(1,0,0);
 	
 	var blackMat = new BABYLON.StandardMaterial("black", jccsStudio.scene);
 	blackMat.emissiveColor = new BABYLON.Color3(0,0,0);
@@ -2216,72 +2354,80 @@ function main() {
 	jccsStudio.followCamera.setTarget(target.getAbsolutePosition());
 	
 	//Create Ground
-	var ground=BABYLON.Mesh.CreateGround("ground",1200, 1200, 20, jccsStudio.scene,  false, BABYLON.Mesh.DOUBLESIDE);	
+	var ground=BABYLON.Mesh.CreateGround("ground",2400, 2400, 40, jccsStudio.scene,  false, BABYLON.Mesh.DOUBLESIDE);	
 	ground.material = greenGridMat;
 	ground.material.wireframe=true;
 	ground.position.y = 0;
+	ground.checkCollisions = true;
+	
+	var currentBlock = ground;
 	
 	//Create Ceiling
-	var ceiling=BABYLON.Mesh.CreateGround("ceiling",1200, 1200, 1, jccsStudio.scene);	
-	ceiling.position.y = 720;
+	var ceiling=BABYLON.Mesh.CreateGround("ceiling",2400, 1200, 1, jccsStudio.scene);	
+	ceiling.position.y = 1440;
 	ceiling.isVisible = false;
 	ceiling.isPickable = false;
+	ceiling.checkCollisions = true;
 
 	//Create Planes for each side	
-	var backPlane=BABYLON.Mesh.CreateGround("backPlane",1200, 1200, 20, jccsStudio.scene);	
+	var backPlane=BABYLON.Mesh.CreateGround("backPlane",2400, 2400, 40, jccsStudio.scene);	
 	backPlane.material = yellowGridMat;
 	backPlane.material.wireframe=true;
 	backPlane.rotation.x = Math.PI/2;
 	backPlane.position.x=0;
-	backPlane.position.y=600;
-	backPlane.position.z=600;
+	backPlane.position.y=1200;
+	backPlane.position.z=1200;
 	backPlane.isPickable = false;
+	backPlane.checkCollisions = false;
 	
-	var backPlaneBlock=BABYLON.Mesh.CreateGround("backPlaneBlock",1200, 1200, 20, jccsStudio.scene);	
+/*	var backPlaneBlock=BABYLON.Mesh.CreateGround("backPlaneBlock",2400, 2400, 40, jccsStudio.scene);	
 	backPlaneBlock.rotation.x = Math.PI/2;
 	backPlaneBlock.position.x=0;
-	backPlaneBlock.position.y=600;
-	backPlaneBlock.position.z=570;
+	backPlaneBlock.position.y=1200;
+	backPlaneBlock.position.z=1170;
 	backPlaneBlock.isPickable = false;
-	backPlaneBlock.isVisible = false;	
+	backPlaneBlock.isVisible = false;	*/
 	
-	var leftSidePlane=BABYLON.Mesh.CreateGround("leftSidePlane",1200, 1200, 20, jccsStudio.scene);	
+	var leftSidePlane=BABYLON.Mesh.CreateGround("leftSidePlane",2400, 2400, 40, jccsStudio.scene);	
 	leftSidePlane.material = blueGridMat;
 	leftSidePlane.material.wireframe=true;
 	leftSidePlane.rotation.z = Math.PI/2;
-	leftSidePlane.position.x=-600;
-	leftSidePlane.position.y=600;
+	leftSidePlane.position.x=-1200;
+	leftSidePlane.position.y=1200;
 	leftSidePlane.position.z=0;
 	leftSidePlane.isPickable = false;
+	leftSidePlane.checkCollisions = false;
 	
-	var leftSideBlock=BABYLON.Mesh.CreateGround("leftSideBlock",1200, 1200, 20, jccsStudio.scene);	
+/*	var leftSideBlock=BABYLON.Mesh.CreateGround("leftSideBlock",2400, 2400, 40, jccsStudio.scene);	
 	leftSideBlock.rotation.z = Math.PI/2;
-	leftSideBlock.position.x=-570;
-	leftSideBlock.position.y=600;
+	leftSideBlock.position.x=-1170;
+	leftSideBlock.position.y=1200;
 	leftSideBlock.position.z=0;
 	leftSideBlock.isPickable = false;
-	leftSideBlock.isVisible = false;
+	leftSideBlock.isVisible = false; */
 	
-	var frontPlane=BABYLON.Mesh.CreateGround("frontPlane",1200, 1200, 20, jccsStudio.scene);	
+	var frontPlane=BABYLON.Mesh.CreateGround("frontPlane",2400, 2400, 40, jccsStudio.scene);	
 	frontPlane.material = brownGridMat;
 	frontPlane.material.wireframe=true;
 	frontPlane.rotation.x = Math.PI/2;
 	frontPlane.position.x=0;
-	frontPlane.position.y=600;
-	frontPlane.position.z=-600;
+	frontPlane.position.y=1200;
+	frontPlane.position.z=-1200;
 	frontPlane.isPickable = false;
 	frontPlane.visibility = 0;
+	frontPlane.checkCollisions = false;
 
-	var rightSidePlane=BABYLON.Mesh.CreateGround("rightSidePlane",1200, 1200, 20, jccsStudio.scene);	
+	var rightSidePlane=BABYLON.Mesh.CreateGround("rightSidePlane",2400, 2400, 40, jccsStudio.scene);	
 	rightSidePlane.material = redGridMat;
 	rightSidePlane.material.wireframe=true;
 	rightSidePlane.rotation.z = Math.PI/2;
-	rightSidePlane.position.x=600;
-	rightSidePlane.position.y=600;
+	rightSidePlane.position.x=1200;
+	rightSidePlane.position.y=1200;
 	rightSidePlane.position.z=0;	
 	rightSidePlane.isPickable = false;
+	rightSidePlane.checkCollisions = false;
 	
-	var skybox = BABYLON.Mesh.CreateBox("skyBox", 2000.0, jccsStudio.scene);
+	var skybox = BABYLON.Mesh.CreateBox("skyBox", 3000.0, jccsStudio.scene);
 	skybox.isVisible=false;
 	var skyboxMaterial = new BABYLON.StandardMaterial("skyBox", jccsStudio.scene);
 	skyboxMaterial.backFaceCulling = false;
@@ -2722,7 +2868,7 @@ function main() {
 				modelMove(collide.right, moveRight);
 			}
 			else {
-				rightMove();
+				doMove(moveRight, rightSidePlane);
 			}
 			return;
 		};
@@ -2736,7 +2882,7 @@ function main() {
 				modelMove(collide.left, moveLeft);
 			}
 			else {
-				leftMove();
+				doMove(moveLeft, leftSidePlane);
 			}
 			return;
 		}
@@ -2750,7 +2896,7 @@ function main() {
 				modelMove(collide.down, moveDown);
 			}
 			else {
-				downMove();
+				doMove(moveDown, ground);
 			}
 			return;
 		}
@@ -2764,7 +2910,7 @@ function main() {
 				modelMove(collide.up, moveUp);
 			}
 			else {
-				upMove();
+				doMove(moveUp, ceiling);
 			}			
 			return;
 		}
@@ -2778,7 +2924,7 @@ function main() {
 				modelMove(collide.front, moveForward);
 			}
 			else {
-				forwardMove();
+				doMove(moveForward, backPlane);
 			}			
 			return;
 		}
@@ -2792,7 +2938,7 @@ function main() {
 				modelMove(collide.back, moveBackward);
 			}
 			else {
-				backMove();
+				doMove(moveBackward, frontPlane);
 			}			
 			return;
 		}
@@ -2807,98 +2953,22 @@ function main() {
 		shiftDown = false;
    };
 	
-	function rightMove() {
-		if(stepsLeftRight(JCubees, currentMeshes).right>0  || !solid.checked) {
-			var diff = moveRight;
-			for(var name in currentMeshes) {			
-				currentMeshes[name].position.addInPlace(diff);			
-				JCubees[name].moveT(currentMeshes[name].position);
+	function doMove(diff, block) {
+		currentBlock.checkCollisions = false;
+		block.checkCollisions = true;
+		currentBlock = block;
+		for(var name in currentMeshes) {
+			if(solid.checked) {
+				currentMeshes[name].moveWithCollisions(diff);
+				currentMeshes[name].onCollide = function(collidedMesh) {
+					//console.log(collidedMesh.name);
+					currentMeshes[name].position.addInPlace(diff.scale(-0.5));
+				};	
 			}
-		}
-		storeMarker = storeIcon; 
-		saveMarker = saveIcon; 
-		exportMarker = exportIcon;
-		model.innerHTML = "Model -- "+currentModelName+storeMarker+saveMarker+exportMarker;
-		stored[currentModelName] = false;
-		saved[currentModelName] = false;
-		exported[currentModelName] = false;
-	}
-	
-	function leftMove() {
-		if(stepsLeftRight(JCubees, currentMeshes).left>0  || !solid.checked) {
-			var diff = moveLeft;
-			for(var name in currentMeshes) {
+			else {
 				currentMeshes[name].position.addInPlace(diff);
-				JCubees[name].moveT(currentMeshes[name].position);
-			}
-		}
-		storeMarker = storeIcon; 
-		saveMarker = saveIcon; 
-		exportMarker = exportIcon;
-		model.innerHTML = "Model -- "+currentModelName+storeMarker+saveMarker+exportMarker;
-		stored[currentModelName] = false;
-		saved[currentModelName] = false;
-		exported[currentModelName] = false;
-	}
-	
-	function upMove() {
-		if(stepsUpDown(JCubees, currentMeshes).up>0  || !solid.checked) {
-			var diff = moveUp;
-			for(var name in currentMeshes) {
-				currentMeshes[name].position.addInPlace(diff);
-				JCubees[name].moveT(currentMeshes[name].position);
-			}
-		}
-		storeMarker = storeIcon; 
-		saveMarker = saveIcon; 
-		exportMarker = exportIcon;
-		model.innerHTML = "Model -- "+currentModelName+storeMarker+saveMarker+exportMarker;
-		stored[currentModelName] = false;
-		saved[currentModelName] = false;
-		exported[currentModelName] = false;
-	}
-	
-	function downMove() {
-		if(stepsUpDown(JCubees, currentMeshes).down>0  || !solid.checked) {
-			var diff = moveDown;
-			for(var name in currentMeshes) {
-				currentMeshes[name].position.addInPlace(diff);
-				JCubees[name].moveT(currentMeshes[name].getAbsolutePosition());
-			}
-		}
-		storeMarker = storeIcon; 
-		saveMarker = saveIcon; 
-		exportMarker = exportIcon;
-		model.innerHTML = "Model -- "+currentModelName+storeMarker+saveMarker+exportMarker;
-		stored[currentModelName] = false;
-		saved[currentModelName] = false;
-		exported[currentModelName] = false;	
-	}
-	
-	function forwardMove() {
-		if(stepsForwardBack(JCubees, currentMeshes).forward>0  || !solid.checked) {
-			var diff = moveForward;
-			for(var name in currentMeshes) {
-				currentMeshes[name].position.addInPlace(diff);
-				JCubees[name].moveT(currentMeshes[name].position);
-			}
-		}
-		storeMarker = storeIcon; 
-		saveMarker = saveIcon; 
-		exportMarker = exportIcon;
-		model.innerHTML = "Model -- "+currentModelName+storeMarker+saveMarker+exportMarker;
-		stored[currentModelName] = false;
-		saved[currentModelName] = false;
-		exported[currentModelName] = false;
-	}
-	
-	function backMove() {
-		if(stepsForwardBack(JCubees, currentMeshes).back>0  || !solid.checked) {
-			var diff = moveBackward;
-			for(var name in currentMeshes) {
-				currentMeshes[name].position.addInPlace(diff);
-				JCubees[name].moveT(currentMeshes[name].position);
-			}
+			};				
+			JCubees[name].moveT(currentMeshes[name].position);
 		}
 		storeMarker = storeIcon; 
 		saveMarker = saveIcon; 

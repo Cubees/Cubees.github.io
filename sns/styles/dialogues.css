@@ -1,0 +1,219 @@
+ul,li { 
+	list-style-type: none;
+	list-style-position:inside;
+	margin:0;
+	padding:0; 
+}
+
+li {
+	color:#666666;
+	cursor:default;
+}
+
+li:hover {
+	color:#000000;
+}
+
+.dragDialogueBox {
+	position:absolute;
+	width:240px;
+	height:120px;
+	top:250px;
+	left:500px;
+	border: 1px solid #333333;
+	background-color: #FFFFFF;
+	box-shadow: 5px 5px 2px #111111;
+	z-index:5;
+	visibility:hidden;
+}
+
+.dragDialogueBox div, input {
+	position:absolute;
+}
+
+.dragDialogueBox label, input {
+	margin: 2px 2px 2px 2px;
+}
+
+li span {
+	position:absolute;
+	left: 20px;
+}
+
+
+.heading {
+	border-bottom: 1px solid #666666;
+	width:100%;
+	height:20px;
+	background-color:#AAAAAA;
+}
+
+.titlediv {
+	left:5px;
+	cursor:default;
+}
+
+.footer {
+	border-top: 1px solid #666666;
+	width:100%;
+	height:30px;
+	bottom:0px;
+	background-color: #FFFFFF;
+}
+
+.closediv {
+	right:2px;
+	opacity:0.6;
+	font-family: sans-serif;
+	cursor:default;
+}
+
+.closedive:hover {
+	opacity:1;
+}
+
+.dragContent {
+	width: 100%;
+	height:80px;
+	top:20px;
+}
+
+.DBBut {
+	top: 1px;
+	right:90px;
+}
+
+.DBCancel {
+	right:5px;
+	top:1px;
+}
+
+.getList {
+	top:25px;
+	left:5px;
+	width:100%;
+	height:220px;
+	overflow-y:hidden;
+	overflow-x:auto;
+}
+
+.getList div {
+	width:100px;
+	height:200px;
+	top:0px;
+	margin:2px;
+}
+
+#storeDesc {
+	top:2px;
+	left:5px;
+	color: #666666;
+	cursor: default;
+}
+
+#storeName {
+	top:25px;
+	left:5px;
+}
+
+#saveDesc {
+	top:2px;
+	left:5px;
+	color: #666666;
+	cursor: default;
+}
+
+#saveName {
+	top:25px;
+	left:5px;
+}
+
+#fetchDB {
+	width:340px;
+	height:210px;
+	resize:both;
+	min-width:340px;
+	min-height:120px;
+	max-height:300px;
+	overflow :hidden;
+}
+
+#fetchDesc {
+	top:2px;
+	left:5px;
+	color: #666666;
+	cursor: default;
+}
+
+#fetchname {
+	left:5px;
+	top:1px;
+	border:1px solid black;
+	height:26px;
+	width:50%;
+	padding-left:5px;
+}
+
+#importDB {
+	width:340px;
+	height:100px;
+	resize:both;
+	min-width:340px;
+	min-height:120px;
+	max-height:300px;
+	overflow :hidden;
+}
+
+#importDesc {
+	top:2px;
+	left:5px;
+	color: #666666;
+	cursor: default;
+}
+
+#importBut {
+	left:5px;
+}
+
+#browseBut {
+	position:static;
+}
+
+#manageDB {
+	width:340px;
+	height:210px;
+	resize:both;
+	min-width:340px;
+	min-height:120px;
+	max-height:300px;
+	overflow :hidden;
+}
+
+#manageBut {
+	left:5px;
+}
+
+#downloadDesc {
+	top:2px;
+	left:5px;
+	color: #666666;
+	cursor: default;
+}
+
+#downloadName {
+	top:25px;
+	left:5px;
+}
+
+#confirmDB {
+	height:135px;
+}
+
+#confirmDesc {
+	margin:5px;
+}
+
+#confirmBut {
+	left:5px;
+}
+
