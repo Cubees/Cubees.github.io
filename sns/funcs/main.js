@@ -336,10 +336,10 @@ function main() {
 				col.colarray = colarray[row][clmn];
 				col.style.backgroundColor = "rgb("+colarray[row][clmn][0] +","+colarray[row][clmn][1]+","+colarray[row][clmn][2]+")";
 				col.className="chart";
-				col.materials=[]
-				for(var m=0; m<7;m++) {
-					col.materials[i] = new BABYLON.StandardMaterial("mat"+row+clmn+matholder[m][0]+matholder[m][1], jccsStudio.scene);
-				}
+				col.materials=[];			
+				for(var m=0; m<7;m++) {					
+					col.materials[m] = new BABYLON.StandardMaterial("mat"+row+clmn+matholder[m][0]+matholder[m][1], jccsStudio.scene);					
+				}				
 				col.material=col.materials[3];
 				col.material.emissiveColor = new BABYLON.Color3(col.colarray[0]/255,col.colarray[1]/255,col.colarray[2]/255);
 				col.addEventListener("click", function() {setMeshColour(this)}, false );

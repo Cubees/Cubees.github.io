@@ -405,34 +405,6 @@
 	background-image:url("../images/xtWood.png");
 }
 
-#textureSwitch {
-	position:absolute;
-	top:447px;
-	width:30px;
-	height:30px;
-	border-bottom:1px solid #666666;
-	background-image:url("../images/xtMetal.png");
-	opacity:0.75;
-}
-
-#textureSwitch:hover {
-	opacity:1;
-}
-
-#textureOpen {
-	text-align:center;
-	font-size:1.5em;
-	cursor:default;
-	opacity:0.75;
-}
-
-#textureOpen:hover {
-	opacity:1;
-}
-
-#vblank4 {
-	top:477px;
-}
 
 /* SCENE CSS */
 
