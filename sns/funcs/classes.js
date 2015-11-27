@@ -6,6 +6,7 @@ Studio = function (engine) {
 function baseCubee(mesh) {
 	this.name = mesh.name;
 	this.mesh = mesh;
+	this.mesh.checkCollisions = true;
 }
 
 function JcubeeBlank(name) {

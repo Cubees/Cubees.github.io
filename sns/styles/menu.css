@@ -1,4 +1,6 @@
-
+body {
+	overflow: hidden;
+}
 .headerBox {
 	position:absolute;
 	top:0px;
@@ -203,42 +205,6 @@
 
 
 
-#textures {
-	width:30%;
-}
-
-#texturepics {
-	width:90%;
-	height:56px;
-	margin:1px;
-	overflow:auto;	
-}
-
-.textureimage {
-	background-repeat:no-repeat;
-	width:50px;
-	height:50px;
-	border:1px solid black;
-	margin:2px 2px 2px 2px;
-	float:left;
-	opacity:0.75;
-}
-
-.textureimage:hover {
-	opacity:1;
-}
-
-#metal {
-	background-image:url("../images/xtMetal.png");
-}
-
-#wood {
-	background-image:url("../images/xtWood.png");
-}
-
-#rust {
-	background-image:url("../images/xtRust.png");
-}
 
 #vertmenu {
 	position:absolute;
@@ -437,19 +403,49 @@
 	right:40px;
 	top:350px;
 	width:130px;
-	height:166px;
+	height:150px;
 	border:1px solid black;
 	background-color:#BBBBBB;
+	visibility:hidden;
 }
 
-#colours2 {
-	position:absolute;
-	width:130px;
-	height:350px;
-	top:150px;
-	right:40px;
+.textureimage {
+	background-repeat:no-repeat;
+	width:50px;
+	height:50px;
 	border:1px solid black;
-	background-color:#FFFFFF;
+	margin:2px 2px 2px 2px;
+	float:left;
+	opacity:0.75;
+}
+
+.textureimage:hover {
+	opacity:1;
+}
+
+#metal {
+	background-image:url("../images/xtMetal.png");
+}
+
+#wood {
+	background-image:url("../images/xtWood.png");
+}
+
+#rust {
+	background-image:url("../images/xtRust.png");
+}
+
+#textures {
+	position:absolute;
+	cursor:default;
+	right:40px;
+	top:424px;
+	width:130px;
+	height:150px;
+	border:1px solid black;
+	background-color:#BBBBBB;
+	overflow-y: scroll;
+	visibility:hidden;
 }
 
 /* SCENE CSS */

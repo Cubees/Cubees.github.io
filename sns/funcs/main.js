@@ -18,16 +18,20 @@ function main() {
 	var currentMeshes={};
 	var currentParents={};
 	var currentColour;
+	var currentTone;
+	var colourShow = true;
+	var textureShow = true;
     
     var newModel=true;
 	var detached = false;
 	var shiftDown=false;
-	var moveRight = new BABYLON.Vector3(60, 0, 0);  // +ve x axis direction
-	var moveLeft = new BABYLON.Vector3(-60, 0, 0); // -ve x axis direction
-	var moveUp = new BABYLON.Vector3(0, 60, 0); // +ve y axis direction
-	var moveDown = new BABYLON.Vector3(0, -60, 0); // -ve y axis direction
-	var moveForward = new BABYLON.Vector3(0, 0, 60); // +ve z axis direction
-	var moveBackward = new BABYLON.Vector3(0, 0, -60); // -ve z axis direction
+	var cubeeUnit = 15;
+	var moveRight = new BABYLON.Vector3(cubeeUnit, 0, 0);  // +ve x axis direction
+	var moveLeft = new BABYLON.Vector3(-cubeeUnit, 0, 0); // -ve x axis direction
+	var moveUp = new BABYLON.Vector3(0, cubeeUnit, 0); // +ve y axis direction
+	var moveDown = new BABYLON.Vector3(0, -cubeeUnit, 0); // -ve y axis direction
+	var moveForward = new BABYLON.Vector3(0, 0, cubeeUnit); // +ve z axis direction
+	var moveBackward = new BABYLON.Vector3(0, 0, -cubeeUnit); // -ve z axis direction
 	
 	var confirmName;
 	var confirmFunc;
@@ -121,8 +125,11 @@ function main() {
 	colour.colarray=[0,0,255];
 	
 	var colours = document.getElementById("colours");
+	var colourOpen = document.getElementById("colourOpen");
 	
-	var texturepics = document.getElementById("texturepics");
+	var texture = document.getElementById("texture");
+	var textures = document.getElementById("textures");
+	var textureOpen = document.getElementById("textureOpen");
 	
 	var rotateX = document.getElementById("rotateX");
 	var rotateY = document.getElementById("rotateY");
@@ -219,6 +226,14 @@ function main() {
 	copy.addEventListener("click", doCopy, false);
 	delete_.addEventListener("click", doDelete, false);
 	colour.addEventListener("click", function() {setMeshColour(this)}, false );
+	colourOpen.addEventListener("click", slideColourDB, false );
+	
+	colours.style.right = "-100px";
+	
+	texture.addEventListener("click", function() {setMeshTexture(this)}, false );
+	textureOpen.addEventListener("click", slideTextureDB, false );
+	
+	textures.style.right = "-100px";
 	
 	rotateX.addEventListener("click", Xrotate, false);
 	rotateY.addEventListener("click", Yrotate, false);
@@ -308,12 +323,36 @@ function main() {
 
 		
 	/*-------------CONSTRUCTION MENU FUNCTIONS ---------------*/
+	function slideColourDB() {
+		
+		if(colourShow) {
+			if(parseInt(colours.style.right)<40) {
+		 		colours.style.right = (parseInt(colours.style.right) + 5)+"px";
+		 		setTimeout(slideColourDB,10);
+			}
+			else {
+				colourShow = !colourShow;
+				colourOpen.innerHTML = "&#x25B6;";
+			}
+		}
+		else {
+			if(parseInt(colours.style.right)>-100) {
+		 		colours.style.right = (parseInt(colours.style.right) - 5)+"px";
+		 		setTimeout(slideColourDB,10);
+			}
+			else {
+				colourShow = !colourShow;
+				colourOpen.innerHTML = "&#x25C0;";
+			}
+		}
+	}
+	
 	//set colours in selection menu
 	function setColours(colours) {
 		var colourHolder =[];
 		var RGB;
 		for(var i=0;i<64;i++){
-			var rbg_value=HSVtoRGB(i/63, 1, 1)
+			var rbg_value=HSVtoRGB(i/64, 1, 1);
 			RGB=[rbg_value.r,rbg_value.g,rbg_value.b];
 			colourHolder.push(RGB);
 		}	
@@ -325,113 +364,69 @@ function main() {
 				colarray[k]=[];
 			}
 			colarray[k].push(colourHolder[i]);
-		} 
-		
-		var matholder=[[25,100],[50,100],[75,100],[100,100],[100,75],[100,50],[100,25]];
+		} 		
+		var toneholder=[[20, 100],[40,100],[60,100],[80,100],[100,100],[100,75],[100,50],[100,25]];
 		
 		for(row=0;row<8;row++) {
 			for(clmn=0;clmn<8;clmn++) {
 				col = document.createElement('div');
 				col.id="id"+row+clmn;
-				col.colarray = colarray[row][clmn];
+				col.row=row;
+				col.clmn=clmn;
+				col.colarray = colarray[row][clmn];				
 				col.style.backgroundColor = "rgb("+colarray[row][clmn][0] +","+colarray[row][clmn][1]+","+colarray[row][clmn][2]+")";
 				col.className="chart";
 				col.materials=[];			
-				for(var m=0; m<7;m++) {					
-					col.materials[m] = new BABYLON.StandardMaterial("mat"+row+clmn+matholder[m][0]+matholder[m][1], jccsStudio.scene);					
-				}				
-				col.material=col.materials[3];
+				for(var m=0; m<8;m++) {					
+					col.materials[m] = new BABYLON.StandardMaterial("mat"+row+clmn+toneholder[m][0]+toneholder[m][1], jccsStudio.scene);					
+				}								
+				col.material=col.materials[4];
 				col.material.emissiveColor = new BABYLON.Color3(col.colarray[0]/255,col.colarray[1]/255,col.colarray[2]/255);
 				col.addEventListener("click", function() {setMeshColour(this)}, false );
 				colours.appendChild(col);
 			}
 		}
 		
+		row=8;
+		colarray[row]=[];
+		for(clmn=0;clmn<8;clmn++) {
+			col = document.createElement('div');
+			col.id="id"+row+clmn;
+			col.row=row;
+			col.clmn = clmn;
+			col.style.backgroundColor = "rgb("+Math.round(255*(8 - clmn)/8) +","+Math.round(255*(8 - clmn)/8)+","+Math.round(255*(8 - clmn)/8)+")";
+			colarray[row][clmn] = [Math.round(255*(8 - clmn)/8), Math.round(255*(8 - clmn)/8), Math.round(255*(8 - clmn)/8)];
+			col.colarray = colarray[row][clmn];
+			col.className="chart";
+			col.materials=[];
+			col.clicked=0;			
+			for(var m=0; m<8;m++) {					
+				col.materials[m] = new BABYLON.StandardMaterial("mat"+row+clmn+toneholder[4][0]+toneholder[4][1], jccsStudio.scene);					
+			}											
+			col.material=col.materials[4];
+			col.material.emissiveColor = new BABYLON.Color3(Math.round(255*(8 - clmn)/8)/255,Math.round(255*(8 - clmn)/8)/255,Math.round(255*(8 - clmn)/8)/255);
+			col.addEventListener("click", function() {changeTone(this)}, false ); 
+			colours.appendChild(col);
+		}
+		
+		currentTone=4;
+		document.getElementById("id84").style.border = "dotted 1px #000000";
+		document.getElementById("id84").clicked =1;
 		currentColour=document.getElementById("id53");
 		colour.style.backgroundColor = currentColour.style.backgroundColor;
 		currentColour.style.border="solid 1px #000000";
+
 		
-		var slider = document.createElement('div');
-		slider.style.width="122px";
-		slider.style.border="solid 1px #000000";
-		slider.style.height="14px";
-		slider.style.display="block";
-		slider.style.float="left";
-		slider.style.margin="2px 2px 2px 2px";
-		slider.style.backgroundColor="#AAAAAA";
-		colours.appendChild(slider);
-		whiteDiv = document.createElement('div');
-		whiteDiv.style.position="absolute";
-		whiteDiv.style.left="3px";
-		whiteDiv.style.height="10px";
-		whiteDiv.style.width="10px";
-		whiteDiv.style.backgroundColor="#FFFFFF";
-		whiteDiv.style.borderRadius="5px";
-		whiteDiv.style.margin="2px 1px 2px 1px";
-		slider.appendChild(whiteDiv);
-		blackDiv = document.createElement('div');
-		blackDiv.style.position="absolute";
-		blackDiv.style.right="4px";
-		blackDiv.style.height="10px";
-		blackDiv.style.width="10px";
-		blackDiv.style.backgroundColor="#000000";
-		blackDiv.style.borderRadius="5px";
-		blackDiv.style.margin="2px 1px 2px 1px";
-		slider.appendChild(blackDiv);
-		diamond = document.createElement('div');
-		diamond.style.position="absolute";
-		diamond.style.left="60px";
-		diamond.style.width="10px";
-		diamond.style.height="10px";
-		diamond.style.transform="rotate(45deg)";
-		diamond.style.backgroundColor="#555555";
-		diamond.style.margin="2px 0px 2px 0px";
-		diamond.draggable=true;
-		slider.appendChild(diamond);
-		diamond.addEventListener('mousedown', dmddragstart, false);
-		diamond.addEventListener('mousemove', dmddrag, false);
-		diamond.addEventListener('mouseup', dmddragend, false);
-		
-		var dpx,nowx;
-		
-		function dmddragstart(e) {
-			dpx=parseInt(diamond.style.left);
-			nowx=getPosition(e).x;
-			dmddown=true;
-			
-		}
-		
-		function dmddrag(e) {
-			if(!dmddown) {
-				return
+		function changeTone(elm) {								
+			if(elm.clicked == 2) {
+				return;
 			}
-			var s = v = 1;
-			var dx=getPosition(e).x-nowx;
-			nowx = getPosition(e).x
-			dx = dx/Math.abs(dx);
-						
-			if(10<dx*16+dpx && dx*16+dpx<110) {
-				dpx+=dx*16;	
-				if(dpx > 60 ) {
-					v= 1 -(dpx - 60)/64;
-				}
-				else {
-					s = (dpx+4)/64;
-				}			
-				diamond.style.left=dpx+"px";
-				changeTone(s, v);
-			}
-		}
-		
-		function dmddragend() {
-			dmddown=false;
-		}
-		
-		function changeTone(s,v) {
 			var colourHolder =[];
 			var RGB;
-			for(var i=0;i<64;i++){
-				var rbg_value=HSVtoRGB(i/63, s, v)
+			var s = toneholder[elm.clmn][0]/100;
+			var h = toneholder[elm.clmn][1]/100;
+			for(var i=0;i<64;i++){				
+				var rbg_value=HSVtoRGB(i/64, s, h);			
 				RGB=[rbg_value.r,rbg_value.g,rbg_value.b];
 				colourHolder.push(RGB);
 			}	
@@ -447,33 +442,84 @@ function main() {
 		
 			for(row=0;row<8;row++) {
 				for(clmn=0;clmn<8;clmn++) {
-					col = document.getElementById('id'+row+clmn);
+					col = document.getElementById('id'+row+clmn);					
 					col.colarray = colarray[row][clmn];
 					col.style.backgroundColor = "rgb("+colarray[row][clmn][0] +","+colarray[row][clmn][1]+","+colarray[row][clmn][2]+")";
+					col.material = col.materials[elm.clmn];
 					col.material.emissiveColor = new BABYLON.Color3(col.colarray[0]/255,col.colarray[1]/255,col.colarray[2]/255);
 				}
+			}			
+			if(elm.clicked == 0) {								
+				elm.style.border ="dotted 1px #000000";		
+				if(document.getElementById("id8"+currentTone).clicked == 2) {
+					elm.clicked = 2;
+					elm.style.border ="solid 1px #000000";
+					if(currentColour.row<8) {
+						currentColour.style.border = "solid 1px #FFFFFF";
+					}
+					setMeshColour(elm);
+				}
+				else {
+					elm.clicked=1;
+				}
+				document.getElementById("id8"+currentTone).style.border ="solid 1px #FFFFFF";				
+				document.getElementById("id8"+currentTone).clicked = 0;				
+				currentTone = elm.clmn;				
+			}
+			else {
+				document.getElementById("id8"+currentTone).style.border ="solid 1px #000000";				
+				document.getElementById("id8"+currentTone).clicked = 2;
+				if(currentColour.row<8) {
+					currentColour.style.border = "solid 1px #FFFFFF";
+				}
+				setMeshColour(elm);
+			}			
+		}		
+	}
+	
+	function slideTextureDB() {
+		
+		if(textureShow) {
+			if(parseInt(textures.style.right)<40) {
+		 		textures.style.right = (parseInt(textures.style.right) + 5)+"px";
+		 		setTimeout(slideTextureDB,10);
+			}
+			else {
+				textureShow = !textureShow;
+				textureOpen.innerHTML = "&#x25B6;";
+			}
+		}
+		else {
+			if(parseInt(textures.style.right)>-100) {
+		 		textures.style.right = (parseInt(textures.style.right) - 5)+"px";
+		 		setTimeout(slideTextureDB,10);
+			}
+			else {
+				textureShow = !textureShow;
+				textureOpen.innerHTML = "&#x25C0;";
 			}
 		}
 	}
 	
-	
-	
 	//set textures in selection menu
 	var T;
 	function setTextures() {
-		var textures = [
+		var texturepics = [
 				"Metal",
 				"Wood",
 				"Rust",
-				"Wheel"
+				"Wheel",
+				"Brick",
+				"Tiles"
 		];
 		
-		for(var t=0;t<textures.length;t++) {
+		for(var t=0;t<texturepics.length;t++) {
+			
 			var txtr = document.createElement('div');
-			txtr.imgName = "images/xt"+textures[t]+".png";
+			txtr.imgName = "images/xt"+texturepics[t]+".png";
 			txtr.style.backgroundImage ="url('"+txtr.imgName+"')";
-			txtr.alt = textures[t];
-			txtr.title = textures[t];
+			txtr.alt = texturepics[t];
+			txtr.title = texturepics[t];
 			txtr.className = "textureimage";
 			T=t;
 			if(t<10) {
@@ -481,10 +527,11 @@ function main() {
 			}
 			txtr.material = new BABYLON.StandardMaterial("Tmt"+T, jccsStudio.scene);
 			txtr.material.emissiveTexture = new BABYLON.Texture(txtr.imgName, jccsStudio.scene);
-			txtr.addEventListener("click", function() {setMeshTexture(this.material)}, false );
-			texturepics.appendChild(txtr);
+			txtr.addEventListener("click", function() {setMeshTexture(this)}, false );			
+			textures.appendChild(txtr);			
 		}
 	}
+	
 	
 	//menu choices actions
 
@@ -1153,8 +1200,14 @@ function main() {
 	return elm;
 	}
 
-	function setMeshColour(elm) {
-		currentColour.style.border="solid 1px #FFFFFF";
+	function setMeshColour(elm) {			
+		if(elm.row<8) {
+			currentColour.style.border = "solid 1px #FFFFFF";
+			if(currentColour.row == 8) {
+				currentColour.style.border = "dotted 1px #000000";
+				currentColour.clicked=1;
+			}			
+		}		
 		currentColour=elm;
 		for(var mesh in currentMeshes) {						
 			currentMeshes[mesh].material = elm.material;
@@ -1162,12 +1215,17 @@ function main() {
 		colour.material=elm.material;
 		colour.colarray=elm.colarray;
 		colour.style.backgroundColor="rgb("+elm.colarray[0] +","+elm.colarray[1]+","+elm.colarray[2]+")";
-		currentColour.style.border="solid 1px #000000";
+		
+		if(currentColour.row<8) {
+			currentColour.style.border="solid 1px #000000";
+		}
 	};
 	
-	function setMeshTexture(material) {
+	function setMeshTexture(elm) {
+		texture.style.backgroundImage = elm.style.backgroundImage;
+		texture.material = elm.material;
 		for(var mesh in currentMeshes) {						
-			currentMeshes[mesh].material = material.clone(material.name.substr(0,5)+(num_of_mats));
+			currentMeshes[mesh].material = elm.material.clone(elm.material.name.substr(0,5)+(num_of_mats));
 		}
 	}
 	
@@ -2260,8 +2318,12 @@ function main() {
 	
 	setColours(colours);
 	setTextures();
+	texture.material = jccsStudio.scene.getMaterialByName("Tmt01");
 
-	colour.material = jccsStudio.scene.getMaterialByName("mat53");
+	colour.material = currentColour.material;
+	
+	colours.style.visibility = "visible";
+	textures.style.visibility = "visible";
 		
 	//Materials
 	var greenGridMat = new BABYLON.StandardMaterial("greenGrid", jccsStudio.scene);
@@ -2753,6 +2815,12 @@ function main() {
 	var onKeyDown = function(evt) {
 //console.log(evt.keyCode);
 
+
+	// space and arrow keys
+    if([32, 37, 38, 39, 40].indexOf(evt.keyCode) > -1) {
+        evt.preventDefault();
+    }
+    
 		if(evt.keyCode == 27  && viewcamera) {
 			build_camera();
 			return;
@@ -2954,21 +3022,43 @@ function main() {
    };
 	
 	function doMove(diff, block) {
-		currentBlock.checkCollisions = false;
-		block.checkCollisions = true;
-		currentBlock = block;
-		for(var name in currentMeshes) {
-			if(solid.checked) {
-				currentMeshes[name].moveWithCollisions(diff);
-				currentMeshes[name].onCollide = function(collidedMesh) {
-					//console.log(collidedMesh.name);
-					currentMeshes[name].position.addInPlace(diff.scale(-0.5));
-				};	
+		var collide = false;
+		var point, compPoint, coner;
+		if(solid.checked) {
+			for(var mesh in currentMeshes) {			
+				collide = collide || block.intersectsMesh(currentMeshes[mesh],false);
 			}
-			else {
+			if(!collide) {
+				for(var name in JCubees) {
+					for(var mesh in currentMeshes) {
+						point = new BABYLON.Vector3(diff.x, diff.y, diff.z);
+						point.normalize()
+						compPoint = new BABYLON.Vector3(1 - Math.abs(point.x), 1 - Math.abs(point.y), 1 - Math.abs(point.z))										
+						point.multiplyInPlace(currentMeshes[mesh].getBoundingInfo().boundingBox.maximum);											
+						point.addInPlace(currentMeshes[mesh].getBoundingInfo().boundingBox.center);
+					
+						if(JCubees[name].Jcubee != currentMeshes[mesh]) {
+							for(var ix = 0; ix < 2; ix++) {
+								for(var iy = 0; iy < 2; iy++) {
+									for(var iz = 0; iz < 2; iz++) {
+										corner = new BABYLON.Vector3((ix - 0.5)*2, (iy - 0.5)*2, (iz - 0.5)*2);
+										corner.multiplyInPlace(compPoint);
+										corner.multiplyInPlace(currentMeshes[mesh].getBoundingInfo().boundingBox.maximum);
+										corner.addInPlace(point);									
+										collide = collide || JCubees[name].Jcubee.intersectsPoint(corner);
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+		if(!solid.checked || !collide) {
+			for(var name in currentMeshes) {
 				currentMeshes[name].position.addInPlace(diff);
-			};				
-			JCubees[name].moveT(currentMeshes[name].position);
+				JCubees[name].moveT(currentMeshes[name].position);
+			}
 		}
 		storeMarker = storeIcon; 
 		saveMarker = saveIcon; 
